@@ -1,12 +1,20 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { SendHorizontal, Search } from 'lucide-react';
 import { motion } from 'motion/react';
+import { GrievanceService } from '../services/grievanceService';
 
 interface HeroProps {
   onSelectTab: (tab: 'new' | 'track') => void;
 }
 
 export const Hero: React.FC<HeroProps> = ({ onSelectTab }) => {
+  const [stats, setStats] = useState({ total: 0, resolved: 0 });
+
+  useEffect(() => {
+    // Mocking a live stat update based on local storage
+    setStats(GrievanceService.getStats());
+  }, []);
+
   const handleAction = (tab: 'new' | 'track') => {
     onSelectTab(tab);
     const formSection = document.getElementById('interactive-form-section');
@@ -64,16 +72,16 @@ export const Hero: React.FC<HeroProps> = ({ onSelectTab }) => {
             <div className="text-xs text-white/90 font-tajawal">أيام أقصى للرد</div>
           </div>
           <div className="bg-white/10 border border-white/20 rounded-xl p-4 flex flex-col items-center justify-center backdrop-blur-sm">
-            <div className="font-changa text-2xl font-bold text-[#D21034] mb-1">94%</div>
-            <div className="text-xs text-white/90 font-tajawal">نسبة الرضا</div>
-          </div>
-          <div className="bg-white/10 border border-white/20 rounded-xl p-4 flex flex-col items-center justify-center backdrop-blur-sm">
-            <div className="font-changa text-2xl font-bold text-[#D21034] mb-1">+1,299</div>
-            <div className="text-xs text-white/90 font-tajawal">عريضة تمت معالجتها</div>
-          </div>
-          <div className="bg-white/10 border border-white/20 rounded-xl p-4 flex flex-col items-center justify-center backdrop-blur-sm">
             <div className="font-changa text-2xl font-bold text-[#D21034] mb-1">24/7</div>
-            <div className="text-xs text-white/90 font-tajawal">منصة متاحة</div>
+            <div className="text-xs text-white/90 font-tajawal">استقبال العرائض</div>
+          </div>
+          <div className="bg-white/10 border border-white/20 rounded-xl p-4 flex flex-col items-center justify-center backdrop-blur-sm" title="يتم حسابه ديناميكياً بناءً على البيانات المحلية">
+            <div className="font-changa text-2xl font-bold text-[#D21034] mb-1">{stats.total}</div>
+            <div className="text-xs text-white/90 font-tajawal">إجمالي الانشغالات (مباشر)</div>
+          </div>
+          <div className="bg-white/10 border border-white/20 rounded-xl p-4 flex flex-col items-center justify-center backdrop-blur-sm" title="يتم حسابه ديناميكياً">
+            <div className="font-changa text-2xl font-bold text-[#D21034] mb-1">{stats.resolved}</div>
+            <div className="text-xs text-white/90 font-tajawal">عريضة تمت معالجتها</div>
           </div>
         </motion.div>
 

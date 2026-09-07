@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { MUNICIPALITIES, CATEGORIES } from '../data';
 import { Municipality, GrievanceCategory, GrievanceSubmission } from '../types';
+import { GrievanceService } from '../services/grievanceService';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Send, Search, CheckCircle, Copy, Check, FileText, 
@@ -18,7 +19,7 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({ activeTab, onTabCh
   const [nin, setNin] = useState('');
   const [fullName, setFullName] = useState('');
   const [municipality, setMunicipality] = useState<Municipality>('الوادي');
-  const [category, setCategory] = useState<GrievanceCategory>(initialCategory || 'الفلاحة والري');
+  const [category, setCategory] = useState<GrievanceCategory>(initialCategory || 'الحالة المدنية');
 
   React.useEffect(() => {
     if (initialCategory) {
@@ -60,29 +61,47 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({ activeTab, onTabCh
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!fullName.trim()) return setFormError('يرجى إدخال الاسم واللقب بالكامل');
-    if (!phone.trim()) return setFormError('يرجى إدخال رقم الهاتف للتواصل');
-    if (!details.trim()) return setFormError('يرجى كتابة تفاصيل العريضة المراد تبليغه');
-    
     setFormError(null);
+
+    // Strict Validations
+    if (!nin.trim() || !/^\d{18}$/.test(nin.trim())) {
+      return setFormError('رقم التعريف الوطني غير صالح (يجب أن يتكون من 18 رقماً)');
+    }
+    if (!fullName.trim()) {
+      return setFormError('يرجى إدخال الاسم واللقب بالكامل');
+    }
+    if (!phone.trim() || !/^(05|06|07)\d{8}$/.test(phone.trim())) {
+      return setFormError('رقم الهاتف غير صالح (يجب أن يبدأ بـ 05، 06، أو 07 ويتكون من 10 أرقام)');
+    }
+    if (!details.trim()) {
+      return setFormError('يرجى كتابة تفاصيل العريضة المراد تبليغها');
+    }
+    
+    // Rate Limiting Check
+    if (!GrievanceService.canSubmit()) {
+      return setFormError('يرجى الانتظار بضع دقائق قبل إرسال عريضة أخرى');
+    }
+
     setIsSubmitting(true);
 
-    // Simulate network delay for premium feel
+    // Simulate network delay for premium feel, but use real local storage
     setTimeout(() => {
-      const newId = generateTrackingId();
-      const newSubmission: GrievanceSubmission = {
-        id: newId,
-        fullName: fullName.trim(),
-        municipality,
-        category,
-        details: details.trim(),
-        phone: phone.trim(),
-        createdAt: new Date().toLocaleDateString('ar-DZ', { year: 'numeric', month: 'long', day: 'numeric' }),
-        status: 'قيد المعالجة',
-      };
-      setSubmissionsHistory(prev => ({ ...prev, [newId]: newSubmission }));
-      setSubmittedTicket(newSubmission);
-      setIsSubmitting(false);
+      try {
+        const newSubmission = GrievanceService.save({
+          nin: nin.trim(),
+          fullName: fullName.trim(),
+          municipality,
+          category,
+          details: details.trim(),
+          phone: phone.trim(),
+        });
+        
+        setSubmittedTicket(newSubmission);
+      } catch (err) {
+        setFormError('حدث خطأ أثناء حفظ العريضة، يرجى المحاولة لاحقاً');
+      } finally {
+        setIsSubmitting(false);
+      }
     }, 800);
   };
 
@@ -93,11 +112,13 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({ activeTab, onTabCh
   };
 
   const handleResetForm = () => {
+    setNin('');
     setFullName('');
     setMunicipality('الوادي');
-    setCategory('الفلاحة والري');
+    setCategory('الحالة المدنية');
     setDetails('');
     setPhone('');
+    setFiles([]);
     setFormError(null);
     setSubmittedTicket(null);
   };
@@ -107,9 +128,10 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({ activeTab, onTabCh
     if (!cleaned) return;
     setIsSearching(true);
     setHasSearched(false);
+    setActiveTrackingResult(null);
 
     setTimeout(() => {
-      const match = submissionsHistory[cleaned];
+      const match = GrievanceService.findByTrackingId(cleaned);
       if (match) {
         setActiveTrackingResult({
           id: match.id,
@@ -117,16 +139,7 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({ activeTab, onTabCh
           municipality: match.municipality,
           category: match.category,
           status: match.status,
-          submissionDate: match.createdAt,
-        });
-      } else {
-        setActiveTrackingResult({
-          id: cleaned.toUpperCase().startsWith('WD-') ? cleaned.toUpperCase() : `WD-2026-${cleaned}`,
-          fullName: 'مواطن مسجل',
-          municipality: 'الوادي',
-          category: 'الفلاحة والري',
-          status: 'قيد المعالجة',
-          submissionDate: 'اليوم، 09:30 ص',
+          submissionDate: new Date(match.createdAt).toLocaleDateString('ar-DZ', { year: 'numeric', month: 'long', day: 'numeric' }),
         });
       }
       setHasSearched(true);

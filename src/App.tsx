@@ -12,27 +12,33 @@ import { GrievanceForm } from './components/GrievanceForm';
 import { ContactMethods } from './components/ContactMethods';
 import { FAQ } from './components/FAQ';
 import { Footer } from './components/Footer';
+import { PrivacyPolicy } from './components/PrivacyPolicy';
 
 import { GrievanceCategory } from './types';
 
 export default function App() {
+  const [currentView, setCurrentView] = useState<'home' | 'privacy'>('home');
   const [formActiveTab, setFormActiveTab] = useState<'new' | 'track'>('new');
   const [selectedCategory, setSelectedCategory] = useState<GrievanceCategory>('الحالة المدنية');
 
   const handleSelectTab = (tab: 'new' | 'track') => {
+    setCurrentView('home');
     setFormActiveTab(tab);
   };
 
   const handleScrollToForm = (tab: 'new' | 'track' = 'new') => {
+    setCurrentView('home');
     setFormActiveTab(tab);
-    const formEl = document.getElementById('interactive-form-section');
-    if (formEl) {
-      formEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+    setTimeout(() => {
+      const formEl = document.getElementById('interactive-form-section');
+      if (formEl) {
+        formEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
   };
 
   const handleDomainClick = (domainTitle: string) => {
-    // Assuming domainTitle matches GrievanceCategory
+    setCurrentView('home');
     setSelectedCategory(domainTitle as GrievanceCategory);
     handleScrollToForm('new');
   };
@@ -44,33 +50,42 @@ export default function App() {
 
       {/* Main Content Sections */}
       <main className="flex-1 w-full space-y-10">
-        {/* 2. Hero Section */}
-        <Hero onSelectTab={handleSelectTab} />
+        {currentView === 'privacy' ? (
+          <PrivacyPolicy />
+        ) : (
+          <>
+            {/* 2. Hero Section */}
+            <Hero onSelectTab={handleSelectTab} />
 
-        <Domains onDomainClick={handleDomainClick} />
+            <Domains onDomainClick={handleDomainClick} />
 
-        {/* Single-column constrained wrapper for body sections (max-w ~520px on mobile/tablet) */}
-        <div className="w-full space-y-10 sm:space-y-12">
-          {/* 3. How It Works (Vertical Timeline) */}
-          <HowItWorks />
+            {/* Single-column constrained wrapper for body sections (max-w ~520px on mobile/tablet) */}
+            <div className="w-full space-y-10 sm:space-y-12">
+              {/* 3. How It Works (Vertical Timeline) */}
+              <HowItWorks />
 
-          {/* 5. Interactive Form & Tracking (Primary card) */}
-          <GrievanceForm 
-            activeTab={formActiveTab} 
-            onTabChange={setFormActiveTab}
-            initialCategory={selectedCategory}
-          />
+              {/* 5. Interactive Form & Tracking (Primary card) */}
+              <GrievanceForm 
+                activeTab={formActiveTab} 
+                onTabChange={setFormActiveTab}
+                initialCategory={selectedCategory}
+              />
 
-          {/* 6. Other Contact Methods */}
-          <ContactMethods />
+              {/* 6. Other Contact Methods */}
+              <ContactMethods />
 
-          {/* 7. Frequently Asked Questions (Accordion) */}
-          <FAQ />
-        </div>
+              {/* 7. Frequently Asked Questions (Accordion) */}
+              <FAQ />
+            </div>
+          </>
+        )}
       </main>
 
       {/* 8. Dark Navy Footer */}
-      <Footer />
+      <Footer onPrivacyClick={() => {
+        setCurrentView('privacy');
+        window.scrollTo(0, 0);
+      }} />
     </div>
   );
 }

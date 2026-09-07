@@ -2,7 +2,11 @@ import React from 'react';
 import { MapPin, PhoneCall, Clock, ShieldCheck } from 'lucide-react';
 import { motion } from 'motion/react';
 
-export const Footer: React.FC = () => {
+interface FooterProps {
+  onPrivacyClick?: () => void;
+}
+
+export const Footer: React.FC<FooterProps> = ({ onPrivacyClick }) => {
   return (
     <footer className="bg-[#111827] text-white mt-16 pt-12 pb-6 border-t-4 border-[#D21034]">
       <div className="max-w-xl md:max-w-5xl mx-auto px-4">
@@ -67,10 +71,13 @@ export const Footer: React.FC = () => {
 
         {/* Official Assurance & Copyright */}
         <div className="mt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-tajawal text-gray-400">
-          <div className="flex items-center gap-2">
+          <button 
+            onClick={onPrivacyClick}
+            className="flex items-center gap-2 hover:text-white transition-colors cursor-pointer outline-none focus:ring-1 focus:ring-gray-400 rounded-sm"
+          >
             <ShieldCheck className="w-4 h-4 text-[#006233]" />
-            <span>اتصال آمن ومحمي. بياناتكم تعامل بسرية تامة.</span>
-          </div>
+            <span className="underline underline-offset-4 decoration-gray-600">سياسة الخصوصية وحماية المعطيات الشخصية</span>
+          </button>
           <p>
             جميع الحقوق محفوظة © ولاية الوادي 2026
           </p>
