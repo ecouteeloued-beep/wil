@@ -17,6 +17,7 @@ export type GrievanceCategory =
 
 export interface GrievanceSubmission {
   id: string; // WD-2026-XXXXX
+  nin?: string; // National Identification Number
   fullName: string;
   municipality: Municipality;
   category: GrievanceCategory;
