@@ -17,14 +17,20 @@ export const Header: React.FC<HeaderProps> = ({ onNavigateToForm }) => {
       </div>
 
       {/* Main Header Bar */}
-      <div className="w-full border-b-[4px] border-[#D21034] bg-white">
-        <div className="max-w-7xl mx-auto px-4 py-4 md:py-6 flex flex-col md:flex-row items-center justify-between gap-6">
+      <div 
+        className="w-full border-b-[4px] border-[#D21034] bg-white relative overflow-hidden bg-cover bg-center"
+        style={{ backgroundImage: "url('/assets/header-bg.jpg')" }}
+      >
+        {/* Overlay to ensure text readability but keep image visible */}
+        <div className="absolute inset-0 bg-white/70 sm:bg-gradient-to-l sm:from-white/95 sm:via-white/70 sm:to-white/20 backdrop-blur-[1px] z-0"></div>
+        
+        <div className="max-w-7xl mx-auto px-4 py-4 md:py-6 flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
           
           {/* Right Section: National Emblem & Wilaya Title */}
           <div className="flex items-center gap-4 cursor-pointer" onClick={() => window.scrollTo(0, 0)}>
             <img 
-              src="https://upload.wikimedia.org/wikipedia/commons/e/ea/Seal_of_Algeria.svg" 
-              alt="شعار الجمهورية الجزائرية" 
+              src="/assets/eloued-logo.png" 
+              alt="شعار ولاية الوادي" 
               className="w-16 h-16 md:w-20 md:h-20 object-contain drop-shadow-sm"
             />
             <div className="flex flex-col justify-center border-r-2 border-gray-200 pr-4">
