@@ -1,0 +1,6 @@
+{
+  "name": "خلية الإصغاء والتكفل بانشغالات المواطن — ولاية الوادي",
+  "description": "المنصة الرسمية لولاية الوادي لتقديم ومتابعة انشغالات المواطنين الإدارية دون تنقل.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
