@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+@theme {
+  --font-changa: "Changa", sans-serif;
+  --font-tajawal: "Tajawal", sans-serif;
+  --color-sand: #F4EBDA;
+  --color-sand-dark: #E9D9BC;
+  --color-navy: #1C2B33;
+  --color-palm: #2F5D45;
+  --color-amber: #C67D2A;
+  --color-terracotta: #A64530;
+}
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Tajawal', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.font-changa {
+  font-family: 'Changa', sans-serif;
+}
+
+.font-tajawal {
+  font-family: 'Tajawal', sans-serif;
+}
+
+/* Custom subtle scrollbar for premium feel */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #F4EBDA;
+}
+::-webkit-scrollbar-thumb {
+  background: #E9D9BC;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #C67D2A;
+}
