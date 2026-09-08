@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { CATEGORIES, DAIRAS, DAIRAS_MUNICIPALITIES } from '../data';
-import { Municipality, GrievanceCategory, GrievanceSubmission } from '../types';
+import { Municipality, GrievanceCategory, GrievanceSubmission, EnhancedGrievance } from '../types';
 import { GrievanceService } from '../services/grievanceService';
+import { complaintRepository } from '../services/complaintRepository';
+import { ComplaintService } from '../services/complaintService';
+import { AdminService } from '../services/adminService';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Send, Search, CheckCircle, Copy, Check, FileText, 
@@ -11,6 +14,7 @@ import {
 } from 'lucide-react';
 import { TOPIC_DEMOS, TRACKING_DEMO_CASES, TopicDemo, TrackingDemoCase } from '../demoData';
 import { TopicDemoModal } from './TopicDemoModal';
+import { CitizenTrackingDossier } from './CitizenTrackingDossier';
 
 interface GrievanceFormProps {
   activeTab: 'new' | 'track';
@@ -107,7 +111,7 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
   const [trackQuery, setTrackQuery] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
-  const [activeTrackingResult, setActiveTrackingResult] = useState<ActiveTrackingDossier | null>(null);
+  const [activeTrackingResult, setActiveTrackingResult] = useState<EnhancedGrievance | null>(null);
   const [selectedDemoCode, setSelectedDemoCode] = useState<string | null>(null);
 
   // Sync initialCategory
@@ -255,7 +259,7 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
     setFormStep(1);
   };
 
-  const executeTrackSearch = (codeToSearch: string) => {
+  const executeTrackSearch = async (codeToSearch: string) => {
     const cleaned = codeToSearch.trim().toUpperCase();
     if (!cleaned) return;
     setTrackQuery(cleaned);
@@ -264,39 +268,63 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
     setHasSearched(false);
     setActiveTrackingResult(null);
 
-    setTimeout(() => {
-      const match = GrievanceService.findByTrackingId(cleaned);
-      if (match) {
-        setActiveTrackingResult({
-          id: match.id,
-          fullName: match.fullName,
-          phone: match.phone,
-          applicantNeighborhood: match.applicantNeighborhood,
-          applicantDaira: match.applicantDaira,
-          applicantMunicipality: match.applicantMunicipality,
-          subject: match.subject,
-          details: match.details,
-          municipality: match.grievanceMunicipality || match.applicantMunicipality || 'ولاية الوادي',
-          daira: match.grievanceDaira || match.applicantDaira || 'الوادي',
-          category: match.category,
-          status: match.status,
-          priority: match.priority || 'عادي',
-          submissionDate: new Date(match.createdAt).toLocaleDateString('ar-DZ', { 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-          }),
-          assignedDepartment: match.assignedDepartment,
-          assignedToName: match.assignedToName,
-          officialResponse: match.officialResponse,
-          timeline: match.timeline
-        });
+    try {
+      // 1. Check direct complaintRepository
+      let match = await complaintRepository.getById(cleaned);
+      
+      // 2. Check AdminService all grievances if not found in first pass
+      if (!match) {
+        const allAdmin = AdminService.getAllGrievances();
+        match = allAdmin.find(g => 
+          g.id.trim().toUpperCase() === cleaned || 
+          (g.trackingNumber && g.trackingNumber.trim().toUpperCase() === cleaned)
+        ) || null;
       }
+
+      // 3. Fallback to GrievanceService
+      if (!match) {
+        const legacyMatch = GrievanceService.findByTrackingId(cleaned);
+        if (legacyMatch) {
+          match = {
+            id: legacyMatch.id,
+            trackingNumber: legacyMatch.id,
+            statusCode: 'IN_PROGRESS',
+            status: legacyMatch.status || 'قيد المعالجة',
+            priority: legacyMatch.priority || 'عادي',
+            fullName: legacyMatch.fullName,
+            phone: legacyMatch.phone || '',
+            applicantDaira: legacyMatch.applicantDaira || 'الوادي',
+            applicantMunicipality: legacyMatch.applicantMunicipality || 'الوادي',
+            applicantNeighborhood: legacyMatch.applicantNeighborhood || '',
+            subject: legacyMatch.subject,
+            grievanceDaira: legacyMatch.grievanceDaira || legacyMatch.applicantDaira || 'الوادي',
+            grievanceMunicipality: legacyMatch.grievanceMunicipality || legacyMatch.applicantMunicipality || 'الوادي',
+            category: legacyMatch.category,
+            sector: legacyMatch.category || 'عام',
+            details: legacyMatch.details,
+            createdAt: legacyMatch.createdAt,
+            updatedAt: legacyMatch.createdAt,
+            dueDate: new Date(Date.now() + 15 * 86400000).toISOString(),
+            isOverdue: false,
+            specialFlags: [],
+            officialResponse: legacyMatch.officialResponse,
+            citizenActionRequired: legacyMatch.citizenActionRequired,
+            citizenRating: legacyMatch.citizenRating,
+            publicMessages: legacyMatch.publicMessages,
+            timeline: legacyMatch.timeline || [],
+            internalNotes: []
+          };
+        }
+      }
+
+      setActiveTrackingResult(match);
+    } catch (err) {
+      console.error('Error executing track search:', err);
+      setActiveTrackingResult(null);
+    } finally {
       setHasSearched(true);
       setIsSearching(false);
-    }, 450);
+    }
   };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -902,7 +930,7 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
                           required
                           value={trackQuery}
                           onChange={e => setTrackQuery(e.target.value)}
-                          placeholder="مثال: WD-2026-00130"
+                          placeholder="WIL-2026-X7K4P92"
                           dir="ltr"
                           className={`${inputBaseClass} font-mono uppercase text-center sm:text-left`}
                         />
@@ -910,14 +938,14 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
                       <button
                         type="submit"
                         disabled={isSearching}
-                        className="py-3 px-6 bg-[#111827] hover:bg-[#1f2937] text-white font-tajawal font-bold text-sm rounded-lg transition-colors flex items-center justify-center gap-2 shrink-0 disabled:opacity-70 cursor-pointer"
+                        className="py-3 px-6 bg-[#006233] hover:bg-[#005228] text-white font-tajawal font-bold text-sm rounded-lg transition-colors flex items-center justify-center gap-2 shrink-0 disabled:opacity-70 cursor-pointer shadow-xs"
                       >
                         {isSearching ? (
                           <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                         ) : (
                           <>
                             <Search className="w-4 h-4" />
-                            <span>بحث واستعلام</span>
+                            <span>تتبع الانشغال</span>
                           </>
                         )}
                       </button>
@@ -926,209 +954,15 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
 
                   {/* Tracking Results Display */}
                   {hasSearched && activeTrackingResult && (
-                    <motion.div 
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="bg-white border border-[#E5E7EB] rounded-xl overflow-hidden shadow-sm space-y-0"
-                    >
-                      {/* Official Document Header */}
-                      <div className="bg-[#111827] px-5 py-3.5 text-white flex justify-between items-center">
-                        <div className="font-tajawal text-sm font-bold flex items-center gap-2">
-                          <FileText className="w-4 h-4 text-[#D21034]" />
-                          <span>ملف عريضة إلكتروني رقم</span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <span className="font-mono font-bold tracking-widest text-base sm:text-lg text-amber-300">
-                            {activeTrackingResult.id}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => handleCopy(activeTrackingResult.id)}
-                            className="text-white/70 hover:text-white p-1 rounded transition-colors cursor-pointer"
-                            title="نسخ رقم الملف"
-                          >
-                            {copiedCode ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="p-5 sm:p-7 space-y-6">
-                        {/* File Metadata Grid */}
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-gray-50 p-4 rounded-xl border border-gray-100 text-xs font-tajawal">
-                          <div>
-                            <span className="text-gray-400 block text-[10px] mb-0.5">تاريخ الإيداع:</span>
-                            <span className="font-bold text-gray-900">{activeTrackingResult.submissionDate}</span>
-                          </div>
-                          <div>
-                            <span className="text-gray-400 block text-[10px] mb-0.5">الحالة الحالية:</span>
-                            <span className={`inline-block text-[11px] font-bold px-2 py-0.5 rounded ${
-                              activeTrackingResult.status === 'تم الرد'
-                                ? 'bg-green-100 text-green-800'
-                                : activeTrackingResult.status === 'بانتظار المراجعة والاعتماد'
-                                ? 'bg-amber-100 text-amber-800'
-                                : 'bg-blue-100 text-blue-800'
-                            }`}>
-                              {activeTrackingResult.status}
-                            </span>
-                          </div>
-                          <div>
-                            <span className="text-gray-400 block text-[10px] mb-0.5">الدائرة والبلدية:</span>
-                            <span className="font-bold text-gray-900">{activeTrackingResult.daira} / {activeTrackingResult.municipality}</span>
-                          </div>
-                          <div>
-                            <span className="text-gray-400 block text-[10px] mb-0.5">تصنيف المجال:</span>
-                            <span className="font-bold text-emerald-800">{activeTrackingResult.category}</span>
-                          </div>
-                        </div>
-
-                        {/* Citizen & Location Info */}
-                        <div className="border border-gray-100 rounded-xl p-4 bg-white space-y-2">
-                          <div className="flex items-center justify-between text-xs font-tajawal text-gray-500">
-                            <span className="flex items-center gap-1.5 font-bold text-gray-700">
-                              <User className="w-3.5 h-3.5 text-[#006233]" />
-                              صاحب العريضة: <strong className="text-gray-900">{activeTrackingResult.fullName}</strong>
-                            </span>
-                            {activeTrackingResult.applicantNeighborhood && (
-                              <span>الحي: {activeTrackingResult.applicantNeighborhood}</span>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Subject & Details */}
-                        <div className="border border-gray-200 rounded-xl p-4 bg-gray-50 space-y-2 text-xs font-tajawal">
-                          <div className="font-bold text-sm text-gray-900 flex items-center gap-1.5">
-                            <Tag className="w-4 h-4 text-[#006233]" />
-                            <span>الموضوع: {activeTrackingResult.subject}</span>
-                          </div>
-                          <p className="text-gray-700 leading-relaxed text-xs sm:text-[13px] whitespace-pre-line pt-1">
-                            {activeTrackingResult.details}
-                          </p>
-                        </div>
-
-                        {/* Official Administrative Response Card (if available) */}
-                        {activeTrackingResult.officialResponse && (
-                          <div className="border-2 border-[#006233] bg-emerald-50/40 rounded-xl p-5 relative overflow-hidden">
-                            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-emerald-200 pb-3 mb-3">
-                              <div className="flex items-center gap-2">
-                                <span className="w-8 h-8 rounded-lg bg-[#006233] text-white flex items-center justify-center shadow-xs">
-                                  <ShieldCheck className="w-5 h-5 text-amber-300" />
-                                </span>
-                                <div>
-                                  <h5 className="font-changa font-bold text-sm sm:text-base text-[#006233]">
-                                    الرد الإداري الرسمي المعتمد
-                                  </h5>
-                                  <span className="text-[11px] font-tajawal text-gray-500">
-                                    صادر عن خلية الإصغاء والتكفل بانشغالات المواطنين لديوان الوالي
-                                  </span>
-                                </div>
-                              </div>
-
-                              {activeTrackingResult.officialResponse.letterNumber && (
-                                <div className="text-left font-tajawal text-xs">
-                                  <span className="text-gray-400 block text-[10px]">رقم المراسلة الرسمية:</span>
-                                  <span className="font-mono font-bold text-gray-900 bg-white px-2 py-0.5 rounded border border-emerald-200">
-                                    {activeTrackingResult.officialResponse.letterNumber}
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-
-                            <div className="text-xs sm:text-sm font-tajawal text-gray-800 leading-relaxed bg-white p-4 rounded-lg border border-emerald-100 shadow-2xs whitespace-pre-line">
-                              {activeTrackingResult.officialResponse.text}
-                            </div>
-
-                            <div className="mt-3 flex items-center justify-between text-[11px] font-tajawal text-gray-500 pt-2 border-t border-emerald-100">
-                              <span>صفة التوقيع: مسؤول خلية التكفل بالانشغالات</span>
-                              <span className="text-emerald-800 font-bold flex items-center gap-1">
-                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                                معتمد وقابل للتنفيذ الميداني
-                              </span>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Official Timeline / Stages */}
-                        <div>
-                          <span className="block text-sm font-changa font-bold text-[#111827] mb-4 bg-gray-50 p-2.5 rounded-lg border-r-4 border-[#006233]">
-                            سجل ومحطات مسار المعالجة الميدانية
-                          </span>
-                          
-                          {activeTrackingResult.timeline && activeTrackingResult.timeline.length > 0 ? (
-                            <div className="space-y-0 relative before:absolute before:inset-y-0 before:right-[9px] before:w-[2px] before:bg-gray-200 pl-2">
-                              {activeTrackingResult.timeline.map((item, idx) => (
-                                <div key={item.id || idx} className="relative pr-6 pb-5">
-                                  <span className={`absolute right-[5px] top-1 w-2.5 h-2.5 rounded-full ring-4 ring-white ${
-                                    idx === 0 ? 'bg-[#006233]' : 'bg-[#D21034]'
-                                  }`} />
-                                  <div className="flex items-center justify-between gap-2">
-                                    <h5 className="font-bold text-gray-900 text-xs sm:text-sm font-tajawal">
-                                      {item.action}
-                                    </h5>
-                                    <span className="text-[10px] text-gray-400 font-mono">
-                                      {item.date} {item.time ? `(${item.time})` : ''}
-                                    </span>
-                                  </div>
-                                  <span className="text-[11px] text-emerald-800 font-tajawal block mt-0.5">
-                                    الجهة: {item.author} — {item.authorRole}
-                                  </span>
-                                  {item.note && (
-                                    <p className="text-gray-600 text-xs mt-1 font-tajawal bg-gray-50 p-2 rounded border border-gray-100 leading-relaxed">
-                                      {item.note}
-                                    </p>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          ) : (
-                            <div className="space-y-0 relative before:absolute before:inset-y-0 before:right-[9px] before:w-[2px] before:bg-gray-200 pl-2">
-                              <div className="relative pr-6 pb-5">
-                                <span className="absolute right-[5px] top-1 w-2.5 h-2.5 rounded-full bg-[#006233] ring-4 ring-white" />
-                                <h5 className="font-bold text-[#006233] text-sm font-tajawal">استلام وتسجيل العريضة بالمنظومة</h5>
-                                <p className="text-gray-500 text-[11px] mt-1 font-tajawal">تم إيداع الانشغال وتوثيقه في السجل الولائي المركزي.</p>
-                              </div>
-                              
-                              <div className="relative pr-6 pb-5">
-                                <span className="absolute right-[5px] top-1 w-2.5 h-2.5 rounded-full bg-[#D21034] ring-4 ring-white animate-pulse" />
-                                <h5 className="font-bold text-[#D21034] text-sm font-tajawal">قيد الدراسة والتوجيه القطاعي</h5>
-                                <p className="text-[#111827]/70 text-[11px] mt-1 font-tajawal">تم تحويل الملف إلى المصالح التقنية والبلدية للمعاينة واتخاذ التدابير.</p>
-                              </div>
-                              
-                              <div className="relative pr-6">
-                                <span className="absolute right-[5px] top-1 w-2.5 h-2.5 rounded-full bg-gray-300 ring-4 ring-white" />
-                                <h5 className="font-bold text-gray-400 text-sm font-tajawal">الرد الإداري النهائي</h5>
-                                <p className="text-gray-400 text-[11px] mt-1 font-tajawal">في انتظار استكمال الإجراءات وصدور القرار الميداني.</p>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Action buttons */}
-                        <div className="pt-4 border-t border-gray-200 flex flex-wrap items-center justify-between gap-3">
-                          <button
-                            type="button"
-                            onClick={handlePrintReceipt}
-                            className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg text-xs font-bold font-tajawal flex items-center gap-1.5 transition-colors cursor-pointer"
-                          >
-                            <Printer className="w-4 h-4" />
-                            <span>طباعة وصل المعاينة</span>
-                          </button>
-
-                          <div className="flex items-center gap-2">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setTrackQuery('');
-                                setActiveTrackingResult(null);
-                                setHasSearched(false);
-                              }}
-                              className="px-4 py-2 bg-[#111827] hover:bg-[#1f2937] text-white rounded-lg text-xs font-bold font-tajawal transition-colors cursor-pointer"
-                            >
-                              استعلام عن ملف آخر
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
+                    <CitizenTrackingDossier
+                      complaint={activeTrackingResult}
+                      onRefresh={updated => setActiveTrackingResult(updated)}
+                      onNewSearch={() => {
+                        setTrackQuery('');
+                        setActiveTrackingResult(null);
+                        setHasSearched(false);
+                      }}
+                    />
                   )}
 
                   {/* Empty state when searched but not found */}
@@ -1137,11 +971,12 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
                       <div className="w-12 h-12 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center mx-auto">
                         <AlertTriangle className="w-6 h-6" />
                       </div>
-                      <h5 className="font-changa font-bold text-base text-gray-900">
-                        لم يتم العثور على ملف برقم التتبع: <span className="font-mono text-[#D21034]">{trackQuery}</span>
+                      <h5 className="font-changa font-bold text-base text-gray-900 leading-snug whitespace-pre-line">
+                        لم نتمكن من العثور على هذا الانشغال.
+                        يرجى التأكد من رقم التتبع والمحاولة مرة أخرى.
                       </h5>
                       <p className="font-tajawal text-xs text-gray-600 max-w-md mx-auto">
-                        يرجى التحقق من صحة الرقم المرجعي أو تجربة أحد الأكواد النموذجية المعتمدة أدناه لمعاينة النظام:
+                        الرقم المدخل: <span className="font-mono text-[#D21034] font-bold">{trackQuery}</span> — يمكنك تجربة أحد الأكواد النموذجية المعتمدة أدناه لمعاينة حالات المعالجة المختلفة:
                       </p>
                       
                       <div className="flex flex-wrap justify-center gap-2 pt-2">

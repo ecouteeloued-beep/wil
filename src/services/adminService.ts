@@ -12,6 +12,7 @@ import {
   InternalNote,
   OfficialResponse
 } from '../types';
+import { MOCK_COMPLAINTS_SEED } from './complaintRepository';
 
 const USERS_STORAGE_KEY = 'wilaya_eloued_admin_users';
 const GRIEVANCES_STORAGE_KEY = 'wilaya_eloued_admin_grievances';
@@ -100,6 +101,7 @@ export const SEED_USERS: SystemUser[] = [
 // INITIAL SEED GRIEVANCES (Authentic for Wilaya d'El Oued)
 // =========================================================================
 export const SEED_GRIEVANCES: EnhancedGrievance[] = [
+  ...MOCK_COMPLAINTS_SEED,
   {
     id: 'WD-2026-00125',
     nin: '198439010023456789',
@@ -796,6 +798,17 @@ export const AdminService = {
       const stored = localStorage.getItem(GRIEVANCES_STORAGE_KEY);
       if (stored) {
         grievances = JSON.parse(stored);
+        // Ensure new mock cases are injected if missing
+        let addedSeed = false;
+        MOCK_COMPLAINTS_SEED.forEach(seedItem => {
+          if (!grievances.some(g => g.id.toUpperCase() === seedItem.id.toUpperCase())) {
+            grievances.push(seedItem);
+            addedSeed = true;
+          }
+        });
+        if (addedSeed) {
+          localStorage.setItem(GRIEVANCES_STORAGE_KEY, JSON.stringify(grievances));
+        }
       } else {
         grievances = SEED_GRIEVANCES;
         localStorage.setItem(GRIEVANCES_STORAGE_KEY, JSON.stringify(grievances));
