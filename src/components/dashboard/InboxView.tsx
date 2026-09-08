@@ -10,7 +10,7 @@ const mockInbox: Partial<EnhancedGrievance>[] = [
     applicantMunicipality: 'الوادي',
     category: 'السكن',
     createdAt: '2026-09-08T10:30:00Z',
-    status: 'جديد',
+    status: 'تم الاستقبال',
     priority: 'عاجل'
   },
   {
@@ -19,7 +19,7 @@ const mockInbox: Partial<EnhancedGrievance>[] = [
     applicantMunicipality: 'قمار',
     category: 'الصحة',
     createdAt: '2026-09-07T14:15:00Z',
-    status: 'قيد المعالجة',
+    status: 'جاري المعالجة',
     priority: 'متوسط'
   },
   {
@@ -28,7 +28,7 @@ const mockInbox: Partial<EnhancedGrievance>[] = [
     applicantMunicipality: 'الرباح',
     category: 'الطرقات',
     createdAt: '2026-09-06T09:00:00Z',
-    status: 'محول للمصلحة',
+    status: 'تم التوجيه للمصلحة المختصة',
     priority: 'عادي'
   },
   {

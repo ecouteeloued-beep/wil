@@ -10,7 +10,7 @@ import {
   Send, Search, CheckCircle, Copy, Check, FileText, 
   ArrowRight, Clock, Building2, Tag, Phone, AlertCircle, UploadCloud, X, MapPin,
   Sparkles, Eye, Printer, ShieldCheck, CheckCircle2, User, HelpCircle, Mail,
-  FileBadge2, Leaf, Building, Bus, HeartPulse, MessageCircle, AlertTriangle
+  FileBadge2, Leaf, Building, Bus, HeartPulse, MessageCircle, AlertTriangle, Briefcase, Home as HomeIcon
 } from 'lucide-react';
 import { CitizenTrackingDossier } from './CitizenTrackingDossier';
 
@@ -60,11 +60,12 @@ interface ActiveTrackingDossier {
 }
 
 const CATEGORY_ICONS: Record<GrievanceCategory, React.ReactNode> = {
-  'الحالة المدنية': <FileBadge2 className="w-4 h-4 text-red-600" />,
+  'السكن': <HomeIcon className="w-4 h-4 text-emerald-600" />,
   'البيئة': <Leaf className="w-4 h-4 text-emerald-600" />,
-  'العمران': <Building className="w-4 h-4 text-amber-600" />,
-  'النقل': <Bus className="w-4 h-4 text-blue-600" />,
+  'الطرقات': <Bus className="w-4 h-4 text-amber-600" />,
   'الصحة': <HeartPulse className="w-4 h-4 text-rose-600" />,
+  'الخدمات الإدارية': <FileBadge2 className="w-4 h-4 text-blue-600" />,
+  'التنمية المحلية': <Briefcase className="w-4 h-4 text-blue-600" />,
   'أخرى': <MessageCircle className="w-4 h-4 text-purple-600" />,
 };
 
@@ -85,7 +86,7 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
   const [subject, setSubject] = useState('');
   const [grievanceDaira, setGrievanceDaira] = useState('');
   const [grievanceMunicipality, setGrievanceMunicipality] = useState('');
-  const [category, setCategory] = useState<GrievanceCategory>(initialCategory || 'الحالة المدنية');
+  const [category, setCategory] = useState<GrievanceCategory>(initialCategory || 'الخدمات الإدارية');
   
   const [details, setDetails] = useState('');
   const [files, setFiles] = useState<File[]>([]);
@@ -209,7 +210,7 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
     setSubject('');
     setGrievanceDaira('');
     setGrievanceMunicipality('');
-    setCategory('الحالة المدنية');
+    setCategory('الخدمات الإدارية');
     setDetails('');
     setFiles([]);
     setFormError(null);
