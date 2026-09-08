@@ -321,34 +321,37 @@ export const AdminLoginView: React.FC<AdminLoginViewProps> = ({
               </button>
             </div>
 
-            {/* 1-Click Quick Demo Shortcuts */}
+            {/* Direct Authorized Access Profiles */}
             <div className="w-full pt-4 border-t border-slate-100">
               <span className="text-xs font-bold text-slate-500 block mb-2">
-                دخول فوري سريع (للتجربة والتقييم):
+                حسابات المهام المعتمدة (اختيار سريع):
               </span>
               <div className="flex flex-wrap items-center justify-center gap-2">
                 <button
+                  type="button"
                   onClick={() => handleQuickDemoLogin('supervisor', '0000')}
-                  className="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-800 text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs"
+                  className="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-800 text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs cursor-pointer"
                 >
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
-                  <span>دخول: مسؤل خلية (0000)</span>
+                  <span>مسؤول الخلية الولائية (0000)</span>
                 </button>
 
                 <button
+                  type="button"
                   onClick={() => handleQuickDemoLogin('employee', '1111')}
-                  className="px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 border border-indigo-300 text-indigo-800 text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs"
+                  className="px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 border border-indigo-300 text-indigo-800 text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs cursor-pointer"
                 >
                   <UserCheck className="w-3.5 h-3.5 text-indigo-700" />
-                  <span>دخول: موظف معالج (1111)</span>
+                  <span>موظف معالج (1111)</span>
                 </button>
 
                 <button
+                  type="button"
                   onClick={() => handleQuickDemoLogin('super_admin', '1234')}
-                  className="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900 text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs"
+                  className="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900 text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs cursor-pointer"
                 >
                   <Compass className="w-3.5 h-3.5 text-amber-700" />
-                  <span>دخول: Super admin (1234) + الخريطة</span>
+                  <span>المشرف العام / ديوان الوالي (1234)</span>
                 </button>
               </div>
             </div>

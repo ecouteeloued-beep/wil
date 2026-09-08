@@ -199,9 +199,17 @@ export const GrievanceDetailModal: React.FC<GrievanceDetailModalProps> = ({
                     </div>
                     <button
                       type="button"
-                      onClick={() => alert(`محاكاة تحميل الوثيقة الإدارية: ${att.name}`)}
-                      className="p-1.5 text-slate-500 hover:text-[#006233] transition-colors"
-                      title="تحميل"
+                      onClick={() => {
+                        const blob = new Blob([`وثيقة إدارية رسمية مرفقة بالملف رقم: ${grievance?.trackingNumber || ''}\nاسم الملف: ${att.name}`], { type: 'text/plain;charset=utf-8' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = att.name;
+                        a.click();
+                        URL.revokeObjectURL(url);
+                      }}
+                      className="p-1.5 text-slate-500 hover:text-[#006233] transition-colors cursor-pointer"
+                      title="تحميل الوثيقة المرفقة"
                     >
                       <Download className="w-3.5 h-3.5" />
                     </button>

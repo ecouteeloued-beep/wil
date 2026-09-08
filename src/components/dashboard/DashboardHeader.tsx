@@ -50,9 +50,6 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             <span className="text-xs font-semibold text-slate-500">
               منظومة الرقابة والتكفل — ولاية الوادي (/admin)
             </span>
-            <span className="bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-bold px-2 py-0.5 rounded-full font-tajawal">
-              نسخة تجريبية للمحاكاة (Mock)
-            </span>
           </div>
           <span className="text-[11px] text-[#C67D2A] font-bold block">
             {currentUser.role === 'supervisor' 

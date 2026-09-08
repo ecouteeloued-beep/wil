@@ -12,16 +12,12 @@ import {
   Sparkles, Eye, Printer, ShieldCheck, CheckCircle2, User, HelpCircle,
   FileBadge2, Leaf, Building, Bus, HeartPulse, MessageCircle, AlertTriangle
 } from 'lucide-react';
-import { TOPIC_DEMOS, TRACKING_DEMO_CASES, TopicDemo, TrackingDemoCase } from '../demoData';
-import { TopicDemoModal } from './TopicDemoModal';
 import { CitizenTrackingDossier } from './CitizenTrackingDossier';
 
 interface GrievanceFormProps {
   activeTab: 'new' | 'track';
   onTabChange: (tab: 'new' | 'track') => void;
   initialCategory?: GrievanceCategory;
-  demoToLoad?: TopicDemo | null;
-  onClearDemoToLoad?: () => void;
 }
 
 interface ActiveTrackingDossier {
@@ -76,8 +72,6 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
   activeTab, 
   onTabChange, 
   initialCategory,
-  demoToLoad,
-  onClearDemoToLoad
 }) => {
   // Submission Form State
   const [nin, setNin] = useState('');
@@ -98,11 +92,6 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formStep, setFormStep] = useState(1);
 
-  // Modal for topic preview
-  const [isTopicDemoModalOpen, setIsTopicDemoModalOpen] = useState(false);
-  const [demoModalCategory, setDemoModalCategory] = useState<GrievanceCategory>('الحالة المدنية');
-  const [loadedDemoNotification, setLoadedDemoNotification] = useState<string | null>(null);
-
   // Success State after submission
   const [submittedTicket, setSubmittedTicket] = useState<GrievanceSubmission | null>(null);
   const [copiedCode, setCopiedCode] = useState(false);
@@ -112,7 +101,6 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
   const [hasSearched, setHasSearched] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [activeTrackingResult, setActiveTrackingResult] = useState<EnhancedGrievance | null>(null);
-  const [selectedDemoCode, setSelectedDemoCode] = useState<string | null>(null);
 
   // Sync initialCategory
   React.useEffect(() => {
@@ -120,41 +108,6 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
       setCategory(initialCategory);
     }
   }, [initialCategory]);
-
-  // Handle demo to load passed from external components (e.g. Domains.tsx)
-  React.useEffect(() => {
-    if (demoToLoad) {
-      applyDemoPreset(demoToLoad);
-      if (onClearDemoToLoad) onClearDemoToLoad();
-    }
-  }, [demoToLoad]);
-
-  const applyDemoPreset = (demo: TopicDemo) => {
-    setNin(demo.nin);
-    setFullName(demo.fullName);
-    setPhone(demo.phone);
-    setApplicantDaira(demo.applicantDaira);
-    setApplicantMunicipality(demo.applicantMunicipality);
-    setApplicantNeighborhood(demo.applicantNeighborhood);
-    setSubject(demo.subject);
-    setGrievanceDaira(demo.grievanceDaira);
-    setGrievanceMunicipality(demo.grievanceMunicipality);
-    setCategory(demo.category);
-    setDetails(demo.details);
-    setFormStep(1);
-    setFormError(null);
-    setLoadedDemoNotification(`تم تحميل النموذج التجريبي: "${demo.title}" بنجاح.`);
-    
-    // Auto-scroll to form fields
-    setTimeout(() => {
-      const el = document.getElementById('form-fields-container');
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 100);
-
-    setTimeout(() => {
-      setLoadedDemoNotification(null);
-    }, 6000);
-  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -263,7 +216,6 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
     const cleaned = codeToSearch.trim().toUpperCase();
     if (!cleaned) return;
     setTrackQuery(cleaned);
-    setSelectedDemoCode(cleaned);
     setIsSearching(true);
     setHasSearched(false);
     setActiveTrackingResult(null);
@@ -341,17 +293,6 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
 
   return (
     <>
-      {/* Modal for topic demo inspection */}
-      <TopicDemoModal
-        isOpen={isTopicDemoModalOpen}
-        onClose={() => setIsTopicDemoModalOpen(false)}
-        initialCategory={demoModalCategory}
-        onSelectAndApplyDemo={(demo) => {
-          applyDemoPreset(demo);
-          onTabChange('new');
-        }}
-      />
-
       <section id="interactive-form-section" className="py-12 sm:py-16 max-w-xl md:max-w-4xl mx-auto px-4">
         {/* Section Title */}
         <motion.div 
@@ -370,7 +311,7 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
             <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-12 h-1 bg-[#006233] rounded-full"></div>
           </h3>
           <p className="font-tajawal text-sm text-[#111827]/70 mt-6 max-w-md mx-auto leading-relaxed">
-            البوابة الرقمية المعتمدة لاستقبال وتتبع كافة العرائض الإدارية مع إمكانية المعاينة التجريبية الفورية
+            البوابة الرقمية الرسمية لاستقبال ومعالجة ومتابعة عرائض وانشغالات المواطنين بولاية الوادي
           </p>
         </motion.div>
 
@@ -404,9 +345,6 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
             >
               <Search className="w-4 h-4" />
               <span>تتبع ملف العريضة</span>
-              <span className="bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-bold px-1.5 py-0.5 rounded font-tajawal">
-                أكواد تجريبية جاهزة
-              </span>
             </button>
           </div>
 
@@ -414,7 +352,7 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
           <div className="p-5 sm:p-8 min-h-[400px]">
             <AnimatePresence mode="wait">
               {/* ========================================================================= */}
-              {/* TAB 1: NEW GRIEVANCE FORM WITH TOPIC DEMO PRESETS */}
+              {/* TAB 1: NEW OFFICIAL GRIEVANCE REGISTRATION FORM */}
               {/* ========================================================================= */}
               {activeTab === 'new' && (
                 <motion.div
@@ -496,93 +434,8 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
                       </div>
                     </div>
                   ) : (
-                    /* The Active Form with Topic Demo Presets */
+                    /* The Active Form */
                     <div className="space-y-6 max-w-2xl mx-auto">
-                      {/* =================================================================== */}
-                      {/* 🌟 TOPIC DEMO PRESETS BAR (رؤية تجريبية للمواضيع) */}
-                      {/* =================================================================== */}
-                      <div className="p-4 sm:p-5 bg-gradient-to-r from-emerald-50 via-teal-50/60 to-emerald-50 border border-emerald-200 rounded-xl shadow-2xs">
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 mb-3">
-                          <div className="flex items-center gap-2.5">
-                            <span className="w-8 h-8 rounded-lg bg-[#006233] text-white flex items-center justify-center shrink-0 shadow-xs">
-                              <Sparkles className="w-4 h-4 text-amber-300" />
-                            </span>
-                            <div>
-                              <h4 className="font-changa font-bold text-sm sm:text-base text-[#006233] flex items-center gap-2">
-                                رؤية تجريبية لنماذج المواضيع
-                                <span className="bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-bold px-2 py-0.5 rounded-full font-tajawal">
-                                  تعبئة تلقائية فورية
-                                </span>
-                              </h4>
-                              <p className="font-tajawal text-xs text-gray-600 mt-0.5">
-                                انقر على أي نموذج موضوع أدناه لملء كافة حقول الاستمارة ببيانات نموذجية وتجربة الإيداع:
-                              </p>
-                            </div>
-                          </div>
-
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setDemoModalCategory(category);
-                              setIsTopicDemoModalOpen(true);
-                            }}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-emerald-300 hover:bg-emerald-50 text-[#006233] rounded-lg text-xs font-bold font-tajawal shadow-2xs transition-colors shrink-0 cursor-pointer"
-                            title="الاطلاع على الوثائق المطلوبة والآجال القانونية"
-                          >
-                            <Eye className="w-3.5 h-3.5 text-emerald-700" />
-                            <span>دليل الوثائق والآجال</span>
-                          </button>
-                        </div>
-
-                        {/* 6 Topic Demo Pills Grid */}
-                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 pt-1">
-                          {TOPIC_DEMOS.map(demo => (
-                            <button
-                              key={demo.id}
-                              type="button"
-                              onClick={() => applyDemoPreset(demo)}
-                              className="p-2.5 bg-white hover:bg-emerald-100/50 border border-emerald-200/90 hover:border-[#006233] rounded-lg text-right transition-all flex flex-col justify-between shadow-2xs cursor-pointer group"
-                              title={`انقر لتعبئة نموذج: ${demo.title}`}
-                            >
-                              <div className="flex items-center justify-between gap-1 mb-1">
-                                <span className="text-[11px] font-bold text-emerald-900 font-tajawal truncate">
-                                  {demo.category}
-                                </span>
-                                <span>{CATEGORY_ICONS[demo.category]}</span>
-                              </div>
-                              <span className="text-[11px] font-tajawal font-medium text-gray-700 line-clamp-2 leading-snug group-hover:text-[#006233]">
-                                {demo.title}
-                              </span>
-                              <span className="mt-2 text-[9px] text-gray-400 font-tajawal self-start group-hover:text-emerald-800 flex items-center gap-1 font-bold">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                                تجربة وتعبئة
-                              </span>
-                            </button>
-                          ))}
-                        </div>
-
-                        {/* Toast Notification when Demo Applied */}
-                        {loadedDemoNotification && (
-                          <motion.div
-                            initial={{ opacity: 0, y: -5 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="mt-3 p-2.5 bg-[#006233] text-white rounded-lg text-xs font-tajawal font-bold flex items-center justify-between gap-2 shadow-xs"
-                          >
-                            <div className="flex items-center gap-2">
-                              <CheckCircle2 className="w-4 h-4 text-emerald-200 shrink-0" />
-                              <span>{loadedDemoNotification}</span>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => setLoadedDemoNotification(null)}
-                              className="text-white/80 hover:text-white p-1 rounded cursor-pointer"
-                            >
-                              <X className="w-3.5 h-3.5" />
-                            </button>
-                          </motion.div>
-                        )}
-                      </div>
-
                       {/* Main Submission Form */}
                       <form id="form-fields-container" onSubmit={handleSubmit} className="space-y-6">
                         {formError && (
@@ -831,7 +684,7 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
               )}
 
               {/* ========================================================================= */}
-              {/* TAB 2: TRACK REQUEST WITH INTERACTIVE DEMO TRACKING CODES */}
+              {/* TAB 2: TRACK REQUEST */}
               {/* ========================================================================= */}
               {activeTab === 'track' && (
                 <motion.div
@@ -842,95 +695,28 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
                   transition={{ duration: 0.2 }}
                   className="max-w-2xl mx-auto space-y-6"
                 >
-                  {/* =================================================================== */}
-                  {/* 🔍 INTERACTIVE DEMO TRACKING CODES (تجربة تتبع فورية) */}
-                  {/* =================================================================== */}
-                  <div className="p-4 sm:p-5 bg-gradient-to-r from-gray-50 via-slate-50 to-gray-50 border border-gray-200 rounded-xl shadow-2xs">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
-                      <div className="flex items-center gap-2">
-                        <span className="w-8 h-8 rounded-lg bg-[#111827] text-white flex items-center justify-center shrink-0">
-                          <Sparkles className="w-4 h-4 text-amber-300" />
-                        </span>
-                        <div>
-                          <h4 className="font-changa font-bold text-sm sm:text-base text-gray-900 flex items-center gap-2">
-                            تجربة تتبع فورية (أكواد تجريبية جاهزة)
-                            <span className="bg-emerald-100 text-emerald-900 border border-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded-full font-tajawal">
-                              استعلام مباشر بنقرة واحدة
-                            </span>
-                          </h4>
-                          <p className="font-tajawal text-xs text-gray-600 mt-0.5">
-                            اختر أحد الملفات النموذجية أدناه للاطلاع الفوري على مخرجات المعالجة والرد الرسمي المعتمد:
-                          </p>
-                        </div>
+                  {/* Official Search Form */}
+                  <form onSubmit={handleSearchSubmit} className="p-6 bg-white border border-gray-200 rounded-xl shadow-xs">
+                    <div className="text-center max-w-md mx-auto mb-5">
+                      <div className="w-12 h-12 rounded-full bg-[#006233]/10 text-[#006233] flex items-center justify-center mx-auto mb-3">
+                        <Search className="w-6 h-6" />
                       </div>
+                      <h4 className="text-base font-bold text-gray-900 font-changa">
+                        الاستعلام ومتابعة العريضة
+                      </h4>
+                      <p className="font-tajawal text-xs text-gray-500 mt-1">
+                        أدخل رقم التسجيل أو رمز التتبع المطبوع على وصل الإيداع لمتابعة مآل المعالجة
+                      </p>
                     </div>
 
-                    {/* 4 Demo Tracking Cards */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
-                      {TRACKING_DEMO_CASES.map(demoCase => {
-                        const isSelected = selectedDemoCode === demoCase.code;
-                        return (
-                          <button
-                            key={demoCase.code}
-                            type="button"
-                            onClick={() => executeTrackSearch(demoCase.code)}
-                            className={`p-3 rounded-xl border text-right transition-all flex flex-col justify-between cursor-pointer group ${
-                              isSelected
-                                ? 'bg-emerald-50/80 border-[#006233] ring-1 ring-[#006233]'
-                                : 'bg-white hover:bg-gray-50 border-gray-200'
-                            }`}
-                          >
-                            <div className="flex items-center justify-between gap-2 mb-1.5">
-                              <span className="font-mono font-bold text-xs text-gray-900 bg-gray-100 px-2 py-0.5 rounded">
-                                {demoCase.code}
-                              </span>
-                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full font-tajawal ${
-                                demoCase.statusType === 'resolved'
-                                  ? 'bg-green-100 text-green-800'
-                                  : demoCase.statusType === 'review'
-                                  ? 'bg-amber-100 text-amber-800'
-                                  : demoCase.statusType === 'in_progress'
-                                  ? 'bg-blue-100 text-blue-800'
-                                  : 'bg-red-100 text-red-800'
-                              }`}>
-                                {demoCase.stageBadge}
-                              </span>
-                            </div>
-
-                            <p className="font-tajawal font-bold text-xs text-gray-800 line-clamp-1 mb-1 group-hover:text-[#006233]">
-                              {demoCase.subject}
-                            </p>
-
-                            <p className="font-tajawal text-[11px] text-gray-500 leading-snug line-clamp-2">
-                              {demoCase.stageDescription}
-                            </p>
-
-                            <div className="mt-2 pt-2 border-t border-gray-100 flex items-center justify-between text-[10px] font-tajawal text-gray-500">
-                              <span>بلدية {demoCase.municipality}</span>
-                              <span className="text-[#006233] font-bold group-hover:underline flex items-center gap-1">
-                                معاينة الملف
-                                <ArrowRight className="w-3 h-3" />
-                              </span>
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Manual Search Form */}
-                  <form onSubmit={handleSearchSubmit} className="p-5 bg-white border border-gray-200 rounded-xl shadow-2xs">
-                    <label className="block text-sm font-bold text-[#111827] mb-2 font-tajawal text-center">
-                      أو أدخل رقم التتبع الخاص بعريضتكم:
-                    </label>
-                    <div className="flex flex-col sm:flex-row gap-2 max-w-lg mx-auto">
+                    <div className="flex flex-col sm:flex-row gap-2.5 max-w-lg mx-auto">
                       <div className="relative flex-1">
                         <input
                           type="text"
                           required
                           value={trackQuery}
                           onChange={e => setTrackQuery(e.target.value)}
-                          placeholder="WIL-2026-X7K4P92"
+                          placeholder="مثال: WD-2026-00125 أو WIL-2026-00130"
                           dir="ltr"
                           className={`${inputBaseClass} font-mono uppercase text-center sm:text-left`}
                         />
@@ -967,30 +753,18 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
 
                   {/* Empty state when searched but not found */}
                   {hasSearched && !activeTrackingResult && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-6 bg-amber-50 border border-amber-200 rounded-xl text-center space-y-3">
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-6 bg-amber-50/70 border border-amber-200 rounded-xl text-center space-y-3">
                       <div className="w-12 h-12 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center mx-auto">
                         <AlertTriangle className="w-6 h-6" />
                       </div>
-                      <h5 className="font-changa font-bold text-base text-gray-900 leading-snug whitespace-pre-line">
-                        لم نتمكن من العثور على هذا الانشغال.
-                        يرجى التأكد من رقم التتبع والمحاولة مرة أخرى.
+                      <h5 className="font-changa font-bold text-base text-gray-900 leading-snug">
+                        لم يتم العثور على أي ملف مسجل بهذا الرمز
                       </h5>
-                      <p className="font-tajawal text-xs text-gray-600 max-w-md mx-auto">
-                        الرقم المدخل: <span className="font-mono text-[#D21034] font-bold">{trackQuery}</span> — يمكنك تجربة أحد الأكواد النموذجية المعتمدة أدناه لمعاينة حالات المعالجة المختلفة:
+                      <p className="font-tajawal text-xs text-gray-600 max-w-md mx-auto leading-relaxed">
+                        الرقم المدخل: <span className="font-mono text-[#D21034] font-bold">{trackQuery}</span>
+                        <br />
+                        يرجى التحقق من كتابة رقم التتبع كما هو مدوّن على وصل الاستلام الرسمي، ثم إعادة المحاولة.
                       </p>
-                      
-                      <div className="flex flex-wrap justify-center gap-2 pt-2">
-                        {TRACKING_DEMO_CASES.map(c => (
-                          <button
-                            key={c.code}
-                            type="button"
-                            onClick={() => executeTrackSearch(c.code)}
-                            className="px-3 py-1.5 bg-white border border-amber-300 hover:bg-amber-100/60 rounded-lg text-xs font-tajawal font-bold text-amber-900 transition-colors cursor-pointer"
-                          >
-                            تجربة: {c.code} ({c.stageBadge})
-                          </button>
-                        ))}
-                      </div>
                     </motion.div>
                   )}
 
@@ -998,7 +772,7 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
                   {!hasSearched && !isSearching && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-6 text-gray-400 font-tajawal text-xs sm:text-sm flex flex-col items-center">
                       <Search className="w-8 h-8 text-gray-300 mb-2" />
-                      <span>يمكنك إدخال كود التتبع الخاص بكم أو النقر على أحد الأكواد التجريبية أعلاه للاستعلام الفوري.</span>
+                      <span>يرجى إدخال رمز المتابعة المسلم لكم عند إيداع العريضة للاطلاع على مسار المعالجة.</span>
                     </motion.div>
                   )}
                 </motion.div>
