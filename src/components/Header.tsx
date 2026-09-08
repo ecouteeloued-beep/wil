@@ -306,11 +306,11 @@ export const Header: React.FC<HeaderProps> = ({ onNavigateToForm, onOpenWelcome,
             <div className="hidden lg:flex items-center gap-2 py-1">
               <button
                 onClick={onOpenDashboard}
-                className="bg-[#C67D2A] hover:bg-[#b06d22] text-white px-3 py-1.5 rounded font-bold text-xs flex items-center gap-1.5 shadow-sm transition-all"
-                title="الدخول إلى فضاء إدارة ومتابعة الخلية"
+                className="bg-[#C67D2A] hover:bg-[#b06d22] text-white px-3.5 py-1.5 rounded-lg font-bold text-xs flex items-center gap-1.5 shadow-sm transition-all border border-amber-300/30"
+                title="الدخول إلى فضاء الإدارة والرقابة (/admin)"
               >
                 <Shield className="w-3.5 h-3.5" />
-                <span>لوحة التحكم (الخلية)</span>
+                <span>لوحة التحكم /admin</span>
               </button>
 
               <a 
@@ -421,6 +421,14 @@ export const Header: React.FC<HeaderProps> = ({ onNavigateToForm, onOpenWelcome,
                 <span>بوابة وزارة الداخلية الرسمية</span>
                 <ExternalLink className="w-3.5 h-3.5" />
               </a>
+
+              <button
+                onClick={() => { setMobileMenuOpen(false); onOpenDashboard(); }}
+                className="w-full text-right py-2.5 px-3 bg-[#C67D2A] text-white font-bold rounded-lg flex items-center gap-2 text-xs shadow-xs mt-2"
+              >
+                <Shield className="w-4 h-4 text-amber-200" />
+                <span>لوحة التحكم والمراقبة (/admin)</span>
+              </button>
             </div>
           )}
         </nav>

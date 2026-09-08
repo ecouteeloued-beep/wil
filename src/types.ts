@@ -45,7 +45,30 @@ export interface GrievanceSubmission {
   category: GrievanceCategory;
   details: string;
   createdAt: string;
-  status: 'قيد المعالجة' | 'تم التوجيه' | 'تم الرد' | 'مسجل حديثاً';
+  status: 'قيد المعالجة' | 'تم التوجيه' | 'تم الرد' | 'مسجل حديثاً' | string;
+  priority?: string;
+  assignedDepartment?: string;
+  assignedToName?: string;
+  officialResponse?: {
+    text: string;
+    preparedBy?: string;
+    preparedAt?: string;
+    reviewedBy?: string;
+    reviewedAt?: string;
+    approved?: boolean;
+    letterNumber?: string;
+  };
+  timeline?: Array<{
+    id: string;
+    date: string;
+    time: string;
+    author: string;
+    authorRole: string;
+    action: string;
+    note?: string;
+    statusFrom?: string;
+    statusTo?: string;
+  }>;
 }
 
 export interface TrackingResult {
@@ -92,10 +115,9 @@ export interface ChannelItem {
 // =========================================================================
 
 export type UserRole = 
-  | 'super_admin'   // المدير الإداري العام (Super Admin - صلاحيات كاملة)
-  | 'supervisor'    // مسؤول الخلية (Cell Supervisor - إدارة، توزيع، تقارير، اعتماد)
-  | 'employee'      // موظف معالجة (Employee - معالجة الانشغالات المسندة إليه فقط)
-  | 'viewer';       // مستخدم مراقب / مدقق (Viewer - معاينة وقراءة البيانات المصرح بها فقط)
+  | 'super_admin'   // Super admin (يرى كل شيء، يراقب كل العمليات ولديه الخريطة الجغرافية التفاعلية)
+  | 'supervisor'    // مسؤول خلية (إدارة التوجيه، اعتماد الردود، إدارة الموظفين وإعدادات الخلية)
+  | 'employee';     // موظف معالج (معالجة الانشغالات المسندة إليه فقط وتقديم مسودات الردود)
 
 export interface SystemUser {
   id: string;
@@ -112,6 +134,7 @@ export interface SystemUser {
   overdueCount: number;
   lastActive: string;
   permissions: string[];
+  pinCode?: string; // 0000 لمسؤول الخلية، 1111 للموظف المعالج، 1234 للـ Super Admin
 }
 
 export type GrievanceStatus = 

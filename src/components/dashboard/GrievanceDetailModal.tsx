@@ -62,7 +62,6 @@ export const GrievanceDetailModal: React.FC<GrievanceDetailModalProps> = ({
 
   const isSupervisor = currentUser.role === 'supervisor' || currentUser.role === 'super_admin';
   const isAssignedEmployee = currentUser.role === 'employee' && grievance.assignedToId === currentUser.id;
-  const isViewer = currentUser.role === 'viewer';
 
   const handlePriorityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const val = e.target.value as GrievancePriority;
@@ -268,14 +267,12 @@ export const GrievanceDetailModal: React.FC<GrievanceDetailModalProps> = ({
             <div className="space-y-4 pt-2">
               <div className="flex items-center justify-between">
                 <h4 className="text-xs font-bold text-slate-700">سجل الملاحظات الداخلية والاتصالات:</h4>
-                {!isViewer && (
-                  <button
-                    onClick={() => onOpenInternalNote(grievance)}
-                    className="text-xs px-3 py-1.5 rounded-lg bg-slate-800 text-white hover:bg-slate-900 transition-colors flex items-center gap-1"
-                  >
-                    <span>+ إضافة ملاحظة جديدة</span>
-                  </button>
-                )}
+                <button
+                  onClick={() => onOpenInternalNote(grievance)}
+                  className="text-xs px-3 py-1.5 rounded-lg bg-slate-800 text-white hover:bg-slate-900 transition-colors flex items-center gap-1"
+                >
+                  <span>+ إضافة ملاحظة جديدة</span>
+                </button>
               </div>
 
               {grievance.internalNotes.length === 0 ? (
@@ -401,14 +398,6 @@ export const GrievanceDetailModal: React.FC<GrievanceDetailModalProps> = ({
           {/* Action Buttons based on Role */}
           <div className="flex flex-wrap items-center gap-2 mr-auto">
             
-            {/* Viewer View */}
-            {isViewer && (
-              <span className="text-xs text-slate-400 flex items-center gap-1.5 bg-slate-100 px-3 py-1.5 rounded-lg">
-                <Lock className="w-3.5 h-3.5" />
-                <span>حساب للمعاينة فقط (Read-Only)</span>
-              </span>
-            )}
-
             {/* Employee Actions */}
             {isAssignedEmployee && (
               <>

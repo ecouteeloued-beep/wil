@@ -16,6 +16,7 @@ import { StaffManagementView } from './StaffManagementView';
 import { ReportsView } from './ReportsView';
 import { AuditLogView } from './AuditLogView';
 import { SettingsView } from './SettingsView';
+import { SuperAdminMapView } from './SuperAdminMapView';
 import { GrievanceDetailModal } from './GrievanceDetailModal';
 import { 
   ApproveCloseModal, 
@@ -28,9 +29,13 @@ import { NotificationPanel } from './NotificationPanel';
 
 interface DashboardLayoutProps {
   onExitDashboard: () => void;
+  onLogout?: () => void;
 }
 
-export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ onExitDashboard }) => {
+export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ 
+  onExitDashboard, 
+  onLogout 
+}) => {
   // State
   const [currentUser, setCurrentUser] = useState<SystemUser>(AdminService.getCurrentUser());
   const [users, setUsers] = useState<SystemUser[]>(AdminService.getUsers());
@@ -42,7 +47,11 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ onExitDashboar
 
   // Active Tab
   const [activeTab, setActiveTab] = useState<string>(
-    currentUser.role === 'employee' ? 'employee_home' : 'supervisor_home'
+    currentUser.role === 'employee' 
+      ? 'employee_home' 
+      : currentUser.role === 'super_admin'
+      ? 'super_admin_map'
+      : 'supervisor_home'
   );
 
   // UI state
@@ -181,6 +190,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ onExitDashboar
         inProgressCount={myInProgress}
         overdueCount={currentUser.role === 'employee' ? myOverdue : executiveStats.overdue}
         onExitDashboard={onExitDashboard}
+        onLogout={onLogout}
       />
 
       {/* Main Content Area */}
@@ -195,11 +205,21 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ onExitDashboar
           onOpenNotifications={() => setIsNotificationsOpen(true)}
           unreadNotifsCount={unreadNotifsCount}
           onExitDashboard={onExitDashboard}
+          onLogout={onLogout}
         />
 
         {/* Scrollable View Content */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           
+          {/* Super Admin Interactive GIS Map View */}
+          {activeTab === 'super_admin_map' && (
+            <SuperAdminMapView
+              currentUser={currentUser}
+              grievances={grievances}
+              onSelectGrievance={(g) => setSelectedGrievance(g)}
+            />
+          )}
+
           {/* Employee Home View */}
           {activeTab === 'employee_home' && (
             <EmployeeDashboardView

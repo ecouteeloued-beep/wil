@@ -114,11 +114,10 @@ export const StaffManagementView: React.FC<StaffManagementViewProps> = ({
             onChange={(e) => setRoleFilter(e.target.value)}
             className="text-xs px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-700"
           >
-            <option value="all">كافة الأدوار</option>
-            <option value="supervisor">مسؤولو الخلية</option>
-            <option value="employee">موظفو المعالجة</option>
-            <option value="viewer">مراقبون / مدققون</option>
-            <option value="super_admin">المدير العام</option>
+            <option value="all">كافة الأدوار (3)</option>
+            <option value="supervisor">مسؤول الخلية (0000)</option>
+            <option value="employee">موظفو المعالجة (1111)</option>
+            <option value="super_admin">Super Admin (1234)</option>
           </select>
         </div>
       </div>
@@ -246,9 +245,9 @@ export const StaffManagementView: React.FC<StaffManagementViewProps> = ({
                     onChange={(e) => setNewRole(e.target.value as UserRole)}
                     className="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs bg-white"
                   >
-                    <option value="employee">موظف معالجة</option>
-                    <option value="supervisor">مسؤول الخلية</option>
-                    <option value="viewer">مراقب / مدقق</option>
+                    <option value="employee">موظف معالج (PIN: 1111)</option>
+                    <option value="supervisor">مسؤول خلية (PIN: 0000)</option>
+                    <option value="super_admin">Super admin (PIN: 1234)</option>
                   </select>
                 </div>
 

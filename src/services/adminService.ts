@@ -18,16 +18,23 @@ const GRIEVANCES_STORAGE_KEY = 'wilaya_eloued_admin_grievances';
 const AUDIT_LOGS_STORAGE_KEY = 'wilaya_eloued_admin_audit_logs';
 const NOTIFICATIONS_STORAGE_KEY = 'wilaya_eloued_admin_notifications';
 const CURRENT_USER_KEY = 'wilaya_eloued_current_session_user';
+const ADMIN_AUTH_KEY = 'wilaya_eloued_admin_authenticated';
 
 // =========================================================================
-// INITIAL SEED USERS
+// INITIAL SEED USERS (STRICTLY 3 ROLES: supervisor, employee, super_admin)
 // =========================================================================
+export const ROLE_PINS: Record<UserRole, string> = {
+  supervisor: '0000',
+  employee: '1111',
+  super_admin: '1234'
+};
+
 export const SEED_USERS: SystemUser[] = [
   {
     id: 'usr-supervisor',
     name: 'عمر بن سالم',
     role: 'supervisor',
-    roleTitle: 'رئيس خلية الإصغاء والتكفل بانشغالات المواطن',
+    roleTitle: 'مسؤول خلية الإصغاء والتكفل',
     email: 'o.bensalem@eloued.gov.dz',
     phone: '032 21 45 10',
     department: 'ديوان والي ولاية الوادي',
@@ -36,13 +43,14 @@ export const SEED_USERS: SystemUser[] = [
     resolvedCount: 42,
     overdueCount: 0,
     lastActive: 'منذ 5 دقائق',
+    pinCode: '0000',
     permissions: ['view_all', 'assign', 'approve', 'manage_staff', 'reports', 'audit_log', 'settings']
   },
   {
     id: 'usr-emp-1',
     name: 'أحمد بن عمار',
     role: 'employee',
-    roleTitle: 'مفتش رئيسي للإدارة الإقليمية',
+    roleTitle: 'موظف معالج رئيسي',
     email: 'a.benammar@eloued.gov.dz',
     phone: '032 21 45 14',
     department: 'مصلحة الشؤون الاجتماعية والتنمية المحلية',
@@ -51,13 +59,14 @@ export const SEED_USERS: SystemUser[] = [
     resolvedCount: 19,
     overdueCount: 1,
     lastActive: 'نشط الآن',
+    pinCode: '1111',
     permissions: ['view_assigned', 'process', 'draft_response', 'add_notes', 'request_info']
   },
   {
     id: 'usr-emp-2',
     name: 'فاطمة الزهراء عثماني',
     role: 'employee',
-    roleTitle: 'متصرفة إدارية رئيسية',
+    roleTitle: 'موظفة معالجة (العمران والبيئة)',
     email: 'fz.othmani@eloued.gov.dz',
     phone: '032 21 45 18',
     department: 'مصلحة العمران والبيئة والتهيئة',
@@ -66,52 +75,24 @@ export const SEED_USERS: SystemUser[] = [
     resolvedCount: 15,
     overdueCount: 0,
     lastActive: 'منذ 20 دقيقة',
-    permissions: ['view_assigned', 'process', 'draft_response', 'add_notes', 'request_info']
-  },
-  {
-    id: 'usr-emp-3',
-    name: 'ياسين قدور',
-    role: 'employee',
-    roleTitle: 'ملحق إدارة رئيسي',
-    email: 'y.kaddour@eloued.gov.dz',
-    phone: '032 21 45 22',
-    department: 'مصلحة النقل والمرافق العمومية',
-    status: 'نشط',
-    assignedCount: 3,
-    resolvedCount: 11,
-    overdueCount: 0,
-    lastActive: 'منذ ساعة',
+    pinCode: '1111',
     permissions: ['view_assigned', 'process', 'draft_response', 'add_notes', 'request_info']
   },
   {
     id: 'usr-admin',
     name: 'عبد الحفيظ التجاني',
     role: 'super_admin',
-    roleTitle: 'المدير العام للمنظومة والرقمنة',
+    roleTitle: 'المشرف العام والرقمنة الولائية (Super Admin)',
     email: 'admin.cellule@eloued.gov.dz',
     phone: '032 21 45 00',
-    department: 'مديرية التقنين والشؤون العامة والرقمنة',
+    department: 'ديوان الوالي — الرقابة والرقمنة',
     status: 'نشط',
     assignedCount: 0,
     resolvedCount: 0,
     overdueCount: 0,
     lastActive: 'نشط الآن',
-    permissions: ['all']
-  },
-  {
-    id: 'usr-viewer',
-    name: 'كمال زروقي',
-    role: 'viewer',
-    roleTitle: 'مفتش ولائي للمصالح الإدارية',
-    email: 'k.zerrouki@eloued.gov.dz',
-    phone: '032 21 45 30',
-    department: 'المفتشية العامة للولاية',
-    status: 'نشط',
-    assignedCount: 0,
-    resolvedCount: 0,
-    overdueCount: 0,
-    lastActive: 'منذ ساعتين',
-    permissions: ['view_all', 'reports']
+    pinCode: '1234',
+    permissions: ['all', 'super_admin_map', 'view_all', 'reports', 'audit_log', 'manage_staff', 'settings']
   }
 ];
 
@@ -586,7 +567,16 @@ export const AdminService = {
   getUsers: (): SystemUser[] => {
     try {
       const stored = localStorage.getItem(USERS_STORAGE_KEY);
-      if (stored) return JSON.parse(stored);
+      if (stored) {
+        const parsed: SystemUser[] = JSON.parse(stored);
+        // Only keep the 3 supported roles: supervisor, employee, super_admin
+        const valid = parsed.filter(u => u.role === 'supervisor' || u.role === 'employee' || u.role === 'super_admin');
+        if (valid.length !== parsed.length || valid.length === 0) {
+          localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(SEED_USERS));
+          return SEED_USERS;
+        }
+        return valid;
+      }
       localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(SEED_USERS));
       return SEED_USERS;
     } catch {
@@ -601,7 +591,9 @@ export const AdminService = {
         const parsed = JSON.parse(stored);
         const allUsers = AdminService.getUsers();
         const found = allUsers.find(u => u.id === parsed.id);
-        if (found) return found;
+        if (found && (found.role === 'supervisor' || found.role === 'employee' || found.role === 'super_admin')) {
+          return found;
+        }
       }
       // Default to supervisor for first load
       const defaultUser = SEED_USERS[0];
@@ -623,6 +615,96 @@ export const AdminService = {
     return user;
   },
 
+  // Official PIN Authentication for /admin
+  // مسؤول خلية: 0000 | موظف معالج: 1111 | Super admin: 1234
+  verifyPin: (role: UserRole, pin: string): boolean => {
+    const expected = ROLE_PINS[role];
+    return expected === pin.trim();
+  },
+
+  loginWithPinAndRole: (role: UserRole, pin: string): { success: boolean; user?: SystemUser; error?: string } => {
+    const trimmed = pin.trim();
+    const expected = ROLE_PINS[role];
+    if (trimmed !== expected) {
+      return { 
+        success: false, 
+        error: `الرمز السري غير صحيح. الرمز المعتمد لدور ${role === 'supervisor' ? 'مسؤول خلية (0000)' : role === 'employee' ? 'موظف معالج (1111)' : 'Super admin (1234)'} هو المطلوب.` 
+      };
+    }
+
+    const users = AdminService.getUsers();
+    // Prioritize primary user for that role
+    let targetUser: SystemUser | undefined;
+    if (role === 'supervisor') {
+      targetUser = users.find(u => u.id === 'usr-supervisor') || users.find(u => u.role === 'supervisor');
+    } else if (role === 'super_admin') {
+      targetUser = users.find(u => u.id === 'usr-admin') || users.find(u => u.role === 'super_admin');
+    } else {
+      targetUser = users.find(u => u.id === 'usr-emp-1') || users.find(u => u.role === 'employee');
+    }
+
+    if (!targetUser) {
+      targetUser = SEED_USERS.find(u => u.role === role) || SEED_USERS[0];
+    }
+
+    AdminService.setCurrentUser(targetUser);
+    AdminService.setAdminLoggedIn(true);
+
+    AdminService.logAudit({
+      userId: targetUser.id,
+      userName: targetUser.name,
+      userRole: targetUser.roleTitle,
+      action: 'تسجيل دخول إداري /admin',
+      targetId: targetUser.id,
+      targetType: 'موظف',
+      newValue: 'متصل بالنظام الإداري',
+      details: `تم التحقق بنجاح من الرمز السري الرسمي وتسجيل الدخول بحساب (${targetUser.name} - ${targetUser.roleTitle}).`
+    });
+
+    return { success: true, user: targetUser };
+  },
+
+  isAdminLoggedIn: (): boolean => {
+    try {
+      return localStorage.getItem(ADMIN_AUTH_KEY) === 'true';
+    } catch {
+      return false;
+    }
+  },
+
+  setAdminLoggedIn: (status: boolean): void => {
+    try {
+      if (status) {
+        localStorage.setItem(ADMIN_AUTH_KEY, 'true');
+      } else {
+        localStorage.removeItem(ADMIN_AUTH_KEY);
+      }
+    } catch {}
+  },
+
+  logoutAdmin: (): void => {
+    try {
+      localStorage.removeItem(ADMIN_AUTH_KEY);
+    } catch {}
+  },
+
+  loginWithPinUniversal: (pin: string): { success: boolean; user?: SystemUser; error?: string } => {
+    const trimmed = pin.trim();
+    if (trimmed === '0000') {
+      return AdminService.loginWithPinAndRole('supervisor', '0000');
+    }
+    if (trimmed === '1111') {
+      return AdminService.loginWithPinAndRole('employee', '1111');
+    }
+    if (trimmed === '1234') {
+      return AdminService.loginWithPinAndRole('super_admin', '1234');
+    }
+    return {
+      success: false,
+      error: 'رمز PIN غير صالح. الرموز المعتمدة: مسؤل خلية (0000)، موظف معالج (1111)، Super admin (1234)'
+    };
+  },
+
   addUser: (userData: Omit<SystemUser, 'id' | 'assignedCount' | 'resolvedCount' | 'overdueCount' | 'lastActive'>, actor: SystemUser): SystemUser => {
     const users = AdminService.getUsers();
     const newUser: SystemUser = {
@@ -636,7 +718,8 @@ export const AdminService = {
         ? ['view_assigned', 'process', 'draft_response', 'add_notes', 'request_info']
         : userData.role === 'supervisor'
         ? ['view_all', 'assign', 'approve', 'manage_staff', 'reports', 'audit_log', 'settings']
-        : ['view_all', 'reports']
+        : ['all', 'super_admin_map', 'view_all', 'reports', 'audit_log', 'manage_staff', 'settings'],
+      pinCode: userData.role === 'supervisor' ? '0000' : userData.role === 'employee' ? '1111' : '1234'
     };
     users.push(newUser);
     localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
