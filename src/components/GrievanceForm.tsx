@@ -98,6 +98,8 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
 
   // Tracking Search State
   const [trackQuery, setTrackQuery] = useState('');
+  const [trackPin, setTrackPin] = useState('');
+  const [trackError, setTrackError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [activeTrackingResult, setActiveTrackingResult] = useState<EnhancedGrievance | null>(null);
@@ -212,10 +214,20 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
     setFormStep(1);
   };
 
-  const executeTrackSearch = async (codeToSearch: string) => {
+  const executeTrackSearch = async (codeToSearch: string, pinToSearch: string) => {
     const cleaned = codeToSearch.trim().toUpperCase();
-    if (!cleaned) return;
+    const cleanedPin = pinToSearch.trim();
+    if (!cleaned) {
+      setTrackError('يرجى إدخال رقم التتبع');
+      return;
+    }
+    if (!cleanedPin) {
+      setTrackError('يرجى إدخال الرمز السري للملف');
+      return;
+    }
+    setTrackError(null);
     setTrackQuery(cleaned);
+    setTrackPin(cleanedPin);
     setIsSearching(true);
     setHasSearched(false);
     setActiveTrackingResult(null);
@@ -240,6 +252,7 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
           match = {
             id: legacyMatch.id,
             trackingNumber: legacyMatch.id,
+            secretPin: (legacyMatch as any).secretPin || '2026',
             statusCode: 'IN_PROGRESS',
             status: legacyMatch.status || 'قيد المعالجة',
             priority: legacyMatch.priority || 'عادي',
@@ -269,6 +282,16 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
         }
       }
 
+      if (match) {
+        if (match.secretPin !== cleanedPin) {
+          setTrackError('الرمز السري غير صحيح. يرجى التأكد من المعلومات.');
+          setActiveTrackingResult(null);
+          setHasSearched(false);
+          setIsSearching(false);
+          return;
+        }
+      }
+
       setActiveTrackingResult(match);
     } catch (err) {
       console.error('Error executing track search:', err);
@@ -281,7 +304,7 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    executeTrackSearch(trackQuery);
+    executeTrackSearch(trackQuery, trackPin);
   };
 
   const handlePrintReceipt = () => {
@@ -389,15 +412,26 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
                             </span>
                           </div>
                           
+                          <div className="mt-4 border-t border-dashed border-gray-200 pt-3">
+                            <span className="block text-[11px] font-tajawal text-[#D21034] mb-1">
+                              الرمز السري الخاص بالملف (للمتابعة)
+                            </span>
+                            <div className="flex items-center justify-center gap-3">
+                              <span className="font-mono text-xl font-bold text-[#111827] tracking-[0.3em]">
+                                {submittedTicket.secretPin || '2026'}
+                              </span>
+                            </div>
+                          </div>
+
                           <button
                             type="button"
-                            onClick={() => handleCopy(submittedTicket.id)}
-                            className={`mt-3 w-full py-2 rounded-lg border text-xs font-tajawal font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                            onClick={() => handleCopy(`الرقم المرجعي: ${submittedTicket.id}\nالرمز السري: ${submittedTicket.secretPin || '2026'}`)}
+                            className={`mt-4 w-full py-2.5 rounded-lg border text-xs font-tajawal font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm ${
                               copiedCode ? 'bg-[#006233] border-[#006233] text-white' : 'bg-gray-50 border-gray-200 text-[#111827] hover:bg-gray-100'
                             }`}
                           >
                             {copiedCode ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                            <span>{copiedCode ? 'تم نسخ الرقم' : 'نسخ الرقم المرجعي'}</span>
+                            <span>{copiedCode ? 'تم نسخ المعلومات' : 'نسخ معلومات المتابعة'}</span>
                           </button>
                         </div>
 
@@ -417,7 +451,7 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
                           type="button"
                           onClick={() => { 
                             onTabChange('track'); 
-                            executeTrackSearch(submittedTicket.id); 
+                            executeTrackSearch(submittedTicket.id, submittedTicket.secretPin || '2026'); 
                           }}
                           className="py-2.5 px-6 bg-[#006233] hover:bg-[#004d28] text-white font-tajawal font-bold text-sm rounded-lg transition-colors flex items-center justify-center gap-2 shadow-xs cursor-pointer"
                         >
@@ -709,16 +743,34 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
                       </p>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row gap-2.5 max-w-lg mx-auto">
+                    <div className="flex flex-col sm:flex-row gap-2.5 max-w-xl mx-auto">
                       <div className="relative flex-1">
                         <input
                           type="text"
                           required
                           value={trackQuery}
-                          onChange={e => setTrackQuery(e.target.value)}
-                          placeholder="مثال: WD-2026-00125 أو WIL-2026-00130"
+                          onChange={e => {
+                            setTrackQuery(e.target.value);
+                            setTrackError(null);
+                          }}
+                          placeholder="رقم التتبع (مثال: WIL-2026-00130)"
                           dir="ltr"
-                          className={`${inputBaseClass} font-mono uppercase text-center sm:text-left`}
+                          className={`${inputBaseClass} font-mono uppercase text-center sm:text-left text-sm`}
+                        />
+                      </div>
+                      <div className="relative w-full sm:w-1/3">
+                        <input
+                          type="text"
+                          required
+                          maxLength={4}
+                          value={trackPin}
+                          onChange={e => {
+                            setTrackPin(e.target.value.replace(/\D/g, ''));
+                            setTrackError(null);
+                          }}
+                          placeholder="الرمز السري"
+                          dir="ltr"
+                          className={`${inputBaseClass} font-mono text-center tracking-widest text-sm`}
                         />
                       </div>
                       <button
@@ -736,6 +788,12 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
                         )}
                       </button>
                     </div>
+
+                    {trackError && (
+                      <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} className="mt-3 text-center text-xs text-[#D21034] font-bold">
+                        {trackError}
+                      </motion.div>
+                    )}
                   </form>
 
                   {/* Tracking Results Display */}

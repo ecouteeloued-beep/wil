@@ -33,6 +33,7 @@ export type GrievanceCategory =
 
 export interface GrievanceSubmission {
   id: string;
+  secretPin?: string; // الرمز السري الخاص بالملف لحماية خصوصية المواطن
   nin?: string;
   fullName: string;
   phone: string;
@@ -236,6 +237,7 @@ export interface PublicMessage {
 export interface EnhancedGrievance {
   id: string; // e.g. WIL-2026-X7K4P92 or WD-2026-00125
   trackingNumber?: string; // alias for id
+  secretPin?: string; // الرمز السري الخاص بالملف لحماية خصوصية المواطن
   statusCode?: ComplaintStatusCode;
   nin?: string;
   fullName: string;

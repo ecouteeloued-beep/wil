@@ -8,12 +8,14 @@ const STORAGE_KEY = 'wilaya_eloued_grievances';
 export const GrievanceService = {
   save: (data: Omit<GrievanceSubmission, 'id' | 'status' | 'createdAt'>): GrievanceSubmission => {
     const existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    // Generate official demo tracking code: WIL-2026-XXXXXXX
+    // Generate official tracking code and confidential PIN
     const trackingId = ComplaintService.generateTrackingNumber();
+    const secretPin = ComplaintService.generateSecretPin();
     
     const newGrievance: GrievanceSubmission = {
       ...data,
       id: trackingId,
+      secretPin,
       status: 'قيد المعالجة', // default status
       createdAt: new Date().toISOString()
     };
@@ -21,7 +23,7 @@ export const GrievanceService = {
     existing.push(newGrievance);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
     
-    // Also add directly to the mock repository so /admin sees it immediately
+    // Also add directly to the repository
     ComplaintService.create({
       fullName: data.fullName,
       nin: data.nin,
@@ -34,6 +36,7 @@ export const GrievanceService = {
       grievanceMunicipality: data.grievanceMunicipality,
       category: data.category,
       details: data.details,
+      secretPin,
     }).catch(err => console.warn('Failed to sync new complaint to repository:', err));
 
     // Also track the last submission time for rate limiting (simple anti-spam)
@@ -57,6 +60,7 @@ export const GrievanceService = {
         return {
           id: adminFound.id,
           trackingNumber: adminFound.trackingNumber || adminFound.id,
+          secretPin: adminFound.secretPin || '2026',
           nin: adminFound.nin,
           fullName: adminFound.fullName,
           phone: adminFound.phone,
@@ -95,6 +99,7 @@ export const GrievanceService = {
       return {
         id: seedFound.id,
         trackingNumber: seedFound.trackingNumber || seedFound.id,
+        secretPin: (seedFound as any).secretPin || '2026',
         nin: seedFound.nin,
         fullName: seedFound.fullName,
         phone: seedFound.phone,
