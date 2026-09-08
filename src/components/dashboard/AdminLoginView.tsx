@@ -13,7 +13,10 @@ import {
   Building2,
   Compass,
   CheckCircle2,
-  Delete
+  Delete,
+  Copy,
+  Check,
+  Globe
 } from 'lucide-react';
 
 interface AdminLoginViewProps {
@@ -29,6 +32,15 @@ export const AdminLoginView: React.FC<AdminLoginViewProps> = ({
   const [pinInput, setPinInput] = useState('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [copiedUrl, setCopiedUrl] = useState(false);
+
+  const directAdminUrl = "https://wil-seven-tan.vercel.app/admin";
+
+  const handleCopyUrl = () => {
+    navigator.clipboard.writeText(directAdminUrl);
+    setCopiedUrl(true);
+    setTimeout(() => setCopiedUrl(false), 2000);
+  };
 
   const roleConfigs = [
     {
@@ -137,13 +149,22 @@ export const AdminLoginView: React.FC<AdminLoginViewProps> = ({
               <KeyRound className="w-6 h-6" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-mono text-[#C67D2A] bg-black/40 px-2 py-0.5 rounded-md font-bold">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs font-mono text-[#C67D2A] bg-black/40 px-2.5 py-0.5 rounded-md font-bold">
                   /admin
                 </span>
-                <span className="text-xs text-white/70 font-semibold">بوابة الإدارة والمراقبة الرسمية</span>
+                <button
+                  type="button"
+                  onClick={handleCopyUrl}
+                  className="inline-flex items-center gap-1 text-[11px] font-mono text-emerald-400 bg-emerald-950/60 hover:bg-emerald-900/60 border border-emerald-500/30 px-2 py-0.5 rounded transition-all cursor-pointer"
+                  title="انقر لنسخ الرابط المباشر"
+                >
+                  <Globe className="w-3 h-3" />
+                  <span>https://wil-seven-tan.vercel.app/admin</span>
+                  {copiedUrl ? <Check className="w-3 h-3 text-emerald-300" /> : <Copy className="w-3 h-3 text-emerald-400" />}
+                </button>
               </div>
-              <h1 className="text-lg sm:text-xl font-bold font-['Changa'] text-white mt-1">
+              <h1 className="text-lg sm:text-xl font-bold font-['Changa'] text-white mt-1.5">
                 تسجيل الدخول الإداري بنظام الرموز المعتمدة (PIN)
               </h1>
             </div>
@@ -151,7 +172,7 @@ export const AdminLoginView: React.FC<AdminLoginViewProps> = ({
 
           <button
             onClick={onExitToCitizenPortal}
-            className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-xs text-white transition-colors flex items-center gap-1.5 self-end sm:self-center"
+            className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-xs text-white transition-colors flex items-center gap-1.5 self-end sm:self-center cursor-pointer"
           >
             <span>بوابة المواطن</span>
             <ArrowRight className="w-3.5 h-3.5 rotate-180 text-[#C67D2A]" />
