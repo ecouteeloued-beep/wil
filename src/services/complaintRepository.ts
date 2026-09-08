@@ -10,10 +10,12 @@ import {
 
 export const STATUS_CODE_TO_ARABIC: Record<ComplaintStatusCode, GrievanceStatus> = {
   NEW: 'جديد',
+  VIEWED: 'تم الاطلاع',
   ASSIGNED: 'تم الإسناد',
   IN_PROGRESS: 'قيد المعالجة',
   WAITING_CITIZEN: 'بانتظار معلومات',
   WAITING_REVIEW: 'بانتظار المراجعة',
+  PENDING_REPLY: 'بانتظار الرد',
   RESOLVED: 'تمت المعالجة',
   CLOSED: 'مغلق',
   URGENT: 'عاجل',
