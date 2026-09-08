@@ -293,10 +293,11 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
       }
 
       setActiveTrackingResult(match);
+      setHasSearched(true);
+      setIsSearching(false);
     } catch (err) {
       console.error('Error executing track search:', err);
       setActiveTrackingResult(null);
-    } finally {
       setHasSearched(true);
       setIsSearching(false);
     }
