@@ -30,6 +30,9 @@ export type GrievanceCategory =
   | 'الصحة'
   | 'الخدمات الإدارية'
   | 'التنمية المحلية'
+  | 'العمران'
+  | 'النقل'
+  | 'الحالة المدنية'
   | 'أخرى';
 
 export interface GrievanceSubmission {
@@ -122,6 +125,7 @@ export type UserRole =
   | 'wali'
   | 'chef_cabinet'
   | 'head_department'
+  | 'supervisor'
   | 'employee';
 
 export interface SystemUser {
@@ -147,19 +151,34 @@ export type ComplaintStatusCode =
   | 'VIEWED'
   | 'ASSIGNED'
   | 'IN_PROGRESS'
+  | 'WAITING_CITIZEN'
+  | 'WAITING_REVIEW'
   | 'PENDING_REPLY'
   | 'RESOLVED'
   | 'CLOSED'
-  | 'REJECTED';
+  | 'REJECTED'
+  | 'URGENT'
+  | 'DUPLICATE'
+  | 'OUT_OF_SCOPE';
 
 export type GrievanceStatus = 
+  | 'جديد'
   | 'تم الاستقبال'
   | 'تم الاطلاع'
+  | 'تم الإسناد'
+  | 'محول للمصلحة'
   | 'تم التوجيه للمصلحة المختصة'
+  | 'قيد المعالجة'
   | 'جاري المعالجة'
+  | 'بانتظار معلومات'
+  | 'بانتظار المراجعة'
   | 'بانتظار الرد'
+  | 'تمت المعالجة'
   | 'تم الحل'
   | 'مغلق'
+  | 'عاجل'
+  | 'مكرر'
+  | 'خارج الاختصاص'
   | 'مرفوض';
 
 export type GrievancePriority = 'عادي' | 'متوسط' | 'عاجل' | 'قصوى';
