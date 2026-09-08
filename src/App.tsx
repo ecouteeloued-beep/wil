@@ -30,22 +30,43 @@ export default function App() {
   // Detect /admin or #admin in URL
   useEffect(() => {
     const handleUrlCheck = () => {
-      const path = window.location.pathname;
-      const hash = window.location.hash;
-      if (path === '/admin' || hash === '#admin' || hash === '#/admin') {
+      const path = window.location.pathname.toLowerCase();
+      const hash = window.location.hash.toLowerCase();
+      
+      const isAdminRoute = 
+        path === '/admin' || 
+        path === '/admin/' || 
+        path.startsWith('/admin') ||
+        path.endsWith('/admin') ||
+        hash === '#admin' || 
+        hash === '#/admin' ||
+        hash.includes('admin');
+
+      if (isAdminRoute) {
         setShowSplash(false);
         if (AdminService.isAdminLoggedIn()) {
           setCurrentView('dashboard');
         } else {
           setCurrentView('admin_login');
         }
+      } else {
+        // If on root or other path
+        if (currentView === 'admin_login' || currentView === 'dashboard') {
+          if (path === '/' || path === '' || !isAdminRoute) {
+            setCurrentView('home');
+          }
+        }
       }
     };
 
     handleUrlCheck();
     window.addEventListener('hashchange', handleUrlCheck);
-    return () => window.removeEventListener('hashchange', handleUrlCheck);
-  }, []);
+    window.addEventListener('popstate', handleUrlCheck);
+    return () => {
+      window.removeEventListener('hashchange', handleUrlCheck);
+      window.removeEventListener('popstate', handleUrlCheck);
+    };
+  }, [currentView]);
 
   const handleSelectTab = (tab: 'new' | 'track') => {
     setCurrentView('home');
@@ -81,6 +102,14 @@ export default function App() {
   };
 
   const handleOpenDashboard = () => {
+    try {
+      if (window.location.pathname !== '/admin') {
+        window.history.pushState({ route: 'admin' }, '', '/admin');
+      }
+    } catch {
+      // safe fallback in iframe environments
+    }
+
     if (AdminService.isAdminLoggedIn()) {
       setCurrentView('dashboard');
     } else {
@@ -90,6 +119,13 @@ export default function App() {
 
   const handleLogoutAdmin = () => {
     AdminService.logoutAdmin();
+    try {
+      if (window.location.pathname !== '/admin') {
+        window.history.pushState({ route: 'admin' }, '', '/admin');
+      }
+    } catch {
+      // safe fallback
+    }
     setCurrentView('admin_login');
   };
 
@@ -97,7 +133,14 @@ export default function App() {
   if (currentView === 'dashboard') {
     return (
       <DashboardLayout 
-        onExitDashboard={() => setCurrentView('home')} 
+        onExitDashboard={() => {
+          try {
+            window.history.pushState({ route: 'home' }, '', '/');
+          } catch {
+            // safe fallback
+          }
+          setCurrentView('home');
+        }} 
         onLogout={handleLogoutAdmin}
       />
     );
@@ -107,8 +150,24 @@ export default function App() {
   if (currentView === 'admin_login') {
     return (
       <AdminLoginView
-        onLoginSuccess={() => setCurrentView('dashboard')}
-        onExitToCitizenPortal={() => setCurrentView('home')}
+        onLoginSuccess={() => {
+          try {
+            if (window.location.pathname !== '/admin') {
+              window.history.pushState({ route: 'admin' }, '', '/admin');
+            }
+          } catch {
+            // safe fallback
+          }
+          setCurrentView('dashboard');
+        }}
+        onExitToCitizenPortal={() => {
+          try {
+            window.history.pushState({ route: 'home' }, '', '/');
+          } catch {
+            // safe fallback
+          }
+          setCurrentView('home');
+        }}
       />
     );
   }
