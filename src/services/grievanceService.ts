@@ -1,4 +1,5 @@
 import { GrievanceSubmission } from '../types';
+import { AdminService, SEED_GRIEVANCES } from './adminService';
 
 const STORAGE_KEY = 'wilaya_eloued_grievances';
 
@@ -23,11 +24,25 @@ export const GrievanceService = {
   },
 
   findByTrackingId: (id: string): GrievanceSubmission | null => {
-    // First check admin synchronized store for most up-to-date status
+    const cleanId = id.trim().toUpperCase();
+    if (!cleanId) return null;
+
+    // 1. First check admin repository (supports all active & seed grievances)
     try {
-      const adminGrievances = JSON.parse(localStorage.getItem('wilaya_eloued_admin_grievances') || '[]');
-      const adminFound = adminGrievances.find((g: any) => g.id === id);
+      const allAdmin = AdminService.getAllGrievances();
+      const adminFound = allAdmin.find(g => g.id.trim().toUpperCase() === cleanId);
       if (adminFound) {
+        let mappedStatus = 'قيد المعالجة';
+        if (adminFound.status === 'مغلق' || adminFound.status === 'تمت المعالجة') {
+          mappedStatus = 'تم الرد';
+        } else if (adminFound.status === 'بانتظار المراجعة') {
+          mappedStatus = 'بانتظار المراجعة والاعتماد';
+        } else if (adminFound.status === 'تم الإسناد') {
+          mappedStatus = 'تم التوجيه';
+        } else if (adminFound.status === 'جديد') {
+          mappedStatus = 'مسجل حديثاً';
+        }
+
         return {
           id: adminFound.id,
           nin: adminFound.nin,
@@ -42,19 +57,58 @@ export const GrievanceService = {
           category: adminFound.category,
           details: adminFound.details,
           createdAt: adminFound.createdAt,
-          status: adminFound.status === 'مغلق' || adminFound.status === 'تمت المعالجة' 
-            ? 'تم الرد' 
-            : adminFound.status === 'تم الإسناد' 
-            ? 'تم التوجيه' 
-            : 'قيد المعالجة'
+          status: mappedStatus,
+          priority: adminFound.priority,
+          assignedDepartment: adminFound.assignedDepartment,
+          assignedToName: adminFound.assignedToName,
+          officialResponse: adminFound.officialResponse,
+          timeline: adminFound.timeline
         };
       }
-    } catch {
-      // fallback
+    } catch (e) {
+      console.warn('Error querying admin service for tracking', e);
     }
 
+    // 2. Direct fallback to SEED_GRIEVANCES if not initialized yet
+    const seedFound = SEED_GRIEVANCES.find(g => g.id.trim().toUpperCase() === cleanId);
+    if (seedFound) {
+      let mappedStatus = 'قيد المعالجة';
+      if (seedFound.status === 'مغلق' || seedFound.status === 'تمت المعالجة') {
+        mappedStatus = 'تم الرد';
+      } else if (seedFound.status === 'بانتظار المراجعة') {
+        mappedStatus = 'بانتظار المراجعة والاعتماد';
+      } else if (seedFound.status === 'تم الإسناد') {
+        mappedStatus = 'تم التوجيه';
+      } else if (seedFound.status === 'جديد') {
+        mappedStatus = 'مسجل حديثاً';
+      }
+
+      return {
+        id: seedFound.id,
+        nin: seedFound.nin,
+        fullName: seedFound.fullName,
+        phone: seedFound.phone,
+        applicantDaira: seedFound.applicantDaira,
+        applicantMunicipality: seedFound.applicantMunicipality,
+        applicantNeighborhood: seedFound.applicantNeighborhood,
+        subject: seedFound.subject,
+        grievanceDaira: seedFound.grievanceDaira,
+        grievanceMunicipality: seedFound.grievanceMunicipality,
+        category: seedFound.category,
+        details: seedFound.details,
+        createdAt: seedFound.createdAt,
+        status: mappedStatus,
+        priority: seedFound.priority,
+        assignedDepartment: seedFound.assignedDepartment,
+        assignedToName: seedFound.assignedToName,
+        officialResponse: seedFound.officialResponse,
+        timeline: seedFound.timeline
+      };
+    }
+
+    // 3. Check client submissions in local storage
     const existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    return existing.find((g: GrievanceSubmission) => g.id === id) || null;
+    return existing.find((g: GrievanceSubmission) => g.id.trim().toUpperCase() === cleanId) || null;
   },
 
   getStats: () => {

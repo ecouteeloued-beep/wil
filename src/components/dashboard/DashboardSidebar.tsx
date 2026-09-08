@@ -5,6 +5,7 @@ import {
   BarChart3, 
   CheckCircle2, 
   Clock, 
+  Compass, 
   FileEdit, 
   FileText, 
   History, 
@@ -12,6 +13,7 @@ import {
   Inbox, 
   LayoutDashboard, 
   LogOut, 
+  Map, 
   Send, 
   Settings, 
   ShieldAlert, 
@@ -31,13 +33,14 @@ interface DashboardSidebarProps {
   inProgressCount: number;
   overdueCount: number;
   onExitDashboard: () => void;
+  onLogout?: () => void;
 }
 
 interface SidebarMenuItem {
   id: string;
   label: string;
   icon: React.ComponentType<{ className?: string }>;
-  badge?: number;
+  badge?: string | number;
   badgeColor?: string;
 }
 
@@ -51,11 +54,12 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
   newAssignedCount,
   inProgressCount,
   overdueCount,
-  onExitDashboard
+  onExitDashboard,
+  onLogout
 }) => {
   const isEmployee = currentUser.role === 'employee';
-  const isSupervisor = currentUser.role === 'supervisor' || currentUser.role === 'super_admin';
-  const isViewer = currentUser.role === 'viewer';
+  const isSupervisor = currentUser.role === 'supervisor';
+  const isSuperAdmin = currentUser.role === 'super_admin';
 
   const employeeMenuItems: SidebarMenuItem[] = [
     { id: 'employee_home', label: 'الرئيسية (مهامي)', icon: LayoutDashboard },
@@ -77,17 +81,28 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
     { id: 'settings', label: 'إعدادات الخلية', icon: Settings },
   ];
 
-  const viewerMenuItems: SidebarMenuItem[] = [
-    { id: 'supervisor_home', label: 'النظرة التنفيذية', icon: LayoutDashboard },
-    { id: 'all_grievances', label: 'استعراض الانشغالات', icon: FileText },
-    { id: 'reports', label: 'التقارير والإحصائيات', icon: BarChart3 },
-    { id: 'audit_log', label: 'سجل الرقابة الإدارية', icon: History },
+  const superAdminMenuItems: SidebarMenuItem[] = [
+    { 
+      id: 'super_admin_map', 
+      label: 'خريطة ولاية الوادي (GIS)', 
+      icon: Compass, 
+      badge: 'خاص', 
+      badgeColor: 'bg-[#C67D2A] text-white font-bold text-[10px]' 
+    },
+    { id: 'supervisor_home', label: 'الرئيسية (التقرير التنفيذي)', icon: LayoutDashboard },
+    { id: 'all_grievances', label: 'كافة انشغالات الولاية', icon: FileText },
+    { id: 'unassigned', label: 'الانشغالات غير المسندة', icon: Inbox, badge: unassignedCount > 0 ? unassignedCount : undefined, badgeColor: 'bg-sky-100 text-sky-800 font-bold' },
+    { id: 'overdue', label: 'المتأخرة ولائياً (SLA)', icon: ShieldAlert, badge: overdueCount > 0 ? overdueCount : undefined, badgeColor: 'bg-red-100 text-red-700 font-bold' },
+    { id: 'staff', label: 'المستخدمون والمسؤولون', icon: Users },
+    { id: 'reports', label: 'التقارير والإحصائيات الشاملة', icon: BarChart3 },
+    { id: 'audit_log', label: 'سجل الرقابة العامة (Audit Log)', icon: History },
+    { id: 'settings', label: 'الإعدادات العامة للمنظومة', icon: Settings },
   ];
 
   const menuItems = isEmployee
     ? employeeMenuItems
-    : isViewer
-    ? viewerMenuItems
+    : isSuperAdmin
+    ? superAdminMenuItems
     : supervisorMenuItems;
 
   const sidebarContent = (
@@ -128,7 +143,11 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
         <div className="flex items-center justify-between text-xs">
           <span className="text-white/60 font-medium">مستوى الصلاحية:</span>
           <span className="px-2 py-0.5 rounded-md bg-[#006233] text-white font-bold text-[10.5px]">
-            {currentUser.role === 'supervisor' ? 'مسؤول الخلية' : currentUser.role === 'employee' ? 'موظف معالجة' : currentUser.role === 'viewer' ? 'مراقب / مدقق' : 'Super Admin'}
+            {currentUser.role === 'supervisor' 
+              ? 'مسؤول الخلية (0000)' 
+              : currentUser.role === 'employee' 
+              ? 'موظف معالجة (1111)' 
+              : 'Super Admin (1234)'}
           </span>
         </div>
         <p className="text-[11px] text-white/80 font-bold truncate mt-1">
@@ -139,7 +158,7 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
       {/* Nav Menu */}
       <div className="flex-1 overflow-y-auto py-3 px-3 space-y-1">
         <div className="text-[10px] font-bold text-white/40 px-3 py-1.5 uppercase tracking-wider">
-          {isEmployee ? 'مهام الموظف' : 'إدارة الخلية والمتابعة'}
+          {isEmployee ? 'مهام الموظف' : isSuperAdmin ? 'الرقابة العامة والخريطة' : 'إدارة الخلية والمتابعة'}
         </div>
 
         {menuItems.map((item) => {
@@ -174,13 +193,23 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
         })}
       </div>
 
-      {/* Footer Return / Exit Button */}
+      {/* Footer Return / Exit / Logout Buttons */}
       <div className="p-3 border-t border-white/10 space-y-2">
+        {onLogout && (
+          <button
+            onClick={onLogout}
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-white/5 hover:bg-red-500/20 text-white/80 hover:text-red-300 text-xs font-semibold transition-colors border border-white/10"
+            title="تسجيل الخروج والعودة لشاشة رمز PIN"
+          >
+            <LogOut className="w-3.5 h-3.5 text-red-400" />
+            <span>تسجيل الخروج (/admin)</span>
+          </button>
+        )}
         <button
           onClick={onExitDashboard}
-          className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition-colors"
+          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition-colors"
         >
-          <LogOut className="w-4 h-4 text-[#C67D2A]" />
+          <span className="text-[#C67D2A]">←</span>
           <span>العودة لبوابة المواطن</span>
         </button>
       </div>

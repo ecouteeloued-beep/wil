@@ -18,6 +18,7 @@ interface DashboardHeaderProps {
   onOpenNotifications: () => void;
   unreadNotifsCount: number;
   onExitDashboard: () => void;
+  onLogout?: () => void;
 }
 
 export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
@@ -27,7 +28,8 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   onToggleMobileSidebar,
   onOpenNotifications,
   unreadNotifsCount,
-  onExitDashboard
+  onExitDashboard,
+  onLogout
 }) => {
   return (
     <header className="h-16 bg-white border-b border-slate-200 px-4 sm:px-6 flex items-center justify-between gap-3 sticky top-0 z-20 shadow-2xs text-right">
@@ -46,17 +48,15 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-[#006233]" />
             <span className="text-xs font-semibold text-slate-500">
-              منظومة الرقابة والتكفل — ولاية الوادي
+              منظومة الرقابة والتكفل — ولاية الوادي (/admin)
             </span>
           </div>
           <span className="text-[11px] text-[#C67D2A] font-bold block">
             {currentUser.role === 'supervisor' 
-              ? 'لوحة إدارة ومتابعة الخلية (Supervisor)' 
+              ? 'لوحة إدارة ومتابعة الخلية (مسؤول الخلية — PIN: 0000)' 
               : currentUser.role === 'employee'
-              ? 'لوحة معالجة الانشغالات (Employee)'
-              : currentUser.role === 'viewer'
-              ? 'لوحة المعاينة والتفتيش (Viewer)'
-              : 'لوحة الإدارة المركزية العامة (Super Admin)'}
+              ? 'لوحة معالجة الانشغالات (موظف معالج — PIN: 1111)'
+              : 'لوحة القيادة والرقابة العامة (Super Admin — PIN: 1234)'}
           </span>
         </div>
       </div>
@@ -64,7 +64,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
       {/* Right (RTL Left): Role Switcher & User & Notifications */}
       <div className="flex items-center gap-2 sm:gap-3">
         
-        {/* Quick Role Switcher (Ideal for testing both Employee & Supervisor views!) */}
+        {/* Quick Role Switcher */}
         <div className="flex items-center gap-1.5 bg-slate-100/90 rounded-xl px-2.5 py-1 border border-slate-200 text-xs">
           <Users className="w-3.5 h-3.5 text-[#C67D2A] shrink-0" />
           <span className="text-[11px] text-slate-500 hidden md:inline font-medium">
@@ -77,7 +77,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           >
             {users.map((u) => (
               <option key={u.id} value={u.id}>
-                {u.name} ({u.role === 'supervisor' ? 'مسؤول الخلية' : u.role === 'employee' ? 'موظف معالجة' : u.role === 'viewer' ? 'مراقب' : 'Super Admin'})
+                {u.name} ({u.role === 'supervisor' ? 'مسؤول الخلية - 0000' : u.role === 'employee' ? 'موظف معالج - 1111' : 'Super Admin - 1234'})
               </option>
             ))}
           </select>
@@ -96,6 +96,17 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             </span>
           )}
         </button>
+
+        {/* Logout to /admin login */}
+        {onLogout && (
+          <button
+            onClick={onLogout}
+            className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-red-200 text-xs font-semibold text-red-700 hover:bg-red-50 transition-colors"
+            title="تسجيل الخروج والعودة لصفحة PIN"
+          >
+            <span>خروج</span>
+          </button>
+        )}
 
         {/* Exit to Citizen Portal */}
         <button
