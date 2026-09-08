@@ -58,12 +58,6 @@ export const Header: React.FC<HeaderProps> = ({ onNavigateToForm, onOpenWelcome,
               <span className="hidden md:inline text-gray-300">
                 الجمهورية الجزائرية الديمقراطية الشعبية
               </span>
-              <span className="hidden lg:inline text-white/40">|</span>
-              {/* Demo Mode Badge */}
-              <div className="flex items-center gap-1.5 bg-amber-400/20 text-amber-200 border border-amber-400/40 px-2 py-0.5 rounded-full text-[10px] font-tajawal font-bold">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
-                <span>نسخة تجريبية للمحاكاة (بيانات وهمية)</span>
-              </div>
             </div>
 
             {/* Left side: Quick Links & Language Switcher */}

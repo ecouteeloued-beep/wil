@@ -233,7 +233,7 @@ export class ComplaintService {
       author: complaint.fullName,
       authorRole: 'المواطن صاحب الانشغال',
       action: 'تقديم وثيقة من المواطن',
-      note: `تم إرفاق الوثيقة التجريبية: ${fileName} ${note ? `(${note})` : ''}`
+      note: `تم إرفاق الوثيقة التكميلية المطلوبة: ${fileName} ${note ? `(${note})` : ''}`
     };
 
     const updatedActionReq: CitizenActionRequired = {

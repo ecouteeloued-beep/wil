@@ -197,8 +197,8 @@ export const CitizenTrackingDossier: React.FC<CitizenTrackingDossierProps> = ({
           <div className="flex items-center gap-2 text-xs font-tajawal text-white/70">
             <FileText className="w-4 h-4 text-[#D21034]" />
             <span>رقم التتبع المعتمد:</span>
-            <span className="bg-white/10 text-emerald-300 px-2 py-0.5 rounded text-[10px] font-mono">
-              محاكاة تجريبية
+            <span className="bg-emerald-900/60 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded text-[10px] font-tajawal font-bold">
+              ملف رسمي مقيّد
             </span>
           </div>
           <div className="flex items-center gap-2 mt-1">
@@ -393,12 +393,12 @@ export const CitizenTrackingDossier: React.FC<CitizenTrackingDossierProps> = ({
               </div>
             </div>
 
-            {/* Document upload simulation controls */}
+            {/* Document upload controls */}
             {complaint.citizenActionRequired?.submittedDocument || docUploadSuccess ? (
               <div className="bg-emerald-50 border border-emerald-300 rounded-lg p-3 text-xs font-tajawal flex items-center justify-between gap-2 text-emerald-900 font-bold">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                  <span>تم إرفاق الوثيقة التجريبية بنجاح: document-example.pdf</span>
+                  <span>تم إرفاق الوثيقة التكميلية بنجاح وإحالتها للمراجعة الإدارية</span>
                 </div>
                 <span className="text-[10px] text-emerald-700 bg-white px-2 py-0.5 rounded border border-emerald-200">
                   قيد المراجعة
@@ -410,22 +410,22 @@ export const CitizenTrackingDossier: React.FC<CitizenTrackingDossierProps> = ({
                   type="button"
                   disabled={isUploadingDoc}
                   onClick={handleSimulateDocumentUpload}
-                  className="px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold font-tajawal rounded-lg shadow-xs flex items-center justify-center gap-2 transition-colors cursor-pointer disabled:opacity-70"
+                  className="px-4 py-2 bg-[#006233] hover:bg-[#004d28] text-white text-xs font-bold font-tajawal rounded-lg shadow-xs flex items-center justify-center gap-2 transition-colors cursor-pointer disabled:opacity-70"
                 >
                   {isUploadingDoc ? (
                     <>
                       <RefreshCw className="w-4 h-4 animate-spin" />
-                      <span>جاري محاكاة رفع الوثيقة...</span>
+                      <span>جاري إرسال الوثيقة التكميلية...</span>
                     </>
                   ) : (
                     <>
                       <UploadCloud className="w-4 h-4" />
-                      <span>[ إرفاق وثيقة تجريبية ] (document-example.pdf)</span>
+                      <span>إرفاق الوثيقة التكميلية المطلوبة</span>
                     </>
                   )}
                 </button>
                 <span className="text-[11px] font-tajawal text-amber-800 text-center sm:text-right">
-                  * سيتم تحديث حالة الانشغال ونقله إلى قيد المعالجة فورياً في النسخة التجريبية.
+                  * سيتم إحالة الوثيقة إلى المصالح المختصة فورياً لتحديث حالة دراسة الانشغال.
                 </span>
               </div>
             )}

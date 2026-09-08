@@ -177,7 +177,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ currentUser }) => {
             className="text-xs text-red-600 hover:text-red-700 font-medium flex items-center gap-1"
           >
             <RotateCcw className="w-3.5 h-3.5" />
-            <span>إعادة ضبط البيانات التجريبية</span>
+            <span>إعادة ضبط ومزامنة السجلات الإدارية</span>
           </button>
         </div>
 

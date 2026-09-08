@@ -9,23 +9,16 @@ import { FAQ } from './components/FAQ';
 import { Footer } from './components/Footer';
 import { PrivacyPolicy } from './components/PrivacyPolicy';
 import { SplashScreen } from './components/SplashScreen';
-import { TopicDemoModal } from './components/TopicDemoModal';
 import { DashboardLayout } from './components/dashboard/DashboardLayout';
 import { AdminLoginView } from './components/dashboard/AdminLoginView';
 import { AdminService } from './services/adminService';
 import { GrievanceCategory } from './types';
-import { TopicDemo } from './demoData';
 
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
   const [currentView, setCurrentView] = useState<'home' | 'privacy' | 'dashboard' | 'admin_login'>('home');
   const [formActiveTab, setFormActiveTab] = useState<'new' | 'track'>('new');
   const [selectedCategory, setSelectedCategory] = useState<GrievanceCategory>('الحالة المدنية');
-  
-  // Topic Demo Preview & Auto-fill state
-  const [demoToLoad, setDemoToLoad] = useState<TopicDemo | null>(null);
-  const [isTopicModalOpen, setIsTopicModalOpen] = useState(false);
-  const [topicModalCategory, setTopicModalCategory] = useState<GrievanceCategory>('الحالة المدنية');
 
   // Detect /admin or #admin in URL
   useEffect(() => {
@@ -87,17 +80,6 @@ export default function App() {
   const handleDomainClick = (domainTitle: string) => {
     setCurrentView('home');
     setSelectedCategory(domainTitle as GrievanceCategory);
-    handleScrollToForm('new');
-  };
-
-  const handleOpenTopicDemoModal = (category: GrievanceCategory) => {
-    setTopicModalCategory(category);
-    setIsTopicModalOpen(true);
-  };
-
-  const handleApplyTopicDemo = (demo: TopicDemo) => {
-    setDemoToLoad(demo);
-    setSelectedCategory(demo.category);
     handleScrollToForm('new');
   };
 
@@ -184,14 +166,6 @@ export default function App() {
         }}
       />
 
-      {/* Interactive Topic Demo Modal */}
-      <TopicDemoModal
-        isOpen={isTopicModalOpen}
-        onClose={() => setIsTopicModalOpen(false)}
-        initialCategory={topicModalCategory}
-        onSelectAndApplyDemo={handleApplyTopicDemo}
-      />
-
       <div className="min-h-screen flex flex-col bg-[#F8F9FA] text-gray-900 font-tajawal selection:bg-[#006233]/20 selection:text-[#006233]">
         {/* 2. Official Algerian Ministry-Style Header (Customized for Wilaya d'El Oued) */}
         <Header 
@@ -211,8 +185,6 @@ export default function App() {
               
               <Domains 
                 onDomainClick={handleDomainClick} 
-                onOpenTopicDemoModal={handleOpenTopicDemoModal}
-                onApplyTopicDemo={handleApplyTopicDemo}
               />
               
               {/* Single-column constrained wrapper for body sections */}
@@ -225,8 +197,6 @@ export default function App() {
                   activeTab={formActiveTab} 
                   onTabChange={setFormActiveTab}
                   initialCategory={selectedCategory}
-                  demoToLoad={demoToLoad}
-                  onClearDemoToLoad={() => setDemoToLoad(null)}
                 />
                 
                 {/* Other Contact Methods & Hotline */}
