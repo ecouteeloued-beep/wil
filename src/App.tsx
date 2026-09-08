@@ -1,8 +1,3 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import React, { useState } from 'react';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
@@ -13,10 +8,11 @@ import { ContactMethods } from './components/ContactMethods';
 import { FAQ } from './components/FAQ';
 import { Footer } from './components/Footer';
 import { PrivacyPolicy } from './components/PrivacyPolicy';
-
+import { SplashScreen } from './components/SplashScreen';
 import { GrievanceCategory } from './types';
 
 export default function App() {
+  const [showSplash, setShowSplash] = useState(true);
   const [currentView, setCurrentView] = useState<'home' | 'privacy'>('home');
   const [formActiveTab, setFormActiveTab] = useState<'new' | 'track'>('new');
   const [selectedCategory, setSelectedCategory] = useState<GrievanceCategory>('الحالة المدنية');
@@ -44,48 +40,51 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F8F9FA] text-gray-900 font-tajawal selection:bg-[#006233]/20 selection:text-[#006233]">
-      {/* 1. Header (Sticky) */}
-      <Header onNavigateToForm={handleScrollToForm} />
+    <>
+      {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
+      <div className="min-h-screen flex flex-col bg-[#F8F9FA] text-gray-900 font-tajawal selection:bg-[#006233]/20 selection:text-[#006233]">
+        {/* 1. Header (Sticky) */}
+        <Header onNavigateToForm={handleScrollToForm} />
 
-      {/* Main Content Sections */}
-      <main className="flex-1 w-full space-y-10">
-        {currentView === 'privacy' ? (
-          <PrivacyPolicy />
-        ) : (
-          <>
-            {/* 2. Hero Section */}
-            <Hero onSelectTab={handleSelectTab} />
+        {/* Main Content Sections */}
+        <main className="flex-1 w-full space-y-10">
+          {currentView === 'privacy' ? (
+            <PrivacyPolicy />
+          ) : (
+            <>
+              {/* 2. Hero Section */}
+              <Hero onSelectTab={handleSelectTab} />
+              
+              <Domains onDomainClick={handleDomainClick} />
+              
+              {/* Single-column constrained wrapper for body sections (max-w ~520px on mobile/tablet) */}
+              <div className="w-full space-y-10 sm:space-y-12">
+                {/* 3. How It Works (Vertical Timeline) */}
+                <HowItWorks />
+                
+                {/* 5. Interactive Form & Tracking (Primary card) */}
+                <GrievanceForm 
+                  activeTab={formActiveTab} 
+                  onTabChange={setFormActiveTab}
+                  initialCategory={selectedCategory}
+                />
+                
+                {/* 6. Other Contact Methods */}
+                <ContactMethods />
+                
+                {/* 7. Frequently Asked Questions (Accordion) */}
+                <FAQ />
+              </div>
+            </>
+          )}
+        </main>
 
-            <Domains onDomainClick={handleDomainClick} />
-
-            {/* Single-column constrained wrapper for body sections (max-w ~520px on mobile/tablet) */}
-            <div className="w-full space-y-10 sm:space-y-12">
-              {/* 3. How It Works (Vertical Timeline) */}
-              <HowItWorks />
-
-              {/* 5. Interactive Form & Tracking (Primary card) */}
-              <GrievanceForm 
-                activeTab={formActiveTab} 
-                onTabChange={setFormActiveTab}
-                initialCategory={selectedCategory}
-              />
-
-              {/* 6. Other Contact Methods */}
-              <ContactMethods />
-
-              {/* 7. Frequently Asked Questions (Accordion) */}
-              <FAQ />
-            </div>
-          </>
-        )}
-      </main>
-
-      {/* 8. Dark Navy Footer */}
-      <Footer onPrivacyClick={() => {
-        setCurrentView('privacy');
-        window.scrollTo(0, 0);
-      }} />
-    </div>
+        {/* 8. Dark Navy Footer */}
+        <Footer onPrivacyClick={() => {
+          setCurrentView('privacy');
+          window.scrollTo(0, 0);
+        }} />
+      </div>
+    </>
   );
 }

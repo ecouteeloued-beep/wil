@@ -31,6 +31,7 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({ activeTab, onTabCh
   const [files, setFiles] = useState<File[]>([]);
   const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formStep, setFormStep] = useState(1);
 
   // Success State after submission
   const [submittedTicket, setSubmittedTicket] = useState<GrievanceSubmission | null>(null);
@@ -65,6 +66,24 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({ activeTab, onTabCh
   const generateTrackingId = (): string => {
     const randomNum = Math.floor(10000 + Math.random() * 90000); 
     return `WD-2026-${randomNum}`;
+  };
+
+  const handleNextStep = () => {
+    setFormError(null);
+    if (formStep === 1) {
+      if (!nin.trim() || !/^\d{18}$/.test(nin.trim())) return setFormError('رقم التعريف الوطني غير صالح (يجب أن يتكون من 18 رقماً)');
+      if (!fullName.trim()) return setFormError('يرجى إدخال الاسم واللقب بالكامل');
+      if (!phone.trim() || !/^(05|06|07)\d{8}$/.test(phone.trim())) return setFormError('رقم الهاتف غير صالح (يجب أن يبدأ بـ 05، 06، أو 07 ويتكون من 10 أرقام)');
+      setFormStep(2);
+    } else if (formStep === 2) {
+      if (!details.trim()) return setFormError('يرجى كتابة تفاصيل العريضة المراد تبليغها');
+      setFormStep(3);
+    }
+  };
+
+  const handlePrevStep = () => {
+    setFormError(null);
+    setFormStep((prev) => Math.max(1, prev - 1));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -129,6 +148,7 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({ activeTab, onTabCh
     setFiles([]);
     setFormError(null);
     setSubmittedTicket(null);
+    setFormStep(1);
   };
 
   const performSearch = (codeToSearch: string) => {
