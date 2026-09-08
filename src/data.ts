@@ -49,7 +49,7 @@ export const HOW_IT_WORKS_STEPS = [
 export const CHANNELS: ChannelItem[] = [
   {
     title: 'واتساب المباشر',
-    value: '0663 00 00 00',
+    value: '06XX XX XX XX (للعرض)',
     description: 'إرسال الرسائل النصية والوثائق أو الصور الداعمة لانشغالك على مدار الساعة.',
     iconName: 'whatsapp',
     badge: 'رد سريع',

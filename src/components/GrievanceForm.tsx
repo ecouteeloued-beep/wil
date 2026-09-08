@@ -41,7 +41,15 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({ activeTab, onTabCh
   const [trackQuery, setTrackQuery] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
-  const [activeTrackingResult, setActiveTrackingResult] = useState<any | null>(null);
+  interface ActiveTrackingResult {
+    id: string;
+    fullName: string;
+    municipality: Municipality;
+    category: GrievanceCategory;
+    status: string;
+    submissionDate: string;
+  }
+  const [activeTrackingResult, setActiveTrackingResult] = useState<ActiveTrackingResult | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {

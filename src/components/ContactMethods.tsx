@@ -44,7 +44,7 @@ export const ContactMethods: React.FC = () => {
           وسائل اتصال أخرى
         </h3>
         <span className="inline-block text-[10px] sm:text-xs font-bold font-tajawal text-gray-500 tracking-[0.2em] uppercase">
-          AUTRES MOYENS DE CONTACT
+          تواصل معنا
         </span>
         <div className="w-12 h-1 bg-[#006233] mx-auto mt-4 rounded-full"></div>
       </motion.div>
