@@ -91,8 +91,8 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
                 </div>
               </div>
 
-              {/* Center/Left: "في تواصل دائم معكم" + Skip button */}
-              <div className="flex items-center gap-4 sm:gap-6 justify-between w-full md:w-auto">
+              {/* Center/Left: "في تواصل دائم معكم" */}
+              <div className="flex items-center gap-4 sm:gap-6 justify-center md:justify-end w-full md:w-auto">
                 <div className="flex flex-col items-center justify-center text-center">
                   <span className="text-[#D21034] font-bold text-xs sm:text-sm font-noto tracking-wider leading-none">
                     في تواصــــل دائــــــــم
@@ -108,14 +108,6 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
                     <Globe className="w-3 h-3 hover:text-emerald-700 transition-colors" />
                   </div>
                 </div>
-
-                <button
-                  onClick={handleEnterPlatform}
-                  className="flex items-center gap-2 bg-[#113061] hover:bg-[#0a1e3d] text-white px-3.5 py-2 rounded-lg font-bold text-xs transition-all shadow-sm border border-[#113061] hover:scale-102"
-                >
-                  <span>تخطي والدخول</span>
-                  <ArrowLeft className="w-3.5 h-3.5" />
-                </button>
               </div>
 
             </div>
