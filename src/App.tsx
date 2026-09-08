@@ -17,14 +17,6 @@ export default function App() {
   const [formActiveTab, setFormActiveTab] = useState<'new' | 'track'>('new');
   const [selectedCategory, setSelectedCategory] = useState<GrievanceCategory>('الحالة المدنية');
 
-  useEffect(() => {
-    // Check if user chose to skip welcome intro on startup
-    const skip = localStorage.getItem('eloued_skip_welcome');
-    if (skip === 'true') {
-      setShowSplash(false);
-    }
-  }, []);
-
   const handleSelectTab = (tab: 'new' | 'track') => {
     setCurrentView('home');
     setFormActiveTab(tab);

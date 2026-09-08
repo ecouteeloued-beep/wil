@@ -58,17 +58,8 @@ export const Header: React.FC<HeaderProps> = ({ onNavigateToForm, onOpenWelcome 
               </span>
             </div>
 
-            {/* Left side: Quick Links, Welcome Portal trigger & Language Switcher */}
+            {/* Left side: Quick Links & Language Switcher */}
             <div className="flex items-center gap-3 text-[11px] sm:text-xs">
-              <button
-                onClick={onOpenWelcome}
-                className="flex items-center gap-1 text-[#fde047] hover:text-white font-bold transition-colors bg-white/10 hover:bg-white/20 px-2.5 py-0.5 rounded text-[10.5px]"
-                title="فتح شاشة الاستقبال والترحيب"
-              >
-                <Sparkles className="w-3 h-3 text-[#fde047]" />
-                <span>شاشة الاستقبال</span>
-              </button>
-
               <a
                 href="https://www.interieur.gov.dz/"
                 target="_blank"
@@ -120,27 +111,21 @@ export const Header: React.FC<HeaderProps> = ({ onNavigateToForm, onOpenWelcome 
         <div className="w-full bg-white py-4 px-4 sm:px-6">
           <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
             
-            {/* Right/Center Section: Dual Emblems & Official Title Hierarchy */}
+            {/* Right/Center Section: Official Ministry Seal & Official Title Hierarchy */}
             <div 
               className="flex items-center gap-3 sm:gap-5 cursor-pointer text-right w-full md:w-auto justify-between md:justify-start"
               onClick={() => { window.scrollTo({ top: 0, behavior: 'smooth' }); }}
             >
               <div className="flex items-center gap-2.5 shrink-0">
-                {/* Wilaya d'El Oued Coat of Arms */}
+                {/* Official Ministry Logo (Exact uploaded emblem from interieur.gov.dz) */}
                 <div className="relative">
                   <img 
-                    src="/assets/eloued-logo.png" 
-                    alt="شعار ولاية الوادي" 
-                    className="w-16 h-16 sm:w-20 sm:h-20 object-contain drop-shadow-sm hover:scale-105 transition-transform"
-                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                  />
-                </div>
-                {/* Republic Seal */}
-                <div className="hidden sm:block">
-                  <img 
-                    src="/assets/seal.svg" 
-                    alt="شعار الجمهورية الجزائرية" 
-                    className="w-12 h-12 sm:w-14 sm:h-14 object-contain opacity-90"
+                    src="/assets/official-ministry-logo.jpg" 
+                    alt="شعار وزارة الداخلية والجماعات المحلية" 
+                    className="w-16 h-16 sm:w-20 sm:h-20 object-contain rounded-full shadow-sm border border-gray-100 p-0.5 hover:scale-105 transition-transform bg-white"
+                    onError={(e) => { 
+                      e.currentTarget.src = '/assets/cropped-549160908_1253679926802055_7139711205682662553_n-e1759419335360.jpg'; 
+                    }}
                   />
                 </div>
               </div>
@@ -153,7 +138,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigateToForm, onOpenWelcome 
                 </h2>
                 {/* 2. Tifinagh */}
                 <p className="text-[11px] sm:text-xs text-gray-600 font-sans tracking-wider leading-snug">
-                  ⵜⴰⴳⴷⵓⴷⴰ ⵜⴰⵣⵣⴰⵢⵔⵉⵜ ⵜⴰⵎⴰⴳⴷⴰⵢⵜ ⵜⴰⵖⴻⵔⴼⴰⵏⵜ
+                  ⵜⴰⴳⴷⵓⴷⴰ ⵜⴰⵣⵣⴰⵢⵔⵉⵜ ⵜⴰⵎⴰⴳⴷⴰⵢⵜ ⵜⴰⵖⴻⵔⴼⴰَنⵜ
                 </p>
                 {/* 3. Ministère */}
                 <p className="font-tajawal font-bold text-xs sm:text-sm text-[#907b00] leading-snug mt-0.5">
@@ -408,13 +393,6 @@ export const Header: React.FC<HeaderProps> = ({ onNavigateToForm, onOpenWelcome 
               >
                 <HelpCircle className="w-4 h-4 text-purple-300" />
                 <span>الأسئلة الشائعة</span>
-              </button>
-              <button 
-                onClick={() => { setMobileMenuOpen(false); onOpenWelcome(); }}
-                className="w-full text-right py-2 px-3 bg-white/10 text-amber-300 rounded flex items-center gap-2 font-bold"
-              >
-                <Sparkles className="w-4 h-4" />
-                <span>فتح شاشة الاستقبال والترحيب</span>
               </button>
               <a 
                 href="https://www.interieur.gov.dz/" 
