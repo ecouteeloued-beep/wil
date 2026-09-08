@@ -66,6 +66,9 @@ const CATEGORY_ICONS: Record<GrievanceCategory, React.ReactNode> = {
   'الصحة': <HeartPulse className="w-4 h-4 text-rose-600" />,
   'الخدمات الإدارية': <FileBadge2 className="w-4 h-4 text-blue-600" />,
   'التنمية المحلية': <Briefcase className="w-4 h-4 text-blue-600" />,
+  'العمران': <Building className="w-4 h-4 text-amber-600" />,
+  'النقل': <Bus className="w-4 h-4 text-blue-600" />,
+  'الحالة المدنية': <FileBadge2 className="w-4 h-4 text-red-600" />,
   'أخرى': <MessageCircle className="w-4 h-4 text-purple-600" />,
 };
 

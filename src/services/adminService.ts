@@ -25,9 +25,12 @@ const ADMIN_AUTH_KEY = 'wilaya_eloued_admin_authenticated';
 // INITIAL SEED USERS (STRICTLY 3 ROLES: supervisor, employee, super_admin)
 // =========================================================================
 export const ROLE_PINS: Record<UserRole, string> = {
+  super_admin: '1234',
+  wali: '2026',
+  chef_cabinet: '2026',
+  head_department: '2026',
   supervisor: '0000',
-  employee: '1111',
-  super_admin: '1234'
+  employee: '1111'
 };
 
 export const SEED_USERS: SystemUser[] = [
