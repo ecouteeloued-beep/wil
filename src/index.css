@@ -49,3 +49,21 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #C67D2A;
 }
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .printable-area, .printable-area * {
+    visibility: visible;
+  }
+  .printable-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+  .print-hidden {
+    display: none !important;
+  }
+}

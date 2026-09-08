@@ -43,11 +43,12 @@ export const DAIRAS_MUNICIPALITIES: Record<string, string[]> = {
 export const DAIRAS = Object.keys(DAIRAS_MUNICIPALITIES);
 
 export const CATEGORIES: GrievanceCategory[] = [
-  'الحالة المدنية',
+  'السكن',
   'البيئة',
-  'العمران',
-  'النقل',
+  'الطرقات',
   'الصحة',
+  'الخدمات الإدارية',
+  'التنمية المحلية',
   'أخرى',
 ];
 

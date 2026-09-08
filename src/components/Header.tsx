@@ -22,9 +22,11 @@ import { DAIRAS, DAIRAS_MUNICIPALITIES } from '../data';
 interface HeaderProps {
   onNavigateToForm: (tab?: 'new' | 'track') => void;
   onOpenWelcome: () => void;
+  onAdminClick?: () => void;
+  onVisionClick?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onNavigateToForm, onOpenWelcome }) => {
+export const Header: React.FC<HeaderProps> = ({ onNavigateToForm, onOpenWelcome, onAdminClick, onVisionClick }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showMunicipalitiesModal, setShowMunicipalitiesModal] = useState(false);
   const [activeLanguage, setActiveLanguage] = useState<'ar' | 'tif' | 'fr'>('ar');
@@ -281,6 +283,15 @@ export const Header: React.FC<HeaderProps> = ({ onNavigateToForm, onOpenWelcome 
                 <span>مجالات الانشغال</span>
               </button>
 
+              {/* Project Vision */}
+              <button 
+                onClick={() => { if (onVisionClick) onVisionClick(); }}
+                className="px-3 py-2 text-white/90 hover:text-white hover:bg-white/10 rounded flex items-center gap-1.5 font-medium transition-colors"
+              >
+                <Sparkles className="w-4 h-4 text-amber-400" />
+                <span>رؤية المشروع</span>
+              </button>
+
               {/* Contact & Hotline */}
               <button 
                 onClick={() => scrollToSection('contact-methods-section')}
@@ -300,8 +311,15 @@ export const Header: React.FC<HeaderProps> = ({ onNavigateToForm, onOpenWelcome 
               </button>
             </div>
 
-            {/* Left side: External Ministry portal link */}
+            {/* Left side: External Ministry portal link & Admin */}
             <div className="hidden lg:flex items-center gap-2 py-1">
+              <button 
+                onClick={() => { if (onAdminClick) onAdminClick(); }}
+                className="text-xs text-white bg-[#0b9a39] hover:bg-[#098330] flex items-center gap-1.5 px-3 py-1.5 rounded transition-colors font-bold shadow-sm"
+              >
+                <Building2 className="w-3.5 h-3.5" />
+                <span>الفضاء الإداري</span>
+              </button>
               <a 
                 href="https://www.interieur.gov.dz/" 
                 target="_blank" 
@@ -365,6 +383,20 @@ export const Header: React.FC<HeaderProps> = ({ onNavigateToForm, onOpenWelcome 
               >
                 <Search className="w-4 h-4 text-emerald-400" />
                 <span>متابعة حالة العريضة</span>
+              </button>
+              <button 
+                onClick={() => { setMobileMenuOpen(false); if (onVisionClick) onVisionClick(); }}
+                className="w-full text-right py-2 px-3 hover:bg-white/10 rounded flex items-center gap-2"
+              >
+                <Sparkles className="w-4 h-4 text-amber-400" />
+                <span>رؤية المشروع</span>
+              </button>
+              <button 
+                onClick={() => { setMobileMenuOpen(false); if (onAdminClick) onAdminClick(); }}
+                className="w-full text-right py-2 px-3 bg-[#0b9a39]/20 hover:bg-[#0b9a39]/30 text-white rounded font-bold flex items-center gap-2 border border-[#0b9a39]/50"
+              >
+                <Building2 className="w-4 h-4 text-[#4ade80]" />
+                <span>الفضاء الإداري</span>
               </button>
               <button 
                 onClick={() => { setMobileMenuOpen(false); setShowMunicipalitiesModal(true); }}

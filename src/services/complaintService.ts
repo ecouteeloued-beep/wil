@@ -43,12 +43,9 @@ export class ComplaintService {
    * Generates a realistic tracking code formatted as WIL-2026-XXXXXXX
    */
   static generateTrackingNumber(): string {
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    let suffix = '';
-    for (let i = 0; i < 7; i++) {
-      suffix += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return `WIL-2026-${suffix}`;
+    const year = new Date().getFullYear();
+    const sequence = Math.floor(100000 + Math.random() * 900000).toString();
+    return `WL-${year}-${sequence}`;
   }
 
   /**

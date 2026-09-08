@@ -5,13 +5,13 @@ import { GrievanceService } from '../services/grievanceService';
 
 interface HeroProps {
   onSelectTab: (tab: 'new' | 'track') => void;
+  onVisionClick?: () => void;
 }
 
-export const Hero: React.FC<HeroProps> = ({ onSelectTab }) => {
+export const Hero: React.FC<HeroProps> = ({ onSelectTab, onVisionClick }) => {
   const [stats, setStats] = useState({ total: 0, resolved: 0 });
 
   useEffect(() => {
-    // Mocking a live stat update based on local storage
     setStats(GrievanceService.getStats());
   }, []);
 
@@ -38,73 +38,72 @@ export const Hero: React.FC<HeroProps> = ({ onSelectTab }) => {
 
   return (
     <section className="relative bg-[#006233] text-white pt-10 sm:pt-16 pb-16 overflow-hidden border-b-4 border-[#D21034]">
-      {/* Official Geometric Pattern overlay */}
-      <div className="absolute inset-0 opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
+      {/* Background Image with Overlay */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-15" 
+        style={{ backgroundImage: 'url("/wilaya_background_clean.jpg")' }}
+      ></div>
+      <div className="absolute inset-0 bg-[#006233]/80 pointer-events-none"></div>
+      
+      <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
 
       <motion.div 
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="relative max-w-xl md:max-w-4xl mx-auto px-4 text-center z-10"
+        className="relative max-w-4xl mx-auto px-4 text-center z-10"
       >
-        {/* Small Badge */}
         <motion.div variants={itemVariants} className="flex justify-center mb-6">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-sm bg-white/10 border border-white/20 text-white text-xs sm:text-sm font-tajawal font-bold uppercase tracking-wider shadow-sm">
-            <span className="w-2 h-2 rounded-full bg-[#D21034] animate-pulse" />
             <span>وساطة المواطن — ولاية الوادي</span>
+            <span className="w-2 h-2 rounded-full bg-[#D21034] animate-pulse" />
           </div>
         </motion.div>
 
-        {/* Large Headline */}
-        <motion.h2 variants={itemVariants} className="font-changa font-extrabold text-3xl sm:text-4xl md:text-5xl lg:text-[56px] leading-[1.3] sm:leading-[1.25] text-white mb-6">
-          فضاء انشغالاتي <br className="hidden sm:block" />
-        </motion.h2>
+        <motion.h1 variants={itemVariants} className="font-changa font-extrabold text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-[1.3] text-white mb-6">
+          فضاء انشغالاتي
+        </motion.h1>
 
-        {/* Subtitle */}
         <motion.p variants={itemVariants} className="font-tajawal text-sm sm:text-base md:text-lg text-white/90 leading-relaxed max-w-2xl mx-auto mb-10 font-normal py-2 text-center">
           صوتك مسموع وانشغالك أولوية. منصة رسمية للتواصل المباشر مع ولاية الوادي، لتقديم شكواكم واقتراحاتكم في كل القطاعات. نتعهد بدراسة كل طلب والرد عليه في غضون <span className="text-[#D21034] font-bold">7 أيام عمل</span>
         </motion.p>
 
-        {/* Quick Stats Grid */}
-        <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto mb-10">
-          <div className="bg-white/10 border border-white/20 rounded-xl p-4 flex flex-col items-center justify-center backdrop-blur-sm">
-            <div className="font-changa text-2xl font-bold text-[#D21034] mb-1">7</div>
-            <div className="text-xs text-white/90 font-tajawal">أيام أقصى للرد</div>
+        {/* Stats Grid */}
+        <motion.div variants={itemVariants} className="grid grid-cols-2 gap-4 max-w-2xl mx-auto mb-10">
+          <div className="bg-white/10 border border-white/20 rounded-xl p-6 flex flex-col items-center justify-center backdrop-blur-sm">
+            <span className="font-changa text-3xl font-bold text-[#D21034] mb-2">7</span>
+            <span className="font-tajawal text-sm text-white/90">أيام أقصى للرد</span>
           </div>
-          <div className="bg-white/10 border border-white/20 rounded-xl p-4 flex flex-col items-center justify-center backdrop-blur-sm">
-            <div className="font-changa text-2xl font-bold text-[#D21034] mb-1">24/7</div>
-            <div className="text-xs text-white/90 font-tajawal">استقبال العرائض</div>
+          <div className="bg-white/10 border border-white/20 rounded-xl p-6 flex flex-col items-center justify-center backdrop-blur-sm">
+            <span className="font-changa text-3xl font-bold text-[#D21034] mb-2">24/7</span>
+            <span className="font-tajawal text-sm text-white/90">استقبال العرائض</span>
           </div>
-          <div className="bg-white/10 border border-white/20 rounded-xl p-4 flex flex-col items-center justify-center backdrop-blur-sm" title="يتم حسابه ديناميكياً بناءً على البيانات المحلية">
-            <div className="font-changa text-2xl font-bold text-[#D21034] mb-1">{stats.total}</div>
-            <div className="text-xs text-white/90 font-tajawal">إجمالي الانشغالات (مباشر)</div>
+          <div className="bg-white/10 border border-white/20 rounded-xl p-6 flex flex-col items-center justify-center backdrop-blur-sm">
+            <span className="font-changa text-3xl font-bold text-[#D21034] mb-2">{stats.total}</span>
+            <span className="font-tajawal text-sm text-white/90">إجمالي الانشغالات (مباشر)</span>
           </div>
-          <div className="bg-white/10 border border-white/20 rounded-xl p-4 flex flex-col items-center justify-center backdrop-blur-sm" title="يتم حسابه ديناميكياً">
-            <div className="font-changa text-2xl font-bold text-[#D21034] mb-1">{stats.resolved}</div>
-            <div className="text-xs text-white/90 font-tajawal">عريضة تمت معالجتها</div>
+          <div className="bg-white/10 border border-white/20 rounded-xl p-6 flex flex-col items-center justify-center backdrop-blur-sm">
+            <span className="font-changa text-3xl font-bold text-[#D21034] mb-2">{stats.resolved}</span>
+            <span className="font-tajawal text-sm text-white/90">عريضة تمت معالجتها</span>
           </div>
         </motion.div>
 
-        {/* Action Buttons - Structured */}
-        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-4 max-w-[500px] mx-auto mb-4">
+        {/* Action Buttons */}
+        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-2xl mx-auto">
           <button
-            id="hero-new-grievance-btn"
-            type="button"
             onClick={() => handleAction('new')}
-            className="flex-1 flex items-center justify-center gap-2.5 bg-[#D21034] hover:bg-[#a00020] text-white font-tajawal font-bold text-base py-3.5 px-6 rounded-md shadow-md transition-colors focus:outline-none focus:ring-2 focus:ring-white cursor-pointer border border-[#a00020]"
+            className="w-full sm:w-1/2 flex items-center justify-center gap-2 px-6 py-4 bg-[#D21034] hover:bg-[#b00d2b] text-white rounded-xl text-lg font-changa font-bold transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 cursor-pointer"
           >
-            <SendHorizontal className="w-5 h-5 text-white" />
             <span>انشغالاتي</span>
+            <SendHorizontal className="w-5 h-5 rtl:-scale-x-100" />
           </button>
-
+          
           <button
-            id="hero-track-request-btn"
-            type="button"
             onClick={() => handleAction('track')}
-            className="flex-1 flex items-center justify-center gap-2.5 bg-white/10 hover:bg-white/20 text-white border-2 border-white/50 hover:border-white font-tajawal font-bold text-base py-3.5 px-6 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-white cursor-pointer"
+            className="w-full sm:w-1/2 flex items-center justify-center gap-2 px-6 py-4 bg-transparent border-2 border-white/30 hover:border-white/60 hover:bg-white/10 text-white rounded-xl text-lg font-changa font-bold transition-all cursor-pointer"
           >
-            <Search className="w-5 h-5 text-white" />
             <span>تتبع مسار انشغال</span>
+            <Search className="w-5 h-5" />
           </button>
         </motion.div>
       </motion.div>

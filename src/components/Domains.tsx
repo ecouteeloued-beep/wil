@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { FileBadge2, Leaf, Building, Bus, HeartPulse, MessageCircle, ShieldCheck, ArrowLeft } from 'lucide-react';
+import { FileBadge2, Leaf, Building, Bus, HeartPulse, MessageCircle, ShieldCheck, ArrowLeft, Home as HomeIcon, Briefcase } from 'lucide-react';
 import { GrievanceCategory } from '../types';
 
 const DOMAINS: Array<{
@@ -12,53 +12,53 @@ const DOMAINS: Array<{
   sampleBadge: string;
 }> = [
   {
-    title: 'الحالة المدنية',
-    description: 'شهادات الميلاد، الزواج، الوفاة، بطاقات التعريف البيومترية، جوازات السفر وتصحيح الألقاب',
-    icon: <FileBadge2 className="w-8 h-8 text-white" />,
-    color: 'bg-[#D21034]',
-    lightColor: 'bg-red-50',
-    sampleBadge: 'تصحيح الأخطاء المادية في وثائق الحالة المدنية'
+    title: 'السكن',
+    description: 'السكن الريفي، السكن الاجتماعي، رخص البناء، وتسوية الوضعية العمرانية',
+    icon: <HomeIcon className="w-8 h-8 text-white" />,
+    color: 'bg-[#006233]',
+    lightColor: 'bg-green-50',
+    sampleBadge: 'طلبات السكن والتسوية العمرانية'
   },
   {
     title: 'البيئة',
-    description: 'الماء الشروب، الصرف الصحي، النظافة، النفايات، المساحات الخضراء وجودة الهواء',
+    description: 'الماء الشروب، الصرف الصحي، النظافة، النفايات، والمساحات الخضراء',
     icon: <Leaf className="w-8 h-8 text-white" />,
     color: 'bg-[#4CAF50]',
     lightColor: 'bg-green-50',
     sampleBadge: 'التزود بالمياه الصالحة للشرب والصرف الصحي'
   },
   {
-    title: 'العمران',
-    description: 'رخص البناء والمطابقة، الكهرباء الفلاحية، التهيئة العمرانية والسكن الريفي',
-    icon: <Building className="w-8 h-8 text-white" />,
+    title: 'الطرقات',
+    description: 'صيانة الطرقات، فك العزلة، الإنارة العمومية، وتهيئة المسالك الريفية',
+    icon: <Bus className="w-8 h-8 text-white" />,
     color: 'bg-[#D4A373]',
     lightColor: 'bg-orange-50',
-    sampleBadge: 'رخص البناء والمطابقة والربط بالشبكات الحيوية'
-  },
-  {
-    title: 'النقل',
-    description: 'النقل المدرسي، حافلات النقل الريفي، المحطات، صيانة الطرق والمسالك',
-    icon: <Bus className="w-8 h-8 text-white" />,
-    color: 'bg-[#1D3557]',
-    lightColor: 'bg-blue-50',
-    sampleBadge: 'النقل المدرسي وصيانة المسالك الحضرية والريفية'
+    sampleBadge: 'تهيئة وصيانة شبكة الطرقات'
   },
   {
     title: 'الصحة',
-    description: 'العيادات متعددة الخدمات، المناوبة الليلية، مصل العقارب، الخدمات الوقائية والإسعاف',
+    description: 'العيادات متعددة الخدمات، المناوبة الليلية، مصل العقارب، والخدمات الوقائية',
     icon: <HeartPulse className="w-8 h-8 text-white" />,
-    color: 'bg-[#E63946]',
+    color: 'bg-[#D21034]',
     lightColor: 'bg-red-50',
-    sampleBadge: 'المرافق الصحية الجوارية والمناوبات الليلية'
+    sampleBadge: 'المرافق الصحية الجوارية والمناوبات'
   },
   {
-    title: 'أخرى',
-    description: 'الإنارة العمومية، شبكات الاتصال، والمرافق العمومية المرتبطة بخدمات الولاية',
-    icon: <MessageCircle className="w-8 h-8 text-white" />,
-    color: 'bg-[#6D597A]',
-    lightColor: 'bg-purple-50',
-    sampleBadge: 'الإنارة العمومية والمرافق الجوارية'
+    title: 'الخدمات الإدارية',
+    description: 'استخراج الوثائق، الحالة المدنية، وسير المرافق العمومية',
+    icon: <FileBadge2 className="w-8 h-8 text-white" />,
+    color: 'bg-[#113061]',
+    lightColor: 'bg-blue-50',
+    sampleBadge: 'تبسيط الإجراءات الإدارية'
   },
+  {
+    title: 'التنمية المحلية',
+    description: 'المشاريع الجوارية، الشباب والرياضة، ومناطق الظل',
+    icon: <Briefcase className="w-8 h-8 text-white" />,
+    color: 'bg-[#1D3557]',
+    lightColor: 'bg-blue-50',
+    sampleBadge: 'دعم المشاريع التنموية المحلية'
+  }
 ];
 
 export interface DomainsProps {

@@ -24,11 +24,12 @@ export type Municipality =
   | 'أخرى';
 
 export type GrievanceCategory = 
-  | 'الحالة المدنية'
+  | 'السكن'
   | 'البيئة'
-  | 'العمران'
-  | 'النقل'
+  | 'الطرقات'
   | 'الصحة'
+  | 'الخدمات الإدارية'
+  | 'التنمية المحلية'
   | 'أخرى';
 
 export interface GrievanceSubmission {
@@ -37,6 +38,7 @@ export interface GrievanceSubmission {
   nin?: string;
   fullName: string;
   phone: string;
+  email?: string;
   applicantDaira: string;
   applicantMunicipality: string;
   applicantNeighborhood: string;
@@ -116,9 +118,11 @@ export interface ChannelItem {
 // =========================================================================
 
 export type UserRole = 
-  | 'super_admin'   // Super admin (يرى كل شيء، يراقب كل العمليات ولديه الخريطة الجغرافية التفاعلية)
-  | 'supervisor'    // مسؤول خلية (إدارة التوجيه، اعتماد الردود، إدارة الموظفين وإعدادات الخلية)
-  | 'employee';     // موظف معالج (معالجة الانشغالات المسندة إليه فقط وتقديم مسودات الردود)
+  | 'super_admin'
+  | 'wali'
+  | 'chef_cabinet'
+  | 'head_department'
+  | 'employee';
 
 export interface SystemUser {
   id: string;
@@ -140,28 +144,22 @@ export interface SystemUser {
 
 export type ComplaintStatusCode = 
   | 'NEW'
+  | 'VIEWED'
   | 'ASSIGNED'
   | 'IN_PROGRESS'
-  | 'WAITING_CITIZEN'
-  | 'WAITING_REVIEW'
+  | 'PENDING_REPLY'
   | 'RESOLVED'
   | 'CLOSED'
-  | 'URGENT'
-  | 'DUPLICATE'
-  | 'OUT_OF_SCOPE'
   | 'REJECTED';
 
 export type GrievanceStatus = 
-  | 'جديد'              // New unassigned
-  | 'تم الإسناد'         // Assigned to employee
-  | 'قيد المعالجة'       // In active processing
-  | 'بانتظار معلومات'    // Waiting for citizen additional info
-  | 'بانتظار المراجعة'   // Response drafted, awaiting supervisor approval
-  | 'تمت المعالجة'       // Resolved / Answered
-  | 'مغلق'              // Fully closed & archived
-  | 'عاجل'
-  | 'مكرر'
-  | 'خارج الاختصاص'
+  | 'تم الاستقبال'
+  | 'تم الاطلاع'
+  | 'تم التوجيه للمصلحة المختصة'
+  | 'جاري المعالجة'
+  | 'بانتظار الرد'
+  | 'تم الحل'
+  | 'مغلق'
   | 'مرفوض';
 
 export type GrievancePriority = 'عادي' | 'متوسط' | 'عاجل' | 'قصوى';
