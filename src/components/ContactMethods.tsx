@@ -31,7 +31,7 @@ export const ContactMethods: React.FC = () => {
   ];
 
   return (
-    <section className="py-12 max-w-xl md:max-w-6xl mx-auto px-4">
+    <section id="contact-methods-section" className="py-12 max-w-xl md:max-w-6xl mx-auto px-4">
       {/* Section Header */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }}

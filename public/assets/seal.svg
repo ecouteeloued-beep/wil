@@ -1,1 +1,43 @@
-File not found: /v1/AUTH_mw/wikipedia-commons-local-public.ea/e/ea/Seal_of_Algeria.svg
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <radialGradient id="algeriaGold" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#f8e79b"/>
+      <stop offset="50%" stop-color="#d4af37"/>
+      <stop offset="100%" stop-color="#996515"/>
+    </radialGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+  <!-- Outer Ring -->
+  <circle cx="100" cy="100" r="94" fill="#ffffff" stroke="#006233" stroke-width="4" filter="url(#shadow)"/>
+  <circle cx="100" cy="100" r="88" fill="none" stroke="#d4af37" stroke-width="1.5" stroke-dasharray="3,2"/>
+  
+  <!-- Central Crescent & Star in Algerian Red -->
+  <g transform="translate(100, 100)">
+    <!-- Crescent -->
+    <path d="M 0,-34 A 34 34 0 1 0 0,34 A 27 27 0 1 1 0,-34 Z" fill="#D21034" transform="rotate(30)"/>
+    <!-- 5-Point Star -->
+    <polygon points="12,-4 16,8 5,0 19,0 8,8" fill="#D21034" transform="scale(1.5) translate(4, -3) rotate(15)"/>
+  </g>
+  
+  <!-- Laurel / Olive wreath branches in Algerian Green -->
+  <path d="M 40,110 C 35,135 55,165 95,172 C 65,160 50,140 50,115 Z" fill="#006233"/>
+  <path d="M 160,110 C 165,135 145,165 105,172 C 135,160 150,140 150,115 Z" fill="#006233"/>
+  
+  <!-- Upper Text Arc -->
+  <path id="textArcTop" d="M 28,100 A 72 72 0 0 1 172,100" fill="none"/>
+  <text font-family="'Noto Kufi Arabic', 'Amiri', 'Traditional Arabic', sans-serif" font-size="10.5" font-weight="bold" fill="#006233" text-anchor="middle">
+    <textPath href="#textArcTop" startOffset="50%">
+      الجمهورية الجزائرية الديمقراطية الشعبية
+    </textPath>
+  </text>
+  
+  <!-- Lower Text Arc -->
+  <path id="textArcBottom" d="M 172,108 A 72 72 0 0 1 28,108" fill="none"/>
+  <text font-family="'Noto Kufi Arabic', 'Amiri', 'Traditional Arabic', sans-serif" font-size="10" font-weight="bold" fill="#996515" text-anchor="middle">
+    <textPath href="#textArcBottom" startOffset="50%">
+      ولاية الوادي • Wilaya d'El Oued
+    </textPath>
+  </text>
+</svg>
