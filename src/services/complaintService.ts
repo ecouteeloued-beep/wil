@@ -52,6 +52,13 @@ export class ComplaintService {
   }
 
   /**
+   * Generates a secure 4-digit confidential PIN for citizen grievance tracking
+   */
+  static generateSecretPin(): string {
+    return Math.floor(1000 + Math.random() * 9000).toString();
+  }
+
+  /**
    * Search for a complaint by tracking number (case-insensitive, trims spaces)
    */
   static async search(trackingNumber: string): Promise<EnhancedGrievance | null> {
@@ -82,8 +89,10 @@ export class ComplaintService {
     grievanceMunicipality: string;
     category: any;
     details: string;
+    secretPin?: string;
   }): Promise<EnhancedGrievance> {
     const trackingNumber = this.generateTrackingNumber();
+    const secretPin = data.secretPin || this.generateSecretPin();
     const now = new Date();
     const dateFormatted = now.toLocaleDateString('ar-DZ', { year: 'numeric', month: 'long', day: 'numeric' });
     const timeFormatted = now.toLocaleTimeString('ar-DZ', { hour: '2-digit', minute: '2-digit' });
@@ -94,6 +103,7 @@ export class ComplaintService {
     const newComplaint: EnhancedGrievance = {
       id: trackingNumber,
       trackingNumber,
+      secretPin,
       statusCode: 'NEW',
       status: 'جديد',
       priority: 'عادي',
