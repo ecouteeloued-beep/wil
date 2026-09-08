@@ -35,7 +35,7 @@ export interface TrackingDemoCase {
   stageBadge: string;
   stageDescription: string;
   highlightText: string;
-  statusType: 'resolved' | 'review' | 'in_progress' | 'overdue';
+  statusType: 'resolved' | 'review' | 'in_progress' | 'overdue' | 'new' | 'waiting_citizen' | 'closed';
   hasOfficialResponse?: boolean;
   letterNumber?: string;
 }
@@ -206,59 +206,84 @@ export const TOPIC_DEMOS: TopicDemo[] = [
 
 export const TRACKING_DEMO_CASES: TrackingDemoCase[] = [
   {
-    code: 'WD-2026-00130',
+    code: 'WIL-2026-X7K4P92',
+    category: 'البيئة',
+    municipality: 'البياضة',
+    daira: 'البياضة',
+    citizenName: 'محمد السعيد غربي',
+    subject: 'انقطاع متكرر لشبكة مياه الشرب بحي 1 نوفمبر',
+    stageTitle: 'قيد المعالجة والمتابعة الميدانية',
+    stageBadge: 'قيد المعالجة (IN_PROGRESS)',
+    stageDescription: 'فرق الصيانة التقنية لمصالح المياه متواجدة بالميدان لمعاينة العطب وإصلاح المضخة.',
+    highlightText: 'نموذج لملف قيد المعالجة الميدانية والتنسيق مع وحدة الجزائرية للمياه.',
+    statusType: 'in_progress'
+  },
+  {
+    code: 'WIL-2026-A8M2K41',
+    category: 'العمران',
+    municipality: 'الوادي',
+    daira: 'الوادي',
+    citizenName: 'عبد القادر حوامدي',
+    subject: 'طلب تهيئة طريق فرعي وتعبيد المدخل الرئيسي للحي',
+    stageTitle: 'تسجيل جديد قيد الفرز الأولي',
+    stageBadge: 'جديد (NEW)',
+    stageDescription: 'تم تسجيل الانشغال بالمنظومة الولائية وهو في مرحلة التدقيق وتوجيهه للمصلحة المختصة.',
+    highlightText: 'نموذج لملف مسجل حديثاً في انتظار المراجعة الأولية وتعيين الموظف المعالج.',
+    statusType: 'new'
+  },
+  {
+    code: 'WIL-2026-P5R8T36',
+    category: 'العمران',
+    municipality: 'حاسي خليفة',
+    daira: 'حاسي خليفة',
+    citizenName: 'فاطمة الزهراء عثماني',
+    subject: 'طلب رخصة ترميم مسكن ريفي وتجديد السقف المتضرر',
+    stageTitle: 'مطلوب إجراء من المواطن',
+    stageBadge: 'بانتظار معلومات (WAITING_CITIZEN)',
+    stageDescription: 'مطلوب تقديم نسخة من الوثيقة المطلوبة (المخطط المسحي أو وصل الإيداع البلدي).',
+    highlightText: 'نموذج لتجربة تفاعل المواطن ورفع وثيقة تجريبية فورية لتحديث الحالة.',
+    statusType: 'waiting_citizen'
+  },
+  {
+    code: 'WIL-2026-Q2N7L84',
+    category: 'الحالة المدنية',
+    municipality: 'الدبيلة',
+    daira: 'الدبيلة',
+    citizenName: 'سليمان بوزيد',
+    subject: 'تصحيح خطأ مادي في لقب الجد برسم الولادة',
+    stageTitle: 'صياغة الرد وبانتظار اعتماد المسؤول',
+    stageBadge: 'بانتظار المراجعة (WAITING_REVIEW)',
+    stageDescription: 'تمت دراسة الملف ومراجعة السجل، وجارٍ توقيع الرد الرسمي من طرف مسؤول الخلية.',
+    highlightText: 'نموذج لملف مكتمل المعالجة الميدانية بانتظار الاعتماد الإداري النهائي.',
+    statusType: 'review'
+  },
+  {
+    code: 'WIL-2026-B6K3M19',
     category: 'النقل',
     municipality: 'قمار',
     daira: 'قمار',
     citizenName: 'سامية تجاني',
-    subject: 'طلب توفير النقل المدرسي لتلاميذ قرية الدبيديبي',
-    stageTitle: 'تم الرد واعتماد الإجراء رسمياً',
-    stageBadge: 'مكتمل / تم الرد',
-    stageDescription: 'صدر رد رسمي كتابي برقم مراسلة إدارية معتمدة، مع تسخير حافلة بلدية للنقل المدرسي.',
-    highlightText: 'نموذج كامل لملف تمت تسويته بنجاح وصدور رد رسمي برقم مراسلة: 2026/خ.إ/849.',
+    subject: 'طلب توفير خط نقل مدرسي لتلاميذ قرية الدبيديبي',
+    stageTitle: 'تم الرد الإداري الرسمي والاعتماد',
+    stageBadge: 'تمت المعالجة (RESOLVED)',
+    stageDescription: 'صدر رد رسمي برقم مراسلة إدارية معتمدة: 2026/خ.إ/849، مع تسخير حافلة بلدية.',
+    highlightText: 'نموذج لملف تمت تسويته بنجاح ويتضمن الرد الرسمي المعتمد وإمكانية تحميل PDF والتقييم.',
     statusType: 'resolved',
     hasOfficialResponse: true,
     letterNumber: '2026/خ.إ/849'
   },
   {
-    code: 'WD-2026-00128',
-    category: 'البيئة',
-    municipality: 'البياضة',
-    daira: 'البياضة',
-    citizenName: 'عبد الرزاق عيفة',
-    subject: 'تذبذب تزويد الحي بالماء الشروب وانخفاض الضغط',
-    stageTitle: 'بانتظار اعتماد الرد الإداري',
-    stageBadge: 'تمت المعاينة والحل الميداني',
-    stageDescription: 'تدخلت الفرق التقنية لشركة ADE وأصلحت الكسر، وجارٍ اعتماد مسودة الرد النهائي من مسؤول الخلية.',
-    highlightText: 'نموذج لملف في مرحلته النهائية بعد تنفيذ التدخل الميداني وإعداد مسودة الرد الرسمية.',
-    statusType: 'review',
-    hasOfficialResponse: true
-  },
-  {
-    code: 'WD-2026-00125',
-    category: 'العمران',
-    municipality: 'حاسي خليفة',
-    daira: 'حاسي خليفة',
-    citizenName: 'بلقاسم مرزوقي',
-    subject: 'طلب ربط المحيط الفلاحي بشبكة الكهرباء الفلاحية',
-    stageTitle: 'قيد المعالجة الميدانية والتنسيق القطاعي',
-    stageBadge: 'قيد المعالجة',
-    stageDescription: 'متابعة حية مع مديرية المصالح الفلاحية ومصالح سونلغاز بعد إرسال الإشعار وبدء غرس الأعمدة.',
-    highlightText: 'نموذج لملف نشط قيد المتابعة مع الهيئات التقنية المشتركة لسونلغاز ومديرية الفلاحة.',
-    statusType: 'in_progress'
-  },
-  {
-    code: 'WD-2026-00135',
+    code: 'WIL-2026-C9F4X27',
     category: 'العمران',
     municipality: 'الرقيبة',
     daira: 'الرقيبة',
-    citizenName: 'حمزة مسعودي',
-    subject: 'تأخر تسليم شهادة مطابقة البناء ورخصة السكن',
-    stageTitle: 'تجاوز الأجل القانوني (تنبيه SLA)',
-    stageBadge: 'متابعة استعجالية',
-    stageDescription: 'أطلق النظام تنبيهاً لتجاوز الأجل القانوني، مع توجيه تعليمات فورية لإيفاد معاينة تفتيشية.',
-    highlightText: 'نموذج لتطبيق الرقابة الصارمة على الآجال وحماية حقوق المواطن من التعطيل الإداري.',
-    statusType: 'overdue'
+    citizenName: 'ياسين بن علي',
+    subject: 'صيانة أعمدة الإنارة العمومية بالطريق الولائي',
+    stageTitle: 'الملف مغلق ومؤرشف بعد الإنجاز',
+    stageBadge: 'مغلق ومؤرشف (CLOSED)',
+    stageDescription: 'تم إتمام أشغال استبدال المصابيح وتأكيد المعاينة الميدانية وإغلاق الملف نهائياً.',
+    highlightText: 'نموذج لملف مكتمل ومغلق في السجل الرقمي الولائي.',
+    statusType: 'closed'
   }
 ];
 

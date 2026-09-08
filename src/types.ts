@@ -137,6 +137,19 @@ export interface SystemUser {
   pinCode?: string; // 0000 لمسؤول الخلية، 1111 للموظف المعالج، 1234 للـ Super Admin
 }
 
+export type ComplaintStatusCode = 
+  | 'NEW'
+  | 'ASSIGNED'
+  | 'IN_PROGRESS'
+  | 'WAITING_CITIZEN'
+  | 'WAITING_REVIEW'
+  | 'RESOLVED'
+  | 'CLOSED'
+  | 'URGENT'
+  | 'DUPLICATE'
+  | 'OUT_OF_SCOPE'
+  | 'REJECTED';
+
 export type GrievanceStatus = 
   | 'جديد'              // New unassigned
   | 'تم الإسناد'         // Assigned to employee
@@ -144,7 +157,11 @@ export type GrievanceStatus =
   | 'بانتظار معلومات'    // Waiting for citizen additional info
   | 'بانتظار المراجعة'   // Response drafted, awaiting supervisor approval
   | 'تمت المعالجة'       // Resolved / Answered
-  | 'مغلق';             // Fully closed & archived
+  | 'مغلق'              // Fully closed & archived
+  | 'عاجل'
+  | 'مكرر'
+  | 'خارج الاختصاص'
+  | 'مرفوض';
 
 export type GrievancePriority = 'عادي' | 'متوسط' | 'عاجل' | 'قصوى';
 
@@ -190,8 +207,36 @@ export interface AttachmentFile {
   url?: string;
 }
 
+export interface CitizenActionRequired {
+  reason: string;
+  documentType?: string;
+  requestedAt: string;
+  requestedBy?: string;
+  submittedDocument?: {
+    name: string;
+    uploadedAt: string;
+    fileSize?: string;
+  };
+}
+
+export interface CitizenRating {
+  score: number; // 1 to 5 stars
+  comment?: string;
+  ratedAt: string;
+}
+
+export interface PublicMessage {
+  id: string;
+  author: string;
+  authorRole: string;
+  message: string;
+  createdAt: string;
+}
+
 export interface EnhancedGrievance {
-  id: string; // e.g. WD-2026-00125
+  id: string; // e.g. WIL-2026-X7K4P92 or WD-2026-00125
+  trackingNumber?: string; // alias for id
+  statusCode?: ComplaintStatusCode;
   nin?: string;
   fullName: string;
   phone: string;
@@ -220,6 +265,9 @@ export interface EnhancedGrievance {
   internalNotes: InternalNote[];
   officialResponse?: OfficialResponse;
   attachments?: AttachmentFile[];
+  citizenActionRequired?: CitizenActionRequired;
+  citizenRating?: CitizenRating;
+  publicMessages?: PublicMessage[];
 }
 
 export interface AuditLogEntry {
