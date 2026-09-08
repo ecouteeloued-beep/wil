@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { MUNICIPALITIES, CATEGORIES } from '../data';
+import { CATEGORIES, DAIRAS, DAIRAS_MUNICIPALITIES } from '../data';
 import { Municipality, GrievanceCategory, GrievanceSubmission } from '../types';
 import { GrievanceService } from '../services/grievanceService';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Send, Search, CheckCircle, Copy, Check, FileText, 
-  ArrowRight, Clock, Building2, Tag, Phone, AlertCircle, UploadCloud, X
+  ArrowRight, Clock, Building2, Tag, Phone, AlertCircle, UploadCloud, X, MapPin
 } from 'lucide-react';
 
 interface GrievanceFormProps {
@@ -18,16 +18,23 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({ activeTab, onTabCh
   // Submission Form State
   const [nin, setNin] = useState('');
   const [fullName, setFullName] = useState('');
-  const [municipality, setMunicipality] = useState<Municipality>('الوادي');
+  const [phone, setPhone] = useState('');
+  const [applicantDaira, setApplicantDaira] = useState('');
+  const [applicantMunicipality, setApplicantMunicipality] = useState('');
+  const [applicantNeighborhood, setApplicantNeighborhood] = useState('');
+  
+  const [subject, setSubject] = useState('');
+  const [grievanceDaira, setGrievanceDaira] = useState('');
+  const [grievanceMunicipality, setGrievanceMunicipality] = useState('');
   const [category, setCategory] = useState<GrievanceCategory>(initialCategory || 'الحالة المدنية');
-
+  
   React.useEffect(() => {
     if (initialCategory) {
       setCategory(initialCategory);
     }
   }, [initialCategory]);
+  
   const [details, setDetails] = useState('');
-  const [phone, setPhone] = useState('');
   const [files, setFiles] = useState<File[]>([]);
   const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -45,7 +52,7 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({ activeTab, onTabCh
   interface ActiveTrackingResult {
     id: string;
     fullName: string;
-    municipality: Municipality;
+    municipality: string;
     category: GrievanceCategory;
     status: string;
     submissionDate: string;
@@ -74,8 +81,14 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({ activeTab, onTabCh
       if (!nin.trim() || !/^\d{18}$/.test(nin.trim())) return setFormError('رقم التعريف الوطني غير صالح (يجب أن يتكون من 18 رقماً)');
       if (!fullName.trim()) return setFormError('يرجى إدخال الاسم واللقب بالكامل');
       if (!phone.trim() || !/^(05|06|07)\d{8}$/.test(phone.trim())) return setFormError('رقم الهاتف غير صالح (يجب أن يبدأ بـ 05، 06، أو 07 ويتكون من 10 أرقام)');
+      if (!applicantDaira) return setFormError('يرجى اختيار دائرة الإقامة');
+      if (!applicantMunicipality) return setFormError('يرجى اختيار بلدية الإقامة');
+      if (!applicantNeighborhood.trim()) return setFormError('يرجى إدخال الحي/العنوان');
       setFormStep(2);
     } else if (formStep === 2) {
+      if (!subject.trim()) return setFormError('يرجى إدخال موضوع العريضة');
+      if (!grievanceDaira) return setFormError('يرجى اختيار الدائرة المعنية بالعريضة');
+      if (!grievanceMunicipality) return setFormError('يرجى اختيار البلدية المعنية بالعريضة');
       if (!details.trim()) return setFormError('يرجى كتابة تفاصيل العريضة المراد تبليغها');
       setFormStep(3);
     }
@@ -117,10 +130,15 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({ activeTab, onTabCh
         const newSubmission = GrievanceService.save({
           nin: nin.trim(),
           fullName: fullName.trim(),
-          municipality,
+          phone: phone.trim(),
+          applicantDaira,
+          applicantMunicipality,
+          applicantNeighborhood: applicantNeighborhood.trim(),
+          subject: subject.trim(),
+          grievanceDaira,
+          grievanceMunicipality,
           category,
           details: details.trim(),
-          phone: phone.trim(),
         });
         
         setSubmittedTicket(newSubmission);
@@ -141,10 +159,15 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({ activeTab, onTabCh
   const handleResetForm = () => {
     setNin('');
     setFullName('');
-    setMunicipality('الوادي');
+    setPhone('');
+    setApplicantDaira('');
+    setApplicantMunicipality('');
+    setApplicantNeighborhood('');
+    setSubject('');
+    setGrievanceDaira('');
+    setGrievanceMunicipality('');
     setCategory('الحالة المدنية');
     setDetails('');
-    setPhone('');
     setFiles([]);
     setFormError(null);
     setSubmittedTicket(null);
@@ -164,7 +187,7 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({ activeTab, onTabCh
         setActiveTrackingResult({
           id: match.id,
           fullName: match.fullName,
-          municipality: match.municipality,
+          municipality: match.grievanceMunicipality,
           category: match.category,
           status: match.status,
           submissionDate: new Date(match.createdAt).toLocaleDateString('ar-DZ', { year: 'numeric', month: 'long', day: 'numeric' }),
@@ -290,7 +313,8 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({ activeTab, onTabCh
                       {/* Official details summary */}
                       <div className="text-right bg-white p-4 border border-gray-200 rounded text-sm font-tajawal grid grid-cols-2 gap-y-3 relative z-10 mx-auto max-w-md">
                          <div><span className="text-gray-500 block text-[11px]">صاحب الطلب:</span><span className="font-bold">{submittedTicket.fullName}</span></div>
-                         <div><span className="text-gray-500 block text-[11px]">البلدية:</span><span className="font-bold">{submittedTicket.municipality}</span></div>
+                         <div><span className="text-gray-500 block text-[11px]">موضوع العريضة:</span><span className="font-bold">{submittedTicket.subject}</span></div>
+                         <div><span className="text-gray-500 block text-[11px]">البلدية المعنية:</span><span className="font-bold">{submittedTicket.grievanceMunicipality}</span></div>
                          <div><span className="text-gray-500 block text-[11px]">تاريخ التسجيل:</span><span className="font-bold font-mono">{submittedTicket.createdAt}</span></div>
                          <div><span className="text-gray-500 block text-[11px]">نوع العريضة:</span><span className="font-bold text-[#D21034]">{submittedTicket.category}</span></div>
                       </div>
@@ -332,18 +356,17 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({ activeTab, onTabCh
                       </legend>
                       
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-3">
-                        <div className="md:col-span-2">
+                        <div>
                           <label className={labelClass}>رقم التعريف الوطني (NIN) <span className="text-[#D21034]">*</span></label>
                           <input
                             type="text"
                             required
                             value={nin}
                             onChange={e => setNin(e.target.value.replace(/[^0-9]/g, '').slice(0, 18))}
-                            placeholder="يتكون من 18 رقماً"
+                            placeholder="18 رقماً"
                             dir="ltr"
                             className={`${inputBaseClass} font-mono text-right placeholder:text-right placeholder:font-tajawal`}
                           />
-                          <p className="text-[10px] text-gray-500 mt-1">تجدونه في بطاقة التعريف الوطنية البيومترية</p>
                         </div>
 
                         <div>
@@ -373,6 +396,51 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({ activeTab, onTabCh
                             <Phone className="w-4 h-4 text-gray-400 absolute right-3 top-3.5 pointer-events-none" />
                           </div>
                         </div>
+
+                        <div>
+                          <label className={labelClass}>دائرة الإقامة <span className="text-[#D21034]">*</span></label>
+                          <div className="relative">
+                            <select
+                              required
+                              value={applicantDaira}
+                              onChange={e => { setApplicantDaira(e.target.value); setApplicantMunicipality(''); }}
+                              className={`${inputBaseClass} appearance-none pr-10`}
+                            >
+                              <option value="">اختر الدائرة</option>
+                              {DAIRAS.map(d => <option key={d} value={d}>دائرة {d}</option>)}
+                            </select>
+                            <MapPin className="w-4 h-4 text-gray-400 absolute right-3 top-3.5 pointer-events-none" />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className={labelClass}>بلدية الإقامة <span className="text-[#D21034]">*</span></label>
+                          <div className="relative">
+                            <select
+                              required
+                              value={applicantMunicipality}
+                              onChange={e => setApplicantMunicipality(e.target.value)}
+                              disabled={!applicantDaira}
+                              className={`${inputBaseClass} appearance-none pr-10 disabled:bg-gray-100 disabled:opacity-70`}
+                            >
+                              <option value="">اختر البلدية</option>
+                              {applicantDaira && DAIRAS_MUNICIPALITIES[applicantDaira]?.map(m => <option key={m} value={m}>بلدية {m}</option>)}
+                            </select>
+                            <Building2 className="w-4 h-4 text-gray-400 absolute right-3 top-3.5 pointer-events-none" />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className={labelClass}>الحي / العنوان <span className="text-[#D21034]">*</span></label>
+                          <input
+                            type="text"
+                            required
+                            value={applicantNeighborhood}
+                            onChange={e => setApplicantNeighborhood(e.target.value)}
+                            placeholder="مثال: حي 08 ماي..."
+                            className={inputBaseClass}
+                          />
+                        </div>
                       </div>
                     </fieldset>
 
@@ -383,26 +451,63 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({ activeTab, onTabCh
                       </legend>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-3">
+                        <div className="md:col-span-2">
+                          <label className={labelClass}>موضوع العريضة <span className="text-[#D21034]">*</span></label>
+                          <input
+                            type="text"
+                            required
+                            value={subject}
+                            onChange={e => setSubject(e.target.value)}
+                            placeholder="عنوان مختصر لموضوع الشكوى..."
+                            className={inputBaseClass}
+                          />
+                        </div>
+                        
                         <div>
-                          <label className={labelClass}>البلدية المعنية <span className="text-[#D21034]">*</span></label>
-                          <select
-                            value={municipality}
-                            onChange={e => setMunicipality(e.target.value as Municipality)}
-                            className={`${inputBaseClass} cursor-pointer bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M5%207.5L10%2012.5L15%207.5%22%20stroke%3D%22%23111827%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E')] bg-[length:20px] bg-no-repeat bg-[position:left_0.75rem_center] appearance-none`}
-                          >
-                            {MUNICIPALITIES.map(m => <option key={m} value={m}>بلدية {m}</option>)}
-                          </select>
+                          <label className={labelClass}>الدائرة المعنية <span className="text-[#D21034]">*</span></label>
+                          <div className="relative">
+                            <select
+                              required
+                              value={grievanceDaira}
+                              onChange={e => { setGrievanceDaira(e.target.value); setGrievanceMunicipality(''); }}
+                              className={`${inputBaseClass} appearance-none pr-10`}
+                            >
+                              <option value="">اختر الدائرة</option>
+                              {DAIRAS.map(d => <option key={d} value={d}>دائرة {d}</option>)}
+                            </select>
+                            <MapPin className="w-4 h-4 text-gray-400 absolute right-3 top-3.5 pointer-events-none" />
+                          </div>
                         </div>
 
                         <div>
+                          <label className={labelClass}>البلدية المعنية <span className="text-[#D21034]">*</span></label>
+                          <div className="relative">
+                            <select
+                              required
+                              value={grievanceMunicipality}
+                              onChange={e => setGrievanceMunicipality(e.target.value)}
+                              disabled={!grievanceDaira}
+                              className={`${inputBaseClass} appearance-none pr-10 disabled:bg-gray-100 disabled:opacity-70`}
+                            >
+                              <option value="">اختر البلدية</option>
+                              {grievanceDaira && DAIRAS_MUNICIPALITIES[grievanceDaira]?.map(m => <option key={m} value={m}>بلدية {m}</option>)}
+                            </select>
+                            <Building2 className="w-4 h-4 text-gray-400 absolute right-3 top-3.5 pointer-events-none" />
+                          </div>
+                        </div>
+
+                        <div className="md:col-span-2">
                           <label className={labelClass}>تصنيف العريضة <span className="text-[#D21034]">*</span></label>
-                          <select
-                            value={category}
-                            onChange={e => setCategory(e.target.value as GrievanceCategory)}
-                            className={`${inputBaseClass} cursor-pointer bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M5%207.5L10%2012.5L15%207.5%22%20stroke%3D%22%23111827%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E')] bg-[length:20px] bg-no-repeat bg-[position:left_0.75rem_center] appearance-none`}
-                          >
-                            {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-                          </select>
+                          <div className="relative">
+                            <select
+                              value={category}
+                              onChange={e => setCategory(e.target.value as GrievanceCategory)}
+                              className={`${inputBaseClass} appearance-none pr-10`}
+                            >
+                              {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                            </select>
+                            <Tag className="w-4 h-4 text-gray-400 absolute right-3 top-3.5 pointer-events-none" />
+                          </div>
                         </div>
 
                         <div className="md:col-span-2">

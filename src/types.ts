@@ -2,9 +2,25 @@ export type Municipality =
   | 'الوادي'
   | 'البياضة'
   | 'الرباح'
+  | 'قمار'
   | 'الرقيبة'
+  | 'المقرن'
+  | 'الدبيلة'
   | 'حاسي خليفة'
-  | 'المغير'
+  | 'الطالب العربي'
+  | 'أمية ونسه'
+  | 'كوينين'
+  | 'العقلة'
+  | 'النخلة'
+  | 'تغزوت'
+  | 'ورماس'
+  | 'الحمراية'
+  | 'سيدي عون'
+  | 'حساني عبد الكريم'
+  | 'الطريفاوي'
+  | 'بن قشة'
+  | 'دوار الماء'
+  | 'وادي العلندة'
   | 'أخرى';
 
 export type GrievanceCategory = 
@@ -16,13 +32,18 @@ export type GrievanceCategory =
   | 'أخرى';
 
 export interface GrievanceSubmission {
-  id: string; // WD-2026-XXXXX
-  nin?: string; // National Identification Number
+  id: string;
+  nin?: string;
   fullName: string;
-  municipality: Municipality;
+  phone: string;
+  applicantDaira: string;
+  applicantMunicipality: string;
+  applicantNeighborhood: string;
+  subject: string;
+  grievanceDaira: string;
+  grievanceMunicipality: string;
   category: GrievanceCategory;
   details: string;
-  phone: string;
   createdAt: string;
   status: 'قيد المعالجة' | 'تم التوجيه' | 'تم الرد' | 'مسجل حديثاً';
 }
