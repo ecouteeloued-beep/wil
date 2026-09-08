@@ -23,6 +23,36 @@ export const GrievanceService = {
   },
 
   findByTrackingId: (id: string): GrievanceSubmission | null => {
+    // First check admin synchronized store for most up-to-date status
+    try {
+      const adminGrievances = JSON.parse(localStorage.getItem('wilaya_eloued_admin_grievances') || '[]');
+      const adminFound = adminGrievances.find((g: any) => g.id === id);
+      if (adminFound) {
+        return {
+          id: adminFound.id,
+          nin: adminFound.nin,
+          fullName: adminFound.fullName,
+          phone: adminFound.phone,
+          applicantDaira: adminFound.applicantDaira,
+          applicantMunicipality: adminFound.applicantMunicipality,
+          applicantNeighborhood: adminFound.applicantNeighborhood,
+          subject: adminFound.subject,
+          grievanceDaira: adminFound.grievanceDaira,
+          grievanceMunicipality: adminFound.grievanceMunicipality,
+          category: adminFound.category,
+          details: adminFound.details,
+          createdAt: adminFound.createdAt,
+          status: adminFound.status === 'مغلق' || adminFound.status === 'تمت المعالجة' 
+            ? 'تم الرد' 
+            : adminFound.status === 'تم الإسناد' 
+            ? 'تم التوجيه' 
+            : 'قيد المعالجة'
+        };
+      }
+    } catch {
+      // fallback
+    }
+
     const existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
     return existing.find((g: GrievanceSubmission) => g.id === id) || null;
   },
