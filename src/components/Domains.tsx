@@ -53,7 +53,7 @@ export interface DomainsProps {
 
 export const Domains: React.FC<DomainsProps> = ({ onDomainClick }) => {
   return (
-    <section className="py-16 bg-gray-50 max-w-7xl mx-auto px-4">
+    <section id="domains-section" className="py-16 bg-gray-50 max-w-7xl mx-auto px-4">
       {/* Section Header */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }}

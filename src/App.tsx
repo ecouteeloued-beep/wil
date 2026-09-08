@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
 import { Domains } from './components/Domains';
@@ -17,6 +17,14 @@ export default function App() {
   const [formActiveTab, setFormActiveTab] = useState<'new' | 'track'>('new');
   const [selectedCategory, setSelectedCategory] = useState<GrievanceCategory>('الحالة المدنية');
 
+  useEffect(() => {
+    // Check if user chose to skip welcome intro on startup
+    const skip = localStorage.getItem('eloued_skip_welcome');
+    if (skip === 'true') {
+      setShowSplash(false);
+    }
+  }, []);
+
   const handleSelectTab = (tab: 'new' | 'track') => {
     setCurrentView('home');
     setFormActiveTab(tab);
@@ -30,7 +38,7 @@ export default function App() {
       if (formEl) {
         formEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
-    }, 100);
+    }, 150);
   };
 
   const handleDomainClick = (domainTitle: string) => {
@@ -41,10 +49,22 @@ export default function App() {
 
   return (
     <>
-      {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
+      {/* 1. Official Ministry-Inspired Welcome / Intro Portal Screen */}
+      <SplashScreen 
+        isOpen={showSplash}
+        onClose={() => setShowSplash(false)}
+        onSelectTab={(tab) => {
+          setShowSplash(false);
+          handleScrollToForm(tab);
+        }}
+      />
+
       <div className="min-h-screen flex flex-col bg-[#F8F9FA] text-gray-900 font-tajawal selection:bg-[#006233]/20 selection:text-[#006233]">
-        {/* 1. Header (Sticky) */}
-        <Header onNavigateToForm={handleScrollToForm} />
+        {/* 2. Official Algerian Ministry-Style Header (Customized for Wilaya d'El Oued) */}
+        <Header 
+          onNavigateToForm={handleScrollToForm} 
+          onOpenWelcome={() => setShowSplash(true)}
+        />
 
         {/* Main Content Sections */}
         <main className="flex-1 w-full space-y-10">
@@ -52,37 +72,37 @@ export default function App() {
             <PrivacyPolicy />
           ) : (
             <>
-              {/* 2. Hero Section */}
+              {/* Hero Section */}
               <Hero onSelectTab={handleSelectTab} />
               
               <Domains onDomainClick={handleDomainClick} />
               
-              {/* Single-column constrained wrapper for body sections (max-w ~520px on mobile/tablet) */}
+              {/* Single-column constrained wrapper for body sections */}
               <div className="w-full space-y-10 sm:space-y-12">
-                {/* 3. How It Works (Vertical Timeline) */}
+                {/* How It Works (Vertical Timeline) */}
                 <HowItWorks />
                 
-                {/* 5. Interactive Form & Tracking (Primary card) */}
+                {/* Interactive Form & Tracking (Primary card) */}
                 <GrievanceForm 
                   activeTab={formActiveTab} 
                   onTabChange={setFormActiveTab}
                   initialCategory={selectedCategory}
                 />
                 
-                {/* 6. Other Contact Methods */}
+                {/* Other Contact Methods & Hotline */}
                 <ContactMethods />
                 
-                {/* 7. Frequently Asked Questions (Accordion) */}
+                {/* Frequently Asked Questions */}
                 <FAQ />
               </div>
             </>
           )}
         </main>
 
-        {/* 8. Dark Navy Footer */}
+        {/* Official Footer */}
         <Footer onPrivacyClick={() => {
           setCurrentView('privacy');
-          window.scrollTo(0, 0);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
         }} />
       </div>
     </>

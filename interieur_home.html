@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>وزارة الداخليـــة و الجماعـــات المحليـــة و النقــــــل</title>
+  <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?display=swap&amp;family=Noto+Kufi+Arabic%3A300%2C400" media="all">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      background-color: #fff;
+      border-bottom: 1px solid #ddd;
+      flex-wrap: wrap;
+    }
+
+    .header-left img {
+      height: 140px;
+      width: auto;
+    }
+
+    .header-center {
+      text-align: center;
+      flex: 1;
+      padding: 5px;
+    }
+
+    .header-right {
+      text-align: center;
+    }
+
+    /* === Bannière === */
+    .banner {
+      flex: 1;
+      background-image: url('http://interieur.gov.dz/wp-content/uploads/2025/12/page-intro-miclat.jpg'); 
+      background-size: cover;
+      background-position: center;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end; /* place le contenu en bas */
+    }
+
+    .overlay {
+     
+     
+      top: 0;
+      left: 0;
+     position: absolute; 
+      width: 100%;
+      height: 100%;
+      
+    /*  background-color: rgba(0, 0, 0, 0.4);*/
+     
+    }
+  
+  
+  
+    .welcome-container {
+      font-family: 'Noto Kufi Arabic', sans-serif !important;
+      position: relative;
+      z-index: 1;
+      color: #fff;
+      text-align: center;
+      width: 100%;
+      padding: 20px;
+      margin-bottom: 140px; /* espace au-dessus du bas */
+    }
+.welcome-arabe { 
+  color: #006831; text-shadow: 2px 2px 8px #2bdc9d !important;   font-size: 8.5rem !important; font-family: 'noto kufi arabic';line-height: 0.9 !important;
+    }
+     .welcome-tamazight { 
+    color: #006831; font-size: 4.0rem !important;text-shadow: 2px 2px 5px #2bdc9d !important; font-family: 'noto kufi arabic';
+    }
+    .btn-group {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .btn, .btn-default {
+      text-decoration: none;
+      padding: 12px 24px;
+      font-size: 1.5rem;
+      border: 2px solid #fff;
+      color: #fff;
+      transition: background-color 0.3s;
+      font-family: 'Noto Kufi Arabic', sans-serif !important;
+      border-radius: 6px;
+    }
+
+    .btn {
+      background-color: #0b9a39;
+    }
+
+    .btn-default {
+      background-color: #1D70B7;
+    }
+
+    .btn:hover, .btn-default:hover {
+      background-color: #41AB34;
+    }
+
+    footer {
+      font-family: 'Noto Kufi Arabic', sans-serif !important;
+      padding: 10px;
+      text-align: center;
+      background-color: #f5f5f5;
+      border-top: 1px solid #ddd;
+      font-size: 0.9rem;
+    }
+
+    /* === Responsive === */
+    @media (max-width: 768px) {
+      header {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .header-left img {
+        height: 70px;
+      }
+
+      .header-center h3, .header-center p {
+        font-size: 1.1rem !important;
+        margin: 5px 0;
+      }
+
+      .welcome-container {
+        margin-bottom: 20px;
+         
+        padding: 15px;
+      }
+         .welcome-arabe { 
+    font-size: 4.5rem !important; line-height: 0.8 !important;
+    }
+     .welcome-tamazight { 
+    font-size: 2.5rem !important; line-height: 1.1 !important;
+    }
+      .btn, .btn-default {
+        width: 80%;
+        font-size: 1.1rem;
+        padding: 10px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header-left img {
+        height: 60px;
+      }
+
+      .btn, .btn-default {
+        width: 90%;
+        font-size: 1rem;
+      }
+    }
+
+
+  </style>
+</head>
+<body>
+
+  <header dir="rtl">
+    <div class="header-left">
+      <a href="https://interieur.gov.dz/ar/">
+        <img src="http://interieur.gov.dz/wp-content/uploads/2025/10/cropped-549160908_1253679926802055_7139711205682662553_n-e1759419335360.jpg" alt="miclt">
+      </a>	
+    </div>
+
+    <div class="header-center">
+      <h3 class="site-title" style="font-family: 'noto kufi arabic' !important; font-size: 1.5rem !important; font-weight: 600 !important; color: #000000 !important; margin-right: 10px !important; text-align: center !important; line-height: 1.4 !important;">
+        الجمهوريــة الجزائريـــة الديمقراطيـــة الشعبيـــــة
+      </h3>
+      <p style="color: #000; font-size: 1.4rem; line-height: 1.3; font-family: 'Noto Sans Tifinagh'; text-align: center; ">
+        ⵜⴰⴳⴷⵓⴷⴰ ⵜⴰⵣⵣⴰⵢⵔⵉⵜ ⵜⴰⵎⴰⴳⴷⴰⵢⵜ ⵜⴰⵖⴻⵔⴼⴰⵏⵜ
+      </p> 
+      <p style="color: #907b00; font-weight: bold; font-size: 1.4rem; margin-bottom: 3px; margin-right:10px; text-align: center; line-height: 1.2; direction: rtl; font-family: 'noto kufi arabic', sans-serif;">
+        وزارة الداخليـــة و الجماعـــات المحليـــة و النقــــــل
+      </p>
+      <p style="font-family: 'Noto Sans Tifinagh'; color: #907b00; font-size: 1.2rem; text-align: center;  ">
+      ⴰⵯⵍⵉⴼ ⵏ ⵓⴳⴻⵏⵙⵓ ⴷ ⵜⵏⴻⴳⵔⴰⵡⵉⵏ ⵜⵉⴷⵉⴳⴰⵏⵉⵏ ⴷ ⵓⵎⴻⵙⵏⵉ
+      </p>
+    </div>
+
+    <div class="header-right">
+      <p style="color: red; font-size: 22px; font-family: 'noto kufi arabic';">في تواصــــل دائــــــــم</p>
+      <p style="color: #0b9a39; font-size: 45px; font-family: 'noto kufi arabic'; line-height: 45px;">معكـــــــــم</p>
+      <div>
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<!-- Icônes -->
+<a href="https://www.facebook.com/..." target="_blank" rel="noopener noreferrer" title="Facebook">
+  <i class="fab fa-facebook" style="font-size: 25px;"></i>
+</a>
+<a href="https://www.instagram.com/@interieur_dz" target="_blank" rel="noopener noreferrer" title="instagram">
+  <i class="fab fa-instagram" style="font-size: 25px; color: #ef2b3c;"></i>
+</a>
+<a href="https://www.twitter.com/@interieur_dz" target="_blank" rel="noopener noreferrer" title="Twitter">
+  <i class="fab fa-x" style="font-size: 23px; color: black;"></i>
+</a>
+<a href="https://www.twitter.com/@interieur_dz" target="_blank" rel="noopener noreferrer" title="Twitter">
+  <i class="fab fa-twitter" style="font-size: 25px; color: #36dbdd;"></i>
+</a>
+<a href="https://www.youtube.com/channel/UCPVOlufr0jn4CF1MVLcm-QQ" target="_blank" rel="noopener noreferrer" title="YouTube">
+  <i class="fab fa-youtube" style="font-size: 25px; color: red;"></i>
+</a>
+
+       
+      </div>
+    </div>
+  </header>
+
+  <div class="banner">
+    <div class="overlay" align="center"> </div>
+     <div align="center" class="welcome-container" dir="rtl">
+     <img src="https://interieur.gov.dz/wp-content/uploads/2025/12/icon.png" alt="miclt">
+     <h1>  <spain class="welcome-arabe"   >مرحبا بكم  </spain></h1> <h3 class="welcome-tamazight"   >  ⵣⴰⵡⴰⵙ ⵙⵉⵙⵡⴻⵏ
+      </h3>
+   
+  <div class="btn-group">
+     <spain style="color: black; font-size: 2.5rem !important;  font-weight: bold; font-family: 'noto kufi arabic';"> في الموقع الإلكتروني ل  </spain>  <a href="https://interieur.gov.dz/ar" class="btn">وزارة الداخليـــة و الجماعـــات المحليـــة</a><a href="https://www.mt.gov.dz" target="_blank" class="btn-default"> و
+        النقــل</a>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    &copy; جميع الحقوق محفوظة © MICLT - 2025.
+  </footer>
+
+</body>
+</html>
