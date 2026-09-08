@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   Send, Search, CheckCircle, Copy, Check, FileText, 
   ArrowRight, Clock, Building2, Tag, Phone, AlertCircle, UploadCloud, X, MapPin,
-  Sparkles, Eye, Printer, ShieldCheck, CheckCircle2, User, HelpCircle,
+  Sparkles, Eye, Printer, ShieldCheck, CheckCircle2, User, HelpCircle, Mail,
   FileBadge2, Leaf, Building, Bus, HeartPulse, MessageCircle, AlertTriangle
 } from 'lucide-react';
 import { CitizenTrackingDossier } from './CitizenTrackingDossier';
@@ -77,6 +77,7 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
   const [nin, setNin] = useState('');
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
   const [applicantDaira, setApplicantDaira] = useState('');
   const [applicantMunicipality, setApplicantMunicipality] = useState('');
   const [applicantNeighborhood, setApplicantNeighborhood] = useState('');
@@ -98,7 +99,7 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
 
   // Tracking Search State
   const [trackQuery, setTrackQuery] = useState('');
-  const [trackPin, setTrackPin] = useState('');
+  const [trackPhone, setTrackPhone] = useState('');
   const [trackError, setTrackError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
@@ -171,6 +172,7 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
           nin: nin.trim(),
           fullName: fullName.trim(),
           phone: phone.trim(),
+          email: email.trim() || undefined,
           applicantDaira,
           applicantMunicipality,
           applicantNeighborhood: applicantNeighborhood.trim(),
@@ -200,6 +202,7 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
     setNin('');
     setFullName('');
     setPhone('');
+    setEmail('');
     setApplicantDaira('');
     setApplicantMunicipality('');
     setApplicantNeighborhood('');
@@ -214,20 +217,20 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
     setFormStep(1);
   };
 
-  const executeTrackSearch = async (codeToSearch: string, pinToSearch: string) => {
+  const executeTrackSearch = async (codeToSearch: string, phoneToSearch: string) => {
     const cleaned = codeToSearch.trim().toUpperCase();
-    const cleanedPin = pinToSearch.trim();
+    const cleanedPhone = phoneToSearch.trim();
     if (!cleaned) {
       setTrackError('يرجى إدخال رقم التتبع');
       return;
     }
-    if (!cleanedPin) {
-      setTrackError('يرجى إدخال الرمز السري للملف');
+    if (!cleanedPhone) {
+      setTrackError('يرجى إدخال رقم الهاتف');
       return;
     }
     setTrackError(null);
     setTrackQuery(cleaned);
-    setTrackPin(cleanedPin);
+    setTrackPhone(cleanedPhone);
     setIsSearching(true);
     setHasSearched(false);
     setActiveTrackingResult(null);
@@ -283,8 +286,8 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
       }
 
       if (match) {
-        if (match.secretPin !== cleanedPin) {
-          setTrackError('الرمز السري غير صحيح. يرجى التأكد من المعلومات.');
+        if (match.phone !== cleanedPhone) {
+          setTrackError('رقم الهاتف غير صحيح. يرجى التأكد من المعلومات.');
           setActiveTrackingResult(null);
           setHasSearched(false);
           setIsSearching(false);
@@ -305,7 +308,7 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    executeTrackSearch(trackQuery, trackPin);
+    executeTrackSearch(trackQuery, trackPhone);
   };
 
   const handlePrintReceipt = () => {
@@ -388,7 +391,7 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
                 >
                   {submittedTicket ? (
                     /* Official Success State (Receipt style) */
-                    <div className="max-w-2xl mx-auto py-4">
+                    <div className="max-w-2xl mx-auto py-4 printable-area">
                       <div className="border border-[#006233]/30 rounded-xl p-6 sm:p-8 bg-green-50/30 text-center relative overflow-hidden">
                         <CheckCircle className="absolute -right-8 -bottom-8 w-40 h-40 text-[#006233]/5 pointer-events-none" />
                         
@@ -427,7 +430,7 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
                           <button
                             type="button"
                             onClick={() => handleCopy(`الرقم المرجعي: ${submittedTicket.id}\nالرمز السري: ${submittedTicket.secretPin || '2026'}`)}
-                            className={`mt-4 w-full py-2.5 rounded-lg border text-xs font-tajawal font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm ${
+                            className={`mt-4 w-full py-2.5 rounded-lg border text-xs font-tajawal font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm print-hidden ${
                               copiedCode ? 'bg-[#006233] border-[#006233] text-white' : 'bg-gray-50 border-gray-200 text-[#111827] hover:bg-gray-100'
                             }`}
                           >
@@ -447,17 +450,25 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
 
                       </div>
 
-                      <div className="flex flex-col sm:flex-row justify-center gap-3 mt-6">
+                      <div className="flex flex-col sm:flex-row justify-center gap-3 mt-6 print-hidden">
                         <button
                           type="button"
                           onClick={() => { 
-                            onTabChange('track'); 
-                            executeTrackSearch(submittedTicket.id, submittedTicket.secretPin || '2026'); 
+                            onTabChange('track');
+                            executeTrackSearch(submittedTicket.id, submittedTicket.secretPin || '2026');
                           }}
                           className="py-2.5 px-6 bg-[#006233] hover:bg-[#004d28] text-white font-tajawal font-bold text-sm rounded-lg transition-colors flex items-center justify-center gap-2 shadow-xs cursor-pointer"
                         >
                           <span>متابعة وتتبع الملف الآن</span>
                           <ArrowRight className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handlePrintReceipt}
+                          className="py-2.5 px-6 bg-gray-100 border border-gray-200 text-[#111827] hover:bg-gray-200 font-tajawal font-bold text-sm rounded-lg transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                        >
+                          <Printer className="w-4 h-4" />
+                          <span>طباعة الوصل</span>
                         </button>
                         <button
                           type="button"
@@ -525,6 +536,21 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
                                   className={`${inputBaseClass} pl-4 pr-10 text-right placeholder:text-right font-mono`}
                                 />
                                 <Phone className="w-4 h-4 text-gray-400 absolute right-3 top-3.5 pointer-events-none" />
+                              </div>
+                            </div>
+
+                            <div>
+                              <label className={labelClass}>البريد الإلكتروني <span className="text-gray-400 font-normal">(اختياري)</span></label>
+                              <div className="relative">
+                                <input
+                                  type="email"
+                                  value={email}
+                                  onChange={e => setEmail(e.target.value)}
+                                  placeholder="example@email.com"
+                                  dir="ltr"
+                                  className={`${inputBaseClass} pl-4 pr-10 text-right placeholder:text-right font-mono`}
+                                />
+                                <Mail className="w-4 h-4 text-gray-400 absolute right-3 top-3.5 pointer-events-none" />
                               </div>
                             </div>
 
@@ -763,13 +789,13 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
                         <input
                           type="text"
                           required
-                          maxLength={4}
-                          value={trackPin}
+                          maxLength={10}
+                          value={trackPhone}
                           onChange={e => {
-                            setTrackPin(e.target.value.replace(/\D/g, ''));
+                            setTrackPhone(e.target.value.replace(/\D/g, ''));
                             setTrackError(null);
                           }}
-                          placeholder="الرمز السري"
+                          placeholder="رقم الهاتف"
                           dir="ltr"
                           className={`${inputBaseClass} font-mono text-center tracking-widest text-sm`}
                         />

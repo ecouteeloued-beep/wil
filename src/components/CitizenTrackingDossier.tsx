@@ -127,12 +127,12 @@ export const CitizenTrackingDossier: React.FC<CitizenTrackingDossierProps> = ({
 
   // Determine stage progression for dynamic timeline
   const getTimelineStages = () => {
-    const isNew = complaint.status === 'جديد' || complaint.statusCode === 'NEW';
-    const isAssigned = complaint.status === 'تم الإسناد' || complaint.statusCode === 'ASSIGNED';
-    const isWaitingCitizen = complaint.status === 'بانتظار معلومات' || complaint.statusCode === 'WAITING_CITIZEN';
-    const isWaitingReview = complaint.status === 'بانتظار المراجعة' || complaint.statusCode === 'WAITING_REVIEW';
-    const isInProgress = complaint.status === 'قيد المعالجة' || complaint.statusCode === 'IN_PROGRESS';
-    const isResolved = complaint.status === 'تمت المعالجة' || complaint.statusCode === 'RESOLVED';
+    const isNew = complaint.status === 'جديد' || complaint.status === 'تم الاستقبال' || complaint.statusCode === 'NEW';
+    const isViewed = complaint.status === 'تم الاطلاع' || complaint.statusCode === 'VIEWED';
+    const isAssigned = complaint.status === 'تم التوجيه للمصلحة المختصة' || complaint.status === 'محول للمصلحة' || complaint.statusCode === 'ASSIGNED';
+    const isInProgress = complaint.status === 'جاري المعالجة' || complaint.status === 'قيد المعالجة' || complaint.statusCode === 'IN_PROGRESS';
+    const isPendingReply = complaint.status === 'بانتظار الرد' || complaint.statusCode === 'PENDING_REPLY';
+    const isResolved = complaint.status === 'تم الحل' || complaint.statusCode === 'RESOLVED';
     const isClosed = complaint.status === 'مغلق' || complaint.statusCode === 'CLOSED';
 
     return [
@@ -144,38 +144,41 @@ export const CitizenTrackingDossier: React.FC<CitizenTrackingDossierProps> = ({
         time: complaint.timeline?.[0]?.time || '09:32'
       },
       {
-        label: 'تمت المراجعة الأولية',
-        done: !isNew,
+        label: 'تم الاطلاع على الملف',
+        done: isViewed || isAssigned || isInProgress || isPendingReply || isResolved || isClosed,
+        current: isViewed,
+        date: '08 سبتمبر 2026',
+        time: '11:15'
+      },
+      {
+        label: 'تم التوجيه للمصلحة المختصة',
+        done: isAssigned || isInProgress || isPendingReply || isResolved || isClosed,
         current: isAssigned,
-        date: !isNew ? '08 سبتمبر 2026' : undefined,
-        time: !isNew ? '11:15' : undefined
+        date: '08 سبتمبر 2026',
+        time: '14:20'
       },
       {
-        label: 'تم توجيه الانشغال',
-        done: !isNew && !isAssigned,
-        current: isWaitingCitizen,
-        date: !isNew && !isAssigned ? '08 سبتمبر 2026' : undefined,
-        time: !isNew && !isAssigned ? '14:20' : undefined
-      },
-      {
-        label: isWaitingCitizen 
-          ? 'في انتظار معلومات من المواطن' 
-          : isWaitingReview 
-          ? 'في انتظار المراجعة والاعتماد' 
-          : 'قيد المعالجة والمتابعة',
-        done: isResolved || isClosed,
-        current: isInProgress || isWaitingCitizen || isWaitingReview,
+        label: 'جاري المعالجة',
+        done: isInProgress || isPendingReply || isResolved || isClosed,
+        current: isInProgress,
         date: '09 سبتمبر 2026',
         time: '10:05'
       },
       {
-        label: 'الرد الرسمي المعتمد',
+        label: 'بانتظار الرد',
+        done: isPendingReply || isResolved || isClosed,
+        current: isPendingReply,
+        date: '09 سبتمبر 2026',
+        time: '15:30'
+      },
+      {
+        label: 'تم الحل',
         done: isResolved || isClosed,
-        current: false,
+        current: isResolved,
         date: (isResolved || isClosed) ? '10 سبتمبر 2026' : undefined
       },
       {
-        label: 'الإغلاق النهائي والأرشفة',
+        label: 'مغلق نهائياً',
         done: isClosed,
         current: isClosed,
         date: isClosed ? '12 سبتمبر 2026' : undefined
@@ -189,7 +192,7 @@ export const CitizenTrackingDossier: React.FC<CitizenTrackingDossierProps> = ({
     <motion.div 
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white border border-gray-300 rounded-2xl overflow-hidden shadow-md"
+      className="bg-white border border-gray-300 rounded-2xl overflow-hidden shadow-md printable-area"
     >
       {/* 1. Header Bar with Tracking Code and Actions */}
       <div className="bg-[#111827] px-4 sm:px-6 py-4 text-white flex flex-wrap justify-between items-center gap-3">
@@ -208,7 +211,7 @@ export const CitizenTrackingDossier: React.FC<CitizenTrackingDossierProps> = ({
             <button
               type="button"
               onClick={handleCopyCode}
-              className="p-1 rounded bg-white/10 hover:bg-white/20 text-white/80 hover:text-white transition-colors cursor-pointer"
+              className="p-1 rounded bg-white/10 hover:bg-white/20 text-white/80 hover:text-white transition-colors cursor-pointer print-hidden"
               title="نسخ رقم التتبع"
             >
               {copiedCode ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
@@ -216,7 +219,7 @@ export const CitizenTrackingDossier: React.FC<CitizenTrackingDossierProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 print-hidden">
           {/* QR Code Button */}
           <button
             type="button"
@@ -614,7 +617,7 @@ export const CitizenTrackingDossier: React.FC<CitizenTrackingDossierProps> = ({
         </div>
 
         {/* 6. Footer Actions */}
-        <div className="pt-4 border-t border-gray-200 flex flex-wrap items-center justify-between gap-3">
+        <div className="pt-4 border-t border-gray-200 flex flex-wrap items-center justify-between gap-3 print-hidden">
           <button
             type="button"
             onClick={() => window.print()}

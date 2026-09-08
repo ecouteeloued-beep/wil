@@ -9,11 +9,13 @@ import { FAQ } from './components/FAQ';
 import { Footer } from './components/Footer';
 import { PrivacyPolicy } from './components/PrivacyPolicy';
 import { SplashScreen } from './components/SplashScreen';
+import { ProjectVision } from './components/ProjectVision';
+import { DashboardLayout } from './components/dashboard/DashboardLayout';
 import { GrievanceCategory } from './types';
 
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
-  const [currentView, setCurrentView] = useState<'home' | 'privacy'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'privacy' | 'vision' | 'admin_dashboard'>('home');
   const [formActiveTab, setFormActiveTab] = useState<'new' | 'track'>('new');
   const [selectedCategory, setSelectedCategory] = useState<GrievanceCategory>('الحالة المدنية');
 
@@ -39,9 +41,12 @@ export default function App() {
     handleScrollToForm('new');
   };
 
+  if (currentView === 'admin_dashboard') {
+    return <DashboardLayout onLogout={() => setCurrentView('home')} />;
+  }
+
   return (
     <>
-      {/* 1. Official Ministry-Inspired Welcome / Intro Portal Screen */}
       <SplashScreen 
         isOpen={showSplash}
         onClose={() => setShowSplash(false)}
@@ -52,48 +57,43 @@ export default function App() {
       />
 
       <div className="min-h-screen flex flex-col bg-[#F8F9FA] text-gray-900 font-tajawal selection:bg-[#006233]/20 selection:text-[#006233]">
-        {/* 2. Official Algerian Ministry-Style Header (Customized for Wilaya d'El Oued) */}
         <Header 
           onNavigateToForm={handleScrollToForm} 
           onOpenWelcome={() => setShowSplash(true)}
+          onAdminClick={() => setCurrentView('admin_dashboard')}
+          onVisionClick={() => setCurrentView('vision')}
         />
 
-        {/* Main Content Sections */}
         <main className="flex-1 w-full space-y-10">
           {currentView === 'privacy' ? (
             <PrivacyPolicy />
+          ) : currentView === 'vision' ? (
+            <ProjectVision />
           ) : (
             <>
-              {/* Hero Section */}
-              <Hero onSelectTab={handleSelectTab} />
+              <Hero onSelectTab={handleSelectTab} onVisionClick={() => setCurrentView('vision')} />
               
               <Domains 
                 onDomainClick={handleDomainClick} 
               />
               
-              {/* Single-column constrained wrapper for body sections */}
               <div className="w-full space-y-10 sm:space-y-12">
-                {/* How It Works (Vertical Timeline) */}
                 <HowItWorks />
                 
-                {/* Interactive Form & Tracking (Primary card) */}
                 <GrievanceForm 
                   activeTab={formActiveTab} 
                   onTabChange={setFormActiveTab}
                   initialCategory={selectedCategory}
                 />
                 
-                {/* Other Contact Methods & Hotline */}
                 <ContactMethods />
                 
-                {/* Frequently Asked Questions */}
                 <FAQ />
               </div>
             </>
           )}
         </main>
 
-        {/* Official Footer */}
         <Footer onPrivacyClick={() => {
           setCurrentView('privacy');
           window.scrollTo({ top: 0, behavior: 'smooth' });
