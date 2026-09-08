@@ -17,7 +17,7 @@ export const HowItWorks: React.FC = () => {
           كيف يعمل الفضاء؟
         </h3>
         <span className="inline-block text-[10px] sm:text-xs font-bold font-tajawal text-gray-500 tracking-[0.2em] uppercase">
-          NOTRE PROCESSUS EN 4 ÉTAPES
+          مسار المعالجة في 4 خطوات
         </span>
         <div className="w-16 h-1 bg-[#006233] mx-auto mt-4 rounded-full"></div>
       </motion.div>
