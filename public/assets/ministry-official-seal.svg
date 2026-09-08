@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300">
+  <defs>
+    <!-- Gradients -->
+    <radialGradient id="sunGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fff8e1"/>
+      <stop offset="60%" stop-color="#ffe082"/>
+      <stop offset="100%" stop-color="#ffb300"/>
+    </radialGradient>
+    
+    <linearGradient id="goldRim" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fdf4c8"/>
+      <stop offset="35%" stop-color="#d4af37"/>
+      <stop offset="70%" stop-color="#aa820a"/>
+      <stop offset="100%" stop-color="#7a5c00"/>
+    </linearGradient>
+
+    <linearGradient id="greenRim" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b9a39"/>
+      <stop offset="100%" stop-color="#006233"/>
+    </linearGradient>
+
+    <filter id="sealShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#000" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+
+  <!-- Base Outer Circle -->
+  <circle cx="150" cy="150" r="144" fill="#ffffff" stroke="url(#greenRim)" stroke-width="4" filter="url(#sealShadow)"/>
+  
+  <!-- Outer Gold Decorative Ring -->
+  <circle cx="150" cy="150" r="138" fill="none" stroke="url(#goldRim)" stroke-width="2"/>
+  <circle cx="150" cy="150" r="134" fill="none" stroke="#006233" stroke-width="1" stroke-dasharray="3 2"/>
+
+  <!-- Inner Center Field Border -->
+  <circle cx="150" cy="150" r="88" fill="#ffffff" stroke="url(#goldRim)" stroke-width="2.5"/>
+  <circle cx="150" cy="150" r="85" fill="url(#sunGlow)" opacity="0.15"/>
+
+  <!-- ================= TEXT ARCS ================= -->
+  <!-- Top Text Arc: République Algérienne -->
+  <path id="topArc" d="M 32,150 A 118 118 0 0 1 268,150" fill="none"/>
+  <text font-family="'Noto Kufi Arabic', 'Amiri', 'Tajawal', sans-serif" font-size="13" font-weight="800" fill="#006233" text-anchor="middle">
+    <textPath href="#topArc" startOffset="50%">
+      الجمهوريــة الجزائريــة الديمقراطيــة الشعبيــة
+    </textPath>
+  </text>
+
+  <!-- Bottom Text Arc: Ministère de l'Intérieur -->
+  <path id="bottomArc" d="M 268,152 A 118 118 0 0 1 32,152" fill="none"/>
+  <text font-family="'Noto Kufi Arabic', 'Amiri', 'Tajawal', sans-serif" font-size="11.5" font-weight="800" fill="#907b00" text-anchor="middle">
+    <textPath href="#bottomArc" startOffset="50%">
+      وزارة الداخليـــة و الجماعـــات المحليـــة و التهيئــة العمرانيــة
+    </textPath>
+  </text>
+
+  <!-- Left & Right Separator Stars -->
+  <polygon points="26,150 29,146 34,146 30,149 32,154 27,151 22,154 24,149 20,146 25,146" fill="#d4af37"/>
+  <polygon points="274,150 277,146 282,146 278,149 280,154 275,151 270,154 272,149 268,146 273,146" fill="#d4af37"/>
+
+  <!-- ================= CENTRAL OFFICIAL EMBLEM ================= -->
+  <!-- Sun Rays in Background -->
+  <g stroke="#ffb300" stroke-width="1.5" opacity="0.6">
+    <line x1="150" y1="130" x2="150" y2="88"/>
+    <line x1="150" y1="130" x2="165" y2="92"/>
+    <line x1="150" y1="130" x2="178" y2="99"/>
+    <line x1="150" y1="130" x2="190" y2="110"/>
+    <line x1="150" y1="130" x2="135" y2="92"/>
+    <line x1="150" y1="130" x2="122" y2="99"/>
+    <line x1="150" y1="130" x2="110" y2="110"/>
+  </g>
+
+  <!-- Rising Sun Disc -->
+  <circle cx="150" cy="130" r="22" fill="url(#sunGlow)"/>
+
+  <!-- Mountain Silhouettes (Atlas) -->
+  <polygon points="102,156 128,136 150,148 172,134 198,156" fill="#d4af37" opacity="0.7"/>
+  <polygon points="110,158 135,142 152,152 170,140 190,158" fill="#aa820a" opacity="0.5"/>
+
+  <!-- Wheat Sheaves (Right Side) -->
+  <g fill="#d4af37">
+    <ellipse cx="188" cy="148" rx="4" ry="9" transform="rotate(35 188 148)"/>
+    <ellipse cx="196" cy="138" rx="3.5" ry="8" transform="rotate(30 196 138)"/>
+    <ellipse cx="201" cy="126" rx="3.5" ry="8" transform="rotate(20 201 126)"/>
+    <ellipse cx="204" cy="114" rx="3" ry="7" transform="rotate(10 204 114)"/>
+    <path d="M 180,165 Q 198,140 206,108" fill="none" stroke="#d4af37" stroke-width="2"/>
+  </g>
+
+  <!-- Olive Branch (Left Side) -->
+  <g fill="#006233">
+    <ellipse cx="112" cy="148" rx="4" ry="9" transform="rotate(-35 112 148)"/>
+    <ellipse cx="104" cy="138" rx="3.5" ry="8" transform="rotate(-30 104 138)"/>
+    <ellipse cx="99" cy="126" rx="3.5" ry="8" transform="rotate(-20 99 126)"/>
+    <ellipse cx="96" cy="114" rx="3" ry="7" transform="rotate(-10 96 114)"/>
+    <path d="M 120,165 Q 102,140 94,108" fill="none" stroke="#006233" stroke-width="2"/>
+  </g>
+
+  <!-- The Hand of Fatima (Emblem of Solidarity & Algerian Heritage) -->
+  <g transform="translate(150, 140) scale(0.75)" fill="#d4af37" stroke="#7a5c00" stroke-width="1.2">
+    <!-- Center Finger -->
+    <rect x="-3.5" y="-30" width="7" height="26" rx="3.5"/>
+    <!-- Index Finger -->
+    <rect x="-10.5" y="-27" width="6" height="23" rx="3"/>
+    <!-- Ring Finger -->
+    <rect x="4.5" y="-27" width="6" height="23" rx="3"/>
+    <!-- Thumb Left -->
+    <rect x="-16.5" y="-20" width="5.5" height="16" rx="2.8" transform="rotate(-15 -16 -12)"/>
+    <!-- Little/Thumb Right -->
+    <rect x="11" y="-20" width="5.5" height="16" rx="2.8" transform="rotate(15 16 -12)"/>
+    <!-- Palm Base -->
+    <path d="M -15,-5 C -15,10 15,10 15,-5 Z"/>
+  </g>
+
+  <!-- Algerian Red Crescent & 5-Point Star -->
+  <g transform="translate(150, 182)">
+    <!-- Red Crescent -->
+    <path d="M 0,-24 A 24 24 0 1 0 0,24 A 19 19 0 1 1 0,-24 Z" fill="#D21034" transform="rotate(15)"/>
+    <!-- Red 5-Point Star -->
+    <polygon points="0,-12 3,-4 11,-4 5,2 7,10 0,5 -7,10 -5,2 -11,-4 -3,-4" fill="#D21034" transform="translate(10, 0) scale(1)"/>
+  </g>
+
+  <!-- Wilaya Banner at base of central circle -->
+  <rect x="110" y="212" width="80" height="16" rx="8" fill="#006233"/>
+  <text x="150" y="223.5" font-family="'Noto Kufi Arabic', 'Tajawal', sans-serif" font-size="8.5" font-weight="bold" fill="#ffffff" text-anchor="middle">
+    ولايـــة الـــوادي
+  </text>
+</svg>

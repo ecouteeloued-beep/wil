@@ -29,19 +29,20 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
   onClose, 
   onSelectTab 
 }) => {
-  const [dontShowAgain, setDontShowAgain] = useState(false);
+  React.useEffect(() => {
+    // Clear any previous skip flag to guarantee the new experience always displays
+    try {
+      localStorage.removeItem('eloued_skip_welcome');
+    } catch {
+      // ignore
+    }
+  }, []);
 
   const handleEnterPlatform = () => {
-    if (dontShowAgain) {
-      localStorage.setItem('eloued_skip_welcome', 'true');
-    }
     onClose();
   };
 
   const handleAction = (tab: 'new' | 'track') => {
-    if (dontShowAgain) {
-      localStorage.setItem('eloued_skip_welcome', 'true');
-    }
     onClose();
     onSelectTab(tab);
   };
@@ -64,19 +65,14 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
           <div className="w-full bg-white text-gray-900 border-b border-gray-200 shadow-sm relative z-20 py-2.5 px-4 sm:px-8">
             <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
               
-              {/* Right: National Emblem & Wilaya Logo */}
+              {/* Right: National Emblem & Ministry Logo */}
               <div className="flex items-center gap-3 sm:gap-4 text-right">
                 <div className="flex items-center gap-2">
                   <img 
-                    src="/assets/eloued-logo.png" 
-                    alt="شعار ولاية الوادي" 
-                    className="w-14 h-14 sm:w-16 sm:h-16 object-contain drop-shadow-sm"
-                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                  />
-                  <img 
-                    src="/assets/seal.svg" 
-                    alt="شعار الجمهورية الجزائرية" 
-                    className="w-10 h-10 sm:w-12 sm:h-12 object-contain opacity-95 hidden sm:block"
+                    src="/assets/official-ministry-logo.jpg" 
+                    alt="شعار وزارة الداخلية والجماعات المحلية" 
+                    className="w-14 h-14 sm:w-16 sm:h-16 object-contain rounded-full shadow-sm bg-white p-0.5"
+                    onError={(e) => { e.currentTarget.src = '/assets/cropped-549160908_1253679926802055_7139711205682662553_n-e1759419335360.jpg'; }}
                   />
                 </div>
                 <div className="border-r-2 border-gray-200 pr-3">
@@ -152,18 +148,18 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
               transition={{ duration: 0.6, ease: 'easeOut', delay: 0.1 }}
               className="relative z-10 w-full max-w-4xl text-center flex flex-col items-center"
             >
-              {/* Prestigious Glowing Seal of Wilaya */}
+              {/* Prestigious Glowing Seal of the Ministry of the Interior */}
               <div className="relative mb-5">
-                <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-white/10 backdrop-blur-md p-3 border-2 border-emerald-400/40 shadow-2xl flex items-center justify-center relative">
+                <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-white p-1.5 border-2 border-emerald-400/60 shadow-2xl flex items-center justify-center relative">
                   <img 
-                    src="/assets/eloued-logo.png" 
-                    alt="شعار ولاية الوادي" 
-                    className="w-full h-full object-contain filter drop-shadow-md"
-                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                    src="/assets/official-ministry-logo.jpg" 
+                    alt="الشعار الرسمي لوزارة الداخلية والجماعات المحلية" 
+                    className="w-full h-full object-contain rounded-full filter drop-shadow-sm"
+                    onError={(e) => { e.currentTarget.src = '/assets/cropped-549160908_1253679926802055_7139711205682662553_n-e1759419335360.jpg'; }}
                   />
                   {/* Subtle rotating glow ring */}
                   <motion.div 
-                    className="absolute -inset-1 rounded-full border border-dashed border-emerald-400/30"
+                    className="absolute -inset-1.5 rounded-full border border-dashed border-emerald-400/50 pointer-events-none"
                     animate={{ rotate: 360 }}
                     transition={{ duration: 30, repeat: Infinity, ease: 'linear' }}
                   />
@@ -273,18 +269,10 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
 
               </div>
 
-              {/* Do not show again checkbox option */}
-              <div className="mt-6 flex items-center gap-2 text-xs text-gray-300">
-                <input
-                  type="checkbox"
-                  id="dontShowAgain"
-                  checked={dontShowAgain}
-                  onChange={(e) => setDontShowAgain(e.target.checked)}
-                  className="rounded border-white/30 text-[#0b9a39] focus:ring-0 cursor-pointer accent-[#0b9a39]"
-                />
-                <label htmlFor="dontShowAgain" className="cursor-pointer text-gray-300 hover:text-white">
-                  عدم إظهار شاشة الترحيب هذه تلقائياً في الزيارات القادمة (يمكن فتحها دائماً من الشريط العلوي)
-                </label>
+              {/* Reassurance line */}
+              <div className="mt-6 flex items-center justify-center gap-1.5 text-xs text-emerald-200/80">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                <span>منصة رقمية رسمية ومؤمّنة تابعة لولاية الوادي لخدمة المواطن والتكفل بانشغالاته</span>
               </div>
 
             </motion.div>

@@ -16,15 +16,13 @@ export const Footer: React.FC<FooterProps> = ({ onPrivacyClick }) => {
           {/* Brand/Identity Column */}
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 shrink-0 bg-white rounded-full flex items-center justify-center p-1.5 shadow-sm">
-                <svg viewBox="0 0 100 100" className="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                  <circle cx="50" cy="50" r="46" stroke="#111827" strokeWidth="2" strokeDasharray="4 2" />
-                  <path d="M22 76 Q50 64 78 76" stroke="#D21034" strokeWidth="3" strokeLinecap="round" />
-                  <path d="M50 72 L50 38" stroke="#E5E7EB" strokeWidth="4" strokeLinecap="round" />
-                  <path d="M50 38 Q32 28 20 40" stroke="#006233" strokeWidth="3" strokeLinecap="round" />
-                  <path d="M50 38 Q68 28 80 40" stroke="#006233" strokeWidth="3" strokeLinecap="round" />
-                  <circle cx="50" cy="24" r="6" fill="#D21034" />
-                </svg>
+              <div className="w-12 h-12 shrink-0 bg-white rounded-full flex items-center justify-center p-0.5 shadow-sm overflow-hidden border border-gray-200">
+                <img 
+                  src="/assets/official-ministry-logo.jpg" 
+                  alt="شعار وزارة الداخلية والجماعات المحلية" 
+                  className="w-full h-full object-contain rounded-full"
+                  onError={(e) => { e.currentTarget.src = '/assets/cropped-549160908_1253679926802055_7139711205682662553_n-e1759419335360.jpg'; }}
+                />
               </div>
               <div>
                 <h4 className="font-changa font-bold text-lg text-white">البوابة الرسمية للانشغالات</h4>
