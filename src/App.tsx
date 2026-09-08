@@ -9,11 +9,12 @@ import { FAQ } from './components/FAQ';
 import { Footer } from './components/Footer';
 import { PrivacyPolicy } from './components/PrivacyPolicy';
 import { SplashScreen } from './components/SplashScreen';
+import { DashboardLayout } from './components/dashboard/DashboardLayout';
 import { GrievanceCategory } from './types';
 
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
-  const [currentView, setCurrentView] = useState<'home' | 'privacy'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'privacy' | 'dashboard'>('home');
   const [formActiveTab, setFormActiveTab] = useState<'new' | 'track'>('new');
   const [selectedCategory, setSelectedCategory] = useState<GrievanceCategory>('الحالة المدنية');
 
@@ -39,6 +40,13 @@ export default function App() {
     handleScrollToForm('new');
   };
 
+  // Dedicated full-screen Dashboard view for cell staff and supervisors
+  if (currentView === 'dashboard') {
+    return (
+      <DashboardLayout onExitDashboard={() => setCurrentView('home')} />
+    );
+  }
+
   return (
     <>
       {/* 1. Official Ministry-Inspired Welcome / Intro Portal Screen */}
@@ -56,6 +64,7 @@ export default function App() {
         <Header 
           onNavigateToForm={handleScrollToForm} 
           onOpenWelcome={() => setShowSplash(true)}
+          onOpenDashboard={() => setCurrentView('dashboard')}
         />
 
         {/* Main Content Sections */}

@@ -15,16 +15,18 @@ import {
   Facebook,
   Youtube,
   Twitter,
-  Instagram
+  Instagram,
+  Shield
 } from 'lucide-react';
 import { DAIRAS, DAIRAS_MUNICIPALITIES } from '../data';
 
 interface HeaderProps {
   onNavigateToForm: (tab?: 'new' | 'track') => void;
   onOpenWelcome: () => void;
+  onOpenDashboard: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onNavigateToForm, onOpenWelcome }) => {
+export const Header: React.FC<HeaderProps> = ({ onNavigateToForm, onOpenWelcome, onOpenDashboard }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showMunicipalitiesModal, setShowMunicipalitiesModal] = useState(false);
   const [activeLanguage, setActiveLanguage] = useState<'ar' | 'tif' | 'fr'>('ar');
@@ -300,15 +302,24 @@ export const Header: React.FC<HeaderProps> = ({ onNavigateToForm, onOpenWelcome 
               </button>
             </div>
 
-            {/* Left side: External Ministry portal link */}
-            <div className="hidden lg:flex items-center gap-3 py-1">
+            {/* Left side: External Ministry portal link & Dashboard Login */}
+            <div className="hidden lg:flex items-center gap-2 py-1">
+              <button
+                onClick={onOpenDashboard}
+                className="bg-[#C67D2A] hover:bg-[#b06d22] text-white px-3 py-1.5 rounded font-bold text-xs flex items-center gap-1.5 shadow-sm transition-all"
+                title="الدخول إلى فضاء إدارة ومتابعة الخلية"
+              >
+                <Shield className="w-3.5 h-3.5" />
+                <span>لوحة التحكم (الخلية)</span>
+              </button>
+
               <a 
                 href="https://www.interieur.gov.dz/" 
                 target="_blank" 
                 rel="noreferrer"
                 className="text-xs text-amber-200 hover:text-white flex items-center gap-1.5 bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded transition-colors font-medium border border-white/10"
               >
-                <span>الموقع الرسمي لوزارة الداخلية</span>
+                <span>وزارة الداخلية</span>
                 <ExternalLink className="w-3 h-3 text-amber-300" />
               </a>
             </div>
@@ -345,6 +356,13 @@ export const Header: React.FC<HeaderProps> = ({ onNavigateToForm, onOpenWelcome 
           {/* Mobile Drawer Menu */}
           {mobileMenuOpen && (
             <div className="md:hidden bg-[#0c244c] border-t border-white/10 px-4 py-3 space-y-2 text-sm">
+              <button 
+                onClick={() => { setMobileMenuOpen(false); onOpenDashboard(); }}
+                className="w-full text-right py-2 px-3 bg-[#C67D2A] text-white rounded font-bold flex items-center gap-2 shadow-xs"
+              >
+                <Shield className="w-4 h-4" />
+                <span>لوحة تحكم الخلية (فضاء الإدارة)</span>
+              </button>
               <button 
                 onClick={() => { setMobileMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
                 className="w-full text-right py-2 px-3 hover:bg-white/10 rounded flex items-center gap-2"
