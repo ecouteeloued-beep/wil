@@ -1,12 +1,13 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   Search, Filter, Eye, User, FileText, Phone, MapPin, Hash, 
   Calendar, ShieldCheck, History, ArrowLeft, CheckCircle2, MessageSquare, 
   Edit3, Printer, Plus, X, Send, Award
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { SystemUser } from '../../types';
+import { SystemUser, EnhancedGrievance } from '../../types';
 import { WILAYA_MUNICIPALITIES_22 } from '../../services/adminService';
+import { SupabaseService } from '../../services/supabaseService';
 
 interface CitizensViewProps {
   user?: SystemUser;
@@ -17,7 +18,7 @@ interface CitizensViewProps {
 const INITIAL_CITIZENS: any[] = [];
 
 export const CitizensView: React.FC<CitizensViewProps> = ({ user, addToast }) => {
-  const [citizens, setCitizens] = useState(INITIAL_CITIZENS);
+  const [citizens, setCitizens] = useState<any[]>(INITIAL_CITIZENS);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterMunicipality, setFilterMunicipality] = useState('');
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
@@ -28,6 +29,40 @@ export const CitizensView: React.FC<CitizensViewProps> = ({ user, addToast }) =>
   const [smsMessage, setSmsMessage] = useState('');
   const [showEditModal, setShowEditModal] = useState(false);
   const [editFormData, setEditFormData] = useState({ phone: '', municipality: '', neighborhood: '' });
+
+  useEffect(() => {
+    const loadCitizens = async () => {
+      const grievances = await SupabaseService.fetchComplaints();
+      const grouped = new Map<string, any>();
+      grievances.forEach((item: EnhancedGrievance) => {
+        const key = `${item.nin || item.phone || item.fullName}|${item.grievanceMunicipality || item.applicantMunicipality}`;
+        const current = grouped.get(key);
+        if (current) {
+          current.filesCount += 1;
+          current.files.push(item);
+          if (new Date(item.createdAt) > new Date(current.lastActivity)) current.lastActivity = item.createdAt;
+        } else {
+          grouped.set(key, {
+            id: item.nin || item.phone || item.id,
+            nin: item.nin || 'غير متوفر',
+            fullName: item.fullName || 'مواطن بدون اسم',
+            phone: item.phone || 'غير متوفر',
+            municipality: item.grievanceMunicipality || item.applicantMunicipality || 'الوادي',
+            neighborhood: item.applicantNeighborhood || 'غير محدد',
+            filesCount: 1,
+            files: [item],
+            status: 'موثق',
+            lastActivity: item.createdAt,
+          });
+        }
+      });
+      setCitizens(Array.from(grouped.values()));
+    };
+    void loadCitizens();
+    const refresh = () => { void loadCitizens(); };
+    window.addEventListener('complaints_updated', refresh);
+    return () => window.removeEventListener('complaints_updated', refresh);
+  }, []);
 
   const filteredCitizens = useMemo(() => {
     return citizens.filter(c => {
@@ -178,7 +213,7 @@ export const CitizensView: React.FC<CitizensViewProps> = ({ user, addToast }) =>
               >
                 الكل (22 بلدية)
               </button>
-              {WILAYA_MUNICIPALITIES_22.slice(0, 10).map(m => (
+              {WILAYA_MUNICIPALITIES_22.map(m => (
                 <button
                   key={m.code}
                   onClick={() => { setFilterMunicipality(m.name); setShowFilterDropdown(false); }}
