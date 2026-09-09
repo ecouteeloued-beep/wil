@@ -1,18 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
-import { Domains } from './components/Domains';
-import { HowItWorks } from './components/HowItWorks';
 import { GrievanceForm } from './components/GrievanceForm';
-import { ContactMethods } from './components/ContactMethods';
-import { FAQ } from './components/FAQ';
-import { Footer } from './components/Footer';
-import { PrivacyPolicy } from './components/PrivacyPolicy';
 import { SplashScreen } from './components/SplashScreen';
-import { ProjectVision } from './components/ProjectVision';
-import { DashboardLayout } from './components/dashboard/DashboardLayout';
-import { AdminLogin } from './components/dashboard/AdminLogin';
 import { GrievanceCategory, SystemUser } from './types';
+
+// Lazy loaded components (Code Splitting for performance)
+const Domains = React.lazy(() => import('./components/Domains').then(module => ({ default: module.Domains })));
+const HowItWorks = React.lazy(() => import('./components/HowItWorks').then(module => ({ default: module.HowItWorks })));
+const ContactMethods = React.lazy(() => import('./components/ContactMethods').then(module => ({ default: module.ContactMethods })));
+const FAQ = React.lazy(() => import('./components/FAQ').then(module => ({ default: module.FAQ })));
+const Footer = React.lazy(() => import('./components/Footer').then(module => ({ default: module.Footer })));
+const PrivacyPolicy = React.lazy(() => import('./components/PrivacyPolicy').then(module => ({ default: module.PrivacyPolicy })));
+const ProjectVision = React.lazy(() => import('./components/ProjectVision').then(module => ({ default: module.ProjectVision })));
+const DashboardLayout = React.lazy(() => import('./components/dashboard/DashboardLayout').then(module => ({ default: module.DashboardLayout })));
+const AdminLogin = React.lazy(() => import('./components/dashboard/AdminLogin').then(module => ({ default: module.AdminLogin })));
+
+// Loading fallback
+const SectionLoader = () => (
+  <div className="flex items-center justify-center p-8">
+    <div className="w-8 h-8 border-4 border-[#006233] border-t-transparent rounded-full animate-spin"></div>
+  </div>
+);
 
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
@@ -75,22 +84,22 @@ export default function App() {
   if (currentView === 'admin_dashboard') {
     if (!adminUser) {
       return (
-        <>
+        <Suspense fallback={<SectionLoader />}>
           <AdminLogin 
             onLogin={(user) => setAdminUser(user)} 
             onCancel={() => setCurrentView('home')} 
           />
-        </>
+        </Suspense>
       );
     }
 
     return (
-      <>
+      <Suspense fallback={<SectionLoader />}>
         <DashboardLayout 
           user={adminUser} 
           onLogout={() => { setAdminUser(null); setCurrentView('home'); }} 
         />
-      </>
+      </Suspense>
     );
   }
 
@@ -114,42 +123,46 @@ export default function App() {
         />
 
         <main className="flex-1 w-full space-y-10">
-          {currentView === 'privacy' ? (
-            <PrivacyPolicy />
-          ) : currentView === 'vision' ? (
-            <ProjectVision />
-          ) : (
-            <>
-              <Hero onSelectTab={handleSelectTab} onVisionClick={() => setCurrentView('vision')} />
-              
-              <Domains 
-                onDomainClick={handleDomainClick}
-              />
-              
-              <div className="w-full space-y-10 sm:space-y-12">
-                <HowItWorks />
+          <Suspense fallback={<SectionLoader />}>
+            {currentView === 'privacy' ? (
+              <PrivacyPolicy />
+            ) : currentView === 'vision' ? (
+              <ProjectVision />
+            ) : (
+              <>
+                <Hero onSelectTab={handleSelectTab} onVisionClick={() => setCurrentView('vision')} />
                 
-                <GrievanceForm 
-                  activeTab={formActiveTab}
-                  onTabChange={setFormActiveTab}
-                  initialCategory={selectedCategory}
+                <Domains 
+                  onDomainClick={handleDomainClick}
                 />
                 
-                <ContactMethods />
-                
-                <FAQ />
-              </div>
-            </>
-          )}
+                <div className="w-full space-y-10 sm:space-y-12">
+                  <HowItWorks />
+                  
+                  <GrievanceForm 
+                    activeTab={formActiveTab}
+                    onTabChange={setFormActiveTab}
+                    initialCategory={selectedCategory}
+                  />
+                  
+                  <ContactMethods />
+                  
+                  <FAQ />
+                </div>
+              </>
+            )}
+          </Suspense>
         </main>
 
-        <Footer 
-          onPrivacyClick={() => {
-            setCurrentView('privacy');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }} 
-          onSecretAdminTrigger={() => setCurrentView('admin_dashboard')}
-        />
+        <Suspense fallback={<div className="h-16 bg-[#0B1519]"></div>}>
+          <Footer 
+            onPrivacyClick={() => {
+              setCurrentView('privacy');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }} 
+            onSecretAdminTrigger={() => setCurrentView('admin_dashboard')}
+          />
+        </Suspense>
       </div>
     </>
   );
