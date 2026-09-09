@@ -43,17 +43,10 @@ export default function App() {
     handleScrollToForm('new');
   };
 
-  const DemoBanner = () => (
-    <div className="bg-amber-100 border-b border-amber-200 text-amber-800 text-xs sm:text-sm font-tajawal font-bold text-center py-2 px-4 shadow-sm z-[9999] relative">
-      ⚠️ نسخة تجريبية للعرض - قبل الربط بالنظام المعلوماتي وقاعدة البيانات الرسمية
-    </div>
-  );
-
   if (currentView === 'admin_dashboard') {
     if (!adminUser) {
       return (
         <>
-          <DemoBanner />
           <AdminLogin 
             onLogin={(user) => setAdminUser(user)} 
             onCancel={() => setCurrentView('home')} 
@@ -64,7 +57,6 @@ export default function App() {
 
     return (
       <>
-        <DemoBanner />
         <DashboardLayout 
           user={adminUser} 
           onLogout={() => { setAdminUser(null); setCurrentView('home'); }} 
@@ -75,7 +67,6 @@ export default function App() {
 
   return (
     <>
-      <DemoBanner />
       <SplashScreen 
         isOpen={showSplash}
         onClose={() => setShowSplash(false)}
