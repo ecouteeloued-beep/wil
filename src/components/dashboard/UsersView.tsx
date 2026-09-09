@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { SystemUser } from '../../types';
 import { AdminService, DEFAULT_ROLE_PERMISSIONS } from '../../services/adminService';
+import { SupabaseService } from '../../services/supabaseService';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface UsersViewProps {
@@ -51,13 +52,13 @@ export const UsersView: React.FC<UsersViewProps> = ({ user, addToast }) => {
 
   const [newPin, setNewPin] = useState('');
 
-  const loadUsers = () => {
-    const list = AdminService.getUsers();
-    setUsers(list);
+  const loadUsers = async () => {
+    const remoteUsers = await SupabaseService.fetchStaffUsers();
+    setUsers(remoteUsers.length > 0 ? remoteUsers : AdminService.getUsers());
   };
 
   useEffect(() => {
-    loadUsers();
+    void loadUsers();
   }, []);
 
   const canManageUsers = useMemo(() => {
@@ -196,7 +197,7 @@ export const UsersView: React.FC<UsersViewProps> = ({ user, addToast }) => {
       setShowAddModal(false);
     }
 
-    loadUsers();
+    void loadUsers();
   };
 
   const handleDeleteUser = () => {
@@ -231,7 +232,7 @@ export const UsersView: React.FC<UsersViewProps> = ({ user, addToast }) => {
     });
 
     setDeleteConfirmUser(null);
-    loadUsers();
+    void loadUsers();
   };
 
   const handleResetPin = (e: React.FormEvent) => {
