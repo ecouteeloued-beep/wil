@@ -187,6 +187,8 @@ export const CitizenTrackingDossier: React.FC<CitizenTrackingDossierProps> = ({
   };
 
   const stages = getTimelineStages();
+  const completedCount = stages.filter(s => s.done).length;
+  const progressPercent = Math.round((completedCount / stages.length) * 100);
 
   return (
     <motion.div 
@@ -330,6 +332,29 @@ export const CitizenTrackingDossier: React.FC<CitizenTrackingDossierProps> = ({
 
       {/* 2. Main Content Body */}
       <div className="p-5 sm:p-7 space-y-6">
+        {/* Progress Percentage Bar */}
+        <div className="bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 p-4 rounded-2xl border border-emerald-200/70 shadow-xs space-y-2">
+          <div className="flex items-center justify-between text-xs font-tajawal">
+            <span className="font-bold text-gray-800 flex items-center gap-1.5 font-changa">
+              <ShieldCheck className="w-4 h-4 text-[#006233]" />
+              <span>معدل إنجاز مسار المعالجة والتكفل</span>
+            </span>
+            <span className="font-mono font-bold text-[#006233] bg-white px-2.5 py-0.5 rounded-full border border-emerald-300">
+              {progressPercent}% مكتمل
+            </span>
+          </div>
+          <div className="w-full bg-white h-2.5 rounded-full overflow-hidden p-0.5 border border-emerald-200">
+            <div 
+              className="bg-gradient-to-r from-[#006233] to-emerald-500 h-full rounded-full transition-all duration-700 ease-out" 
+              style={{ width: `${progressPercent}%` }} 
+            />
+          </div>
+          <div className="flex justify-between text-[11px] text-gray-500 pt-0.5 font-tajawal">
+            <span>المصالح المكلفة: {complaint.assignedDepartment || 'ديوان الوالي - خلية الإصغاء والتكفل'}</span>
+            <span className="font-bold text-emerald-800">الحالة: {complaint.status}</span>
+          </div>
+        </div>
+
         {/* Metadata Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-gray-50 p-4 rounded-xl border border-gray-200 text-xs font-tajawal">
           <div>
