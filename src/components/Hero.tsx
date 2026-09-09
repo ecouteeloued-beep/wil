@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { SendHorizontal, Search } from 'lucide-react';
-import { motion } from 'motion/react';
 import { GrievanceService } from '../services/grievanceService';
 
 interface HeroProps {
@@ -23,19 +22,6 @@ export const Hero: React.FC<HeroProps> = ({ onSelectTab, onVisionClick }) => {
     }
   };
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.1, delayChildren: 0.1 },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 15 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
-  };
-
   return (
     <section className="relative bg-[#006233] text-white pt-10 sm:pt-16 pb-16 overflow-hidden border-b-4 border-[#D21034]">
       {/* Background Image with Overlay */}
@@ -47,29 +33,24 @@ export const Hero: React.FC<HeroProps> = ({ onSelectTab, onVisionClick }) => {
       
       <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
 
-      <motion.div 
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="relative max-w-4xl mx-auto px-4 text-center z-10"
-      >
-        <motion.div variants={itemVariants} className="flex justify-center mb-6">
+      <div className="relative max-w-4xl mx-auto px-4 text-center z-10 animate-fade-in-up">
+        <div className="flex justify-center mb-6">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-sm bg-white/10 border border-white/20 text-white text-xs sm:text-sm font-tajawal font-bold uppercase tracking-wider shadow-sm">
             <span>وساطة المواطن — ولاية الوادي</span>
             <span className="w-2 h-2 rounded-full bg-[#D21034] animate-pulse" />
           </div>
-        </motion.div>
+        </div>
 
-        <motion.h1 variants={itemVariants} className="font-changa font-extrabold text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-[1.3] text-white mb-6">
+        <h1 className="font-changa font-extrabold text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-[1.3] text-white mb-6">
           فضاء انشغالاتي
-        </motion.h1>
+        </h1>
 
-        <motion.p variants={itemVariants} className="font-tajawal text-sm sm:text-base md:text-lg text-white/90 leading-relaxed max-w-2xl mx-auto mb-10 font-normal py-2 text-center">
+        <p className="font-tajawal text-sm sm:text-base md:text-lg text-white/90 leading-relaxed max-w-2xl mx-auto mb-10 font-normal py-2 text-center">
           صوتك مسموع وانشغالك أولوية. منصة رسمية للتواصل المباشر مع ولاية الوادي، لتقديم شكواكم واقتراحاتكم في كل القطاعات. نتعهد بدراسة كل طلب والرد عليه في غضون <span className="text-[#D21034] font-bold">7 أيام عمل</span>
-        </motion.p>
+        </p>
 
         {/* Stats Grid */}
-        <motion.div variants={itemVariants} className="grid grid-cols-2 gap-4 max-w-2xl mx-auto mb-10">
+        <div className="grid grid-cols-2 gap-4 max-w-2xl mx-auto mb-10">
           <div className="bg-white/10 border border-white/20 rounded-xl p-6 flex flex-col items-center justify-center backdrop-blur-sm">
             <span className="font-changa text-3xl font-bold text-[#D21034] mb-2">7</span>
             <span className="font-tajawal text-sm text-white/90">أيام أقصى للرد</span>
@@ -86,10 +67,10 @@ export const Hero: React.FC<HeroProps> = ({ onSelectTab, onVisionClick }) => {
             <span className="font-changa text-3xl font-bold text-[#D21034] mb-2">{stats.resolved}</span>
             <span className="font-tajawal text-sm text-white/90">عريضة تمت معالجتها</span>
           </div>
-        </motion.div>
+        </div>
 
         {/* Action Buttons */}
-        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-2xl mx-auto">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-2xl mx-auto">
           <button
             onClick={() => handleAction('new')}
             className="w-full sm:w-1/2 flex items-center justify-center gap-2 px-6 py-4 bg-[#D21034] hover:bg-[#b00d2b] text-white rounded-xl text-lg font-changa font-bold transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 cursor-pointer"
@@ -105,8 +86,8 @@ export const Hero: React.FC<HeroProps> = ({ onSelectTab, onVisionClick }) => {
             <span>تتبع مسار انشغال</span>
             <Search className="w-5 h-5" />
           </button>
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
     </section>
   );
 };
