@@ -7,7 +7,7 @@ import { SupabaseService } from './supabaseService';
 const STORAGE_KEY = 'wilaya_eloued_grievances';
 
 export const GrievanceService = {
-  save: (data: {
+  save: async (data: {
     nin?: string;
     fullName: string;
     phone: string;
@@ -21,7 +21,7 @@ export const GrievanceService = {
     category: any;
     details: string;
     attachments?: AttachmentFile[];
-  }): GrievanceSubmission => {
+  }): Promise<GrievanceSubmission> => {
     const existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
     // Generate unified official tracking code and confidential PIN
     const trackingId = ComplaintService.generateTrackingNumber();
@@ -100,9 +100,10 @@ export const GrievanceService = {
 
     // 4. Asynchronous Cloud Sync to Supabase (if configured)
     if (SupabaseService.isConfigured()) {
-      SupabaseService.insertComplaint(enhancedGrievance).catch(err => {
-        console.warn('Supabase background sync failed:', err);
-      });
+      const cloudResult = await SupabaseService.insertComplaint(enhancedGrievance);
+      if (!cloudResult.success) {
+        throw new Error(cloudResult.error || 'تعذر حفظ الانشغال في قاعدة البيانات السحابية.');
+      }
     }
 
     // Track the last submission time for rate limiting (anti-spam)
