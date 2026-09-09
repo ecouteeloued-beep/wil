@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   X, ZoomIn, ZoomOut, RotateCw, Maximize2, Minimize2, Printer, 
   Download, FileText, Image as ImageIcon, ShieldCheck, Check, 
@@ -16,6 +16,7 @@ interface DocumentReaderModalProps {
   allAttachments?: AttachmentFile[];
   grievance?: EnhancedGrievance | null;
   onSelectAttachment?: (att: AttachmentFile) => void;
+  onViewed?: () => void;
   addToast?: (toast: { type: 'success' | 'info' | 'warning' | 'error'; title: string; message: string }) => void;
 }
 
@@ -26,7 +27,8 @@ export const DocumentReaderModal: React.FC<DocumentReaderModalProps> = ({
   allAttachments = [],
   grievance,
   onSelectAttachment,
-  addToast
+  addToast,
+  onViewed
 }) => {
   const [zoomLevel, setZoomLevel] = useState<number>(100);
   const [rotation, setRotation] = useState<number>(0);
@@ -36,10 +38,16 @@ export const DocumentReaderModal: React.FC<DocumentReaderModalProps> = ({
   const [highContrastMode, setHighContrastMode] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<'preview' | 'ocr' | 'metadata'>('preview');
   const [copiedText, setCopiedText] = useState<boolean>(false);
+  const lastViewedAttachment = useRef<string | null>(null);
 
   // Reset view settings when opening a new attachment
   useEffect(() => {
     if (attachment) {
+      const attachmentKey = attachment.id || attachment.name;
+      if (lastViewedAttachment.current !== attachmentKey) {
+        lastViewedAttachment.current = attachmentKey;
+        onViewed?.();
+      }
       setZoomLevel(100);
       setRotation(0);
       setActivePage(1);
@@ -52,7 +60,7 @@ export const DocumentReaderModal: React.FC<DocumentReaderModalProps> = ({
                           attachment.name.includes('عريضة');
       setTotalPages(isMultiPage ? 2 : 1);
     }
-  }, [attachment]);
+  }, [attachment, onViewed]);
 
   // Handle escape key
   useEffect(() => {

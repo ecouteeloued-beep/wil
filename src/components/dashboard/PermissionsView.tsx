@@ -67,7 +67,11 @@ export const PermissionsView: React.FC<PermissionsViewProps> = ({ user, addToast
 
   const handleSave = () => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(roleMatrix));
+      const serialized = JSON.stringify(roleMatrix);
+      localStorage.setItem(STORAGE_KEY, serialized);
+      if (localStorage.getItem(STORAGE_KEY) !== serialized) {
+        throw new Error('تعذر التحقق من التخزين المحلي');
+      }
       setHasUnsavedChanges(false);
 
       AdminService.logAudit({

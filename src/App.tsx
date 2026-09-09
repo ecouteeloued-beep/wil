@@ -26,7 +26,14 @@ const SectionLoader = () => (
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
   const [currentView, setCurrentView] = useState<'home' | 'privacy' | 'vision' | 'admin_dashboard'>('home');
-  const [adminUser, setAdminUser] = useState<SystemUser | null>(null);
+  const [adminUser, setAdminUser] = useState<SystemUser | null>(() => {
+    try {
+      const saved = window.localStorage.getItem('wilaya_eloued_current_session_user');
+      return saved ? JSON.parse(saved) as SystemUser : null;
+    } catch {
+      return null;
+    }
+  });
   const [formActiveTab, setFormActiveTab] = useState<'new' | 'track'>('new');
   const [selectedCategory, setSelectedCategory] = useState<GrievanceCategory>('الحالة المدنية');
 
@@ -97,7 +104,11 @@ export default function App() {
       <Suspense fallback={<SectionLoader />}>
         <DashboardLayout 
           user={adminUser} 
-          onLogout={() => { setAdminUser(null); setCurrentView('home'); }} 
+          onLogout={() => {
+            window.localStorage.removeItem('wilaya_eloued_current_session_user');
+            setAdminUser(null);
+            setCurrentView('home');
+          }}
         />
       </Suspense>
     );

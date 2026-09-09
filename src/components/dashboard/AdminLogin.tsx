@@ -82,7 +82,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onCancel }) => 
 
     SecurityRateLimiter.reset('admin-login', identifier || 'anonymous');
     const role = (profile.role || 'employee') as UserRole;
-    onLogin({
+    const authenticatedUser: SystemUser = {
       id: profile.id,
       username: profile.username,
       name: profile.name,
@@ -97,7 +97,9 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onCancel }) => 
       overdueCount: 0,
       lastActive: new Date().toISOString(),
       permissions: ROLE_PERMISSIONS[role] || [],
-    });
+    };
+    localStorage.setItem('wilaya_eloued_current_session_user', JSON.stringify(authenticatedUser));
+    onLogin(authenticatedUser);
   };
 
   return (
