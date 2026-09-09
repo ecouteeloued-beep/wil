@@ -680,7 +680,7 @@ export const MOCK_COMPLAINTS_SEED: EnhancedGrievance[] = [
   }
 ];
 
-const STORAGE_KEY = 'wilaya_eloued_mock_complaints_v2';
+const STORAGE_KEY = 'wilaya_eloued_complaints_clean_2026';
 
 export interface IComplaintRepository {
   getAll(): Promise<EnhancedGrievance[]>;
@@ -691,35 +691,22 @@ export interface IComplaintRepository {
   resetToDefaults(): Promise<EnhancedGrievance[]>;
 }
 
-// Client-Side Mock Repository backed by LocalStorage with Seed Data fallback
+// Client-Side Clean Repository backed by LocalStorage starting empty for live demo
 export class MockComplaintRepository implements IComplaintRepository {
   private load(): EnhancedGrievance[] {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          // Ensure all required cases exist in storage
-          const idsInStorage = new Set(parsed.map((p: EnhancedGrievance) => p.id.toUpperCase()));
-          let addedMissing = false;
-          MOCK_COMPLAINTS_SEED.forEach(seed => {
-            if (!idsInStorage.has(seed.id.toUpperCase())) {
-              parsed.push(seed);
-              addedMissing = true;
-            }
-          });
-          if (addedMissing) {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
-          }
+        if (Array.isArray(parsed)) {
           return parsed;
         }
       }
     } catch (e) {
-      console.warn('Failed to parse mock complaints from storage:', e);
+      console.warn('Failed to parse complaints from storage:', e);
     }
-    // Initialize default seed
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(MOCK_COMPLAINTS_SEED));
-    return [...MOCK_COMPLAINTS_SEED];
+    localStorage.setItem(STORAGE_KEY, JSON.stringify([]));
+    return [];
   }
 
   private save(data: EnhancedGrievance[]): void {

@@ -18,7 +18,7 @@ import { SecurityRateLimiter, sanitizeInput } from '../utils/security';
 import { SupabaseService } from './supabaseService';
 
 const USERS_STORAGE_KEY = 'wilaya_eloued_admin_users';
-const GRIEVANCES_STORAGE_KEY = 'wilaya_eloued_admin_grievances';
+const GRIEVANCES_STORAGE_KEY = 'wilaya_eloued_admin_grievances_clean_2026';
 const AUDIT_LOGS_STORAGE_KEY = 'wilaya_eloued_admin_audit_logs';
 const NOTIFICATIONS_STORAGE_KEY = 'wilaya_eloued_admin_notifications';
 const CURRENT_USER_KEY = 'wilaya_eloued_current_session_user';
@@ -1016,19 +1016,8 @@ export const AdminService = {
       const stored = localStorage.getItem(GRIEVANCES_STORAGE_KEY);
       if (stored) {
         grievances = JSON.parse(stored);
-        // Ensure new mock cases are injected if missing
-        let addedSeed = false;
-        MOCK_COMPLAINTS_SEED.forEach(seedItem => {
-          if (!grievances.some(g => g.id.toUpperCase() === seedItem.id.toUpperCase())) {
-            grievances.push(seedItem);
-            addedSeed = true;
-          }
-        });
-        if (addedSeed) {
-          localStorage.setItem(GRIEVANCES_STORAGE_KEY, JSON.stringify(grievances));
-        }
       } else {
-        grievances = SEED_GRIEVANCES;
+        grievances = [];
         localStorage.setItem(GRIEVANCES_STORAGE_KEY, JSON.stringify(grievances));
       }
 
