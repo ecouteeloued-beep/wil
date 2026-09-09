@@ -23,14 +23,6 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onCancel }) => 
   const [passwordInput, setPasswordInput] = useState('••••••••');
   const [isVerifying, setIsVerifying] = useState(false);
 
-  // Quick One-click Sovereign login
-  const handleQuickLogin = (user: SystemUser) => {
-    setIsVerifying(true);
-    setTimeout(() => {
-      onLogin(user);
-    }, 450);
-  };
-
   const handlePinSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedUser) return;
@@ -246,18 +238,9 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onCancel }) => 
                         </div>
 
                         <div className="flex items-center gap-2">
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleQuickLogin(user);
-                            }}
-                            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#006233] hover:bg-[#004d28] text-white text-xs font-changa font-bold border border-emerald-400/30 shadow-md transition-colors"
-                          >
-                            <span>دخول فوري</span>
-                            <ArrowRight className="w-3.5 h-3.5" />
-                          </button>
-
+                          <span className="text-xs text-emerald-300 font-changa bg-emerald-950/60 px-2.5 py-1 rounded-lg border border-emerald-500/30">
+                            إدخال الرمز السري
+                          </span>
                           <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-gray-400 group-hover:text-white transition-colors">
                             <ChevronRight className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
                           </div>
@@ -341,15 +324,6 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onCancel }) => 
                           <span>تأكيد الهوية والدخول</span>
                         </>
                       )}
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => handleQuickLogin(selectedUser)}
-                      className="px-4 py-3.5 bg-white/10 hover:bg-white/15 text-gray-300 hover:text-white rounded-xl font-tajawal text-xs font-bold transition-colors"
-                      title="تجاوز الرمز ودخول مباشر"
-                    >
-                      دخول مباشر
                     </button>
                   </div>
                 </form>
