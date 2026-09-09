@@ -23,15 +23,12 @@ export const Hero: React.FC<HeroProps> = ({ onSelectTab, onVisionClick }) => {
   };
 
   return (
-    <section className="relative bg-[#006233] text-white pt-10 sm:pt-16 pb-16 overflow-hidden border-b-4 border-[#D21034]">
-      {/* Background Image with Overlay */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-15" 
-        style={{ backgroundImage: 'url("/wilaya_background_clean.jpg")' }}
-      ></div>
-      <div className="absolute inset-0 bg-[#006233]/80 pointer-events-none"></div>
-      
-      <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
+    <section className="relative bg-[#28533f] text-white pt-10 sm:pt-16 pb-16 overflow-hidden border-b-4 border-[#c67d2a]">
+      {/* El Oued atmosphere: golden dunes, palm green and a calm desert horizon. */}
+      <div className="absolute inset-0 opacity-95 pointer-events-none" style={{ backgroundImage: 'radial-gradient(ellipse at 8% 12%, rgba(247,205,119,.55) 0 12%, transparent 38%), radial-gradient(ellipse at 92% 18%, rgba(103,164,117,.38) 0 11%, transparent 36%), linear-gradient(165deg, #173d36 0%, #28533f 44%, #b8823e 100%)' }}></div>
+      <div className="absolute -bottom-20 -left-20 w-[70%] h-56 rounded-[50%] bg-[#d7a85b]/35 blur-2xl pointer-events-none"></div>
+      <div className="absolute -bottom-24 -right-24 w-[75%] h-64 rounded-[50%] bg-[#e3b96d]/30 blur-2xl pointer-events-none"></div>
+      <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
 
       <div className="relative max-w-4xl mx-auto px-4 text-center z-10 animate-fade-in-up">
         <div className="flex justify-center mb-6">

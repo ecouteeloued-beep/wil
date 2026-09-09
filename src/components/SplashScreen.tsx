@@ -52,7 +52,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
-          className="fixed inset-0 z-[99999] overflow-y-auto bg-[#0c244c] flex flex-col justify-between min-h-screen text-white font-tajawal selection:bg-[#0b9a39] selection:text-white"
+          className="fixed inset-0 z-[99999] overflow-y-auto bg-[#173d36] flex flex-col justify-between min-h-screen text-white font-tajawal selection:bg-[#c67d2a] selection:text-white"
           dir="rtl"
         >
           {/* =========================================================================
@@ -108,7 +108,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
           <div 
             className="flex-1 relative flex items-center justify-center py-10 px-4 sm:px-6"
             style={{
-              backgroundImage: `radial-gradient(circle at center, rgba(17, 48, 97, 0.92) 0%, rgba(5, 17, 36, 0.98) 100%), url('/assets/header-bg.jpg')`,
+              backgroundImage: 'radial-gradient(ellipse at 12% 12%, rgba(235, 183, 91, .45) 0 12%, transparent 42%), radial-gradient(ellipse at 88% 18%, rgba(67, 139, 92, .35) 0 12%, transparent 38%), linear-gradient(150deg, #173d36 0%, #28533f 48%, #9d6b35 100%)',
               backgroundSize: 'cover',
               backgroundPosition: 'center',
             }}
