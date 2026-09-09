@@ -30,10 +30,11 @@ export const SupabaseService = {
 
   markComplaintViewed: async (trackingId: string): Promise<{ success: boolean; error?: string }> => {
     if (!isSupabaseConfigured || !supabase) return { success: false, error: 'Supabase غير مهيأ.' };
-    const { error } = await supabase
-      .from('complaints')
-      .update({ status: 'تم الاطلاع', updated_at: new Date().toISOString() })
-      .eq('tracking_id', trackingId);
+    const { error } = await supabase.rpc('transition_complaint', {
+      p_tracking_id: trackingId.trim().toUpperCase(),
+      p_target_status: 'تم الاطلاع',
+      p_metadata: { source: 'staff_view' },
+    });
     return error ? { success: false, error: error.message } : { success: true };
   },
 
@@ -116,37 +117,28 @@ export const SupabaseService = {
     try {
       const trackingId = (complaint.trackingNumber || complaint.id).trim().toUpperCase();
       
-      const payload: SupabaseComplaintRow = {
-        tracking_id: trackingId,
-        citizen_name: complaint.fullName || 'مواطن',
-        national_id_encrypted: complaint.nin || '',
-        phone_encrypted: complaint.phone || '',
-        citizen_nin: complaint.nin || '',
-        citizen_phone: complaint.phone || '',
-        category: complaint.category || 'أخرى',
-        municipality: complaint.grievanceMunicipality || complaint.applicantMunicipality || 'الوادي',
-        subject: complaint.subject || 'انشغال إداري',
-        description: complaint.details || '',
-        status: complaint.status === 'قيد المعالجة' ? 'قيد المعالجة' : (complaint.status || 'جديد'),
-        priority: complaint.priority === 'عاجل' ? 'عاجل' : (complaint.priority === 'متوسط' ? 'متوسط' : 'عادي'),
-        deadline: complaint.dueDate || new Date(Date.now() + 15 * 86400000).toISOString(),
-        pin_hash: complaint.secretPin || '',
-        attachments: complaint.attachments || [],
-        created_at: complaint.createdAt || new Date().toISOString(),
-        updated_at: complaint.updatedAt || new Date().toISOString()
-      };
-
-      const { error } = await supabase
-        .from('complaints')
-        .upsert(payload, { onConflict: 'tracking_id' });
+      const { data, error } = await supabase.rpc('submit_complaint', {
+        p_payload: {
+          full_name: complaint.fullName || 'مواطن',
+          phone: complaint.phone,
+          email: complaint.email || null,
+          category: complaint.category || 'أخرى',
+          municipality: complaint.grievanceMunicipality || complaint.applicantMunicipality || 'الوادي',
+          daira: complaint.grievanceDaira || complaint.applicantDaira || 'الوادي',
+          neighborhood: complaint.applicantNeighborhood || null,
+          subject: complaint.subject || 'انشغال إداري',
+          description: complaint.details || '',
+        },
+      });
 
       if (error) {
         console.warn('⚠️ Supabase complaint insert notice:', error.message);
         return { success: false, error: error.message };
       }
 
-      console.info('✅ Complaint successfully synchronized to Supabase Cloud:', trackingId);
-      return { success: true };
+      const created = Array.isArray(data) ? data[0] : data;
+      console.info('✅ Complaint successfully synchronized to Supabase Cloud:', created?.tracking_id || trackingId);
+      return { success: true, data: created };
     } catch (err: any) {
       console.warn('⚠️ Error communicating with Supabase:', err?.message || err);
       return { success: false, error: err?.message || 'Network error' };
@@ -164,7 +156,7 @@ export const SupabaseService = {
     try {
       const { data, error } = await supabase
         .from('complaints')
-        .select('*')
+        .select('id,tracking_id,citizen_name,category,municipality,daira,neighborhood,subject,description,status,priority,assigned_department,assigned_user_id,deadline,official_response,timeline,created_at,updated_at,attachments')
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -314,11 +306,11 @@ export const SupabaseService = {
               const mapped: EnhancedGrievance = {
                 id: trackingId,
                 trackingNumber: trackingId,
-                secretPin: row.pin_hash || '',
+                secretPin: undefined,
                 statusCode: 'NEW',
-                nin: row.citizen_nin || '',
+                nin: undefined,
                 fullName: row.citizen_name || 'مواطن',
-                phone: row.citizen_phone || '',
+                phone: '',
                 applicantDaira: row.municipality || 'الوادي',
                 applicantMunicipality: row.municipality || 'الوادي',
                 applicantNeighborhood: 'حي سكني',
@@ -346,7 +338,7 @@ export const SupabaseService = {
                   }
                 ],
                 internalNotes: [],
-                attachments: Array.isArray(row.attachments) ? row.attachments : []
+                attachments: []
               };
               onNewComplaint(mapped);
             }
