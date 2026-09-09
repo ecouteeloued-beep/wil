@@ -33,15 +33,23 @@ export const SupabaseService = {
       .select('id,name,email,role,department,phone,is_active,created_at')
       .order('created_at', { ascending: true });
     if (error || !Array.isArray(data)) return [];
-    return data.filter(row => row.is_active).map(row => ({
+    const roleTitles: Record<string, string> = {
+      wali: 'والي الولاية',
+      chef_cabinet: 'الأمين العام للولاية',
+      head_department: 'رئيس الديوان',
+      supervisor: 'رئيس خلية الإصغاء والتكفل',
+      employee: 'الموظف المكلف',
+      super_admin: 'المشرف التقني العام',
+    };
+    return data.map(row => ({
       id: row.id,
       name: row.name,
       role: row.role as UserRole,
-      roleTitle: row.role,
+      roleTitle: roleTitles[row.role] || row.role,
       email: row.email,
       phone: row.phone || '',
       department: row.department || '',
-      status: 'نشط',
+      status: row.is_active ? 'نشط' : 'معطل',
       assignedCount: 0,
       resolvedCount: 0,
       overdueCount: 0,
