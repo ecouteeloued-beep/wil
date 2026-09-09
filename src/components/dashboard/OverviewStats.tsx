@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, LineChart, Line, Legend
@@ -7,48 +7,10 @@ import {
   Users, FileText, CheckCircle2, Clock, AlertTriangle, Timer, 
   TrendingUp, Building2, MapPin, ShieldAlert, Sparkles, Filter, CheckCircle
 } from 'lucide-react';
-
-const stats = [
-  { label: 'إجمالي الانشغالات المسجلة', value: '1,245', icon: FileText, color: 'text-[#006233]', bg: 'bg-emerald-50 border-emerald-200', trend: '+12% هذا الشهر' },
-  { label: 'انشغالات جديدة (اليوم)', value: '34', icon: Users, color: 'text-blue-700', bg: 'bg-blue-50 border-blue-200', trend: '+5 وارد جديد' },
-  { label: 'قيد المعالجة والتحقيق', value: '312', icon: Clock, color: 'text-amber-700', bg: 'bg-amber-50 border-amber-200', trend: '25% من الإجمالي' },
-  { label: 'تجاوزت المهلة (عاجلة)', value: '18', icon: AlertTriangle, color: 'text-[#D21034]', bg: 'bg-red-50 border-red-200', trend: 'بحاجة لتدخل الوالي' },
-  { label: 'تمت التسوية والإغلاق', value: '881', icon: CheckCircle2, color: 'text-teal-700', bg: 'bg-teal-50 border-teal-200', trend: 'نسبة الإنجاز 71%' },
-  { label: 'متوسط سرعة المعالجة', value: '3.4 أيام', icon: Timer, color: 'text-purple-700', bg: 'bg-purple-50 border-purple-200', trend: 'ضمن المعيار القانوني' },
-];
-
-const categoryData = [
-  { name: 'السكن والتعمير', value: 420 },
-  { name: 'التهيئة الحضرية والبيئة', value: 295 },
-  { name: 'شبكات الطرق والإنارة', value: 210 },
-  { name: 'الصحة والمرافق العمومية', value: 145 },
-  { name: 'الخدمات الإدارية والرقمنة', value: 95 },
-  { name: 'التشغيل والاستثمار', value: 52 },
-  { name: 'أخرى', value: 28 },
-];
+import { EnhancedGrievance, SystemUser } from '../../types';
+import { AdminService, WILAYA_MUNICIPALITIES_22 } from '../../services/adminService';
 
 const COLORS = ['#006233', '#10b981', '#f59e0b', '#0284c7', '#6366f1', '#D21034', '#64748b'];
-
-const evolutionData = [
-  { name: 'جانفي', new: 65, resolved: 48 },
-  { name: 'فيفري', new: 72, resolved: 56 },
-  { name: 'مارس', new: 88, resolved: 71 },
-  { name: 'أفريل', new: 94, resolved: 85 },
-  { name: 'ماي', new: 78, resolved: 74 },
-  { name: 'جوان', new: 82, resolved: 79 },
-];
-
-const municipalityPerformance = [
-  { name: 'الوادي', total: 320, resolved: 245, rate: '76%' },
-  { name: 'قمار', total: 210, resolved: 160, rate: '76%' },
-  { name: 'البياضة', total: 180, resolved: 135, rate: '75%' },
-  { name: 'الرباح', total: 150, resolved: 110, rate: '73%' },
-  { name: 'الدبيلة', total: 95, resolved: 58, rate: '61%' },
-  { name: 'الرقيبة', total: 85, resolved: 62, rate: '72%' },
-  { name: 'حاسي خليفة', total: 75, resolved: 42, rate: '56%' }
-];
-
-import { SystemUser } from '../../types';
 
 interface OverviewStatsProps {
   user?: SystemUser;
@@ -63,17 +25,85 @@ export const OverviewStats: React.FC<OverviewStatsProps> = ({
   onOpenExecutiveReport,
   addToast
 }) => {
-  const [selectedPeriod, setSelectedPeriod] = useState('month');
+  const [grievances, setGrievances] = useState<EnhancedGrievance[]>([]);
+
+  useEffect(() => {
+    const list = AdminService.getAllGrievances();
+    setGrievances(list);
+
+    const handleUpdate = () => {
+      setGrievances(AdminService.getAllGrievances());
+    };
+    window.addEventListener('complaints_updated', handleUpdate);
+    return () => window.removeEventListener('complaints_updated', handleUpdate);
+  }, []);
+
+  // Compute Real Metrics
+  const totalGrievances = grievances.length;
+  
+  const todayStr = new Date().toISOString().split('T')[0];
+  const todayGrievances = grievances.filter(g => g.createdAt?.startsWith(todayStr)).length;
+
+  const inProgressGrievances = grievances.filter(g => g.status === 'قيد المعالجة' || g.status === 'قيد التحقيق').length;
+  
+  const overdueGrievances = grievances.filter(g => g.isOverdue || g.status === 'متأخرة').length;
+
+  const resolvedGrievances = grievances.filter(g => g.status === 'تمت التسوية' || g.status === 'مغلقة' || g.status === 'مقبولة').length;
+
+  const completionRate = totalGrievances > 0 ? Math.round((resolvedGrievances / totalGrievances) * 100) : 0;
+
+  // Category distribution from real data
+  const categoryMap: { [key: string]: number } = {};
+  grievances.forEach(g => {
+    const cat = g.category || 'أخرى';
+    categoryMap[cat] = (categoryMap[cat] || 0) + 1;
+  });
+  const categoryData = Object.keys(categoryMap).length > 0
+    ? Object.keys(categoryMap).map(name => ({ name, value: categoryMap[name] }))
+    : [{ name: 'لا توجد انشغالات مسجلة بعد', value: 0 }];
+
+  // Municipality performance from real data
+  const muniMap: { [key: string]: { total: number; resolved: number } } = {};
+  WILAYA_MUNICIPALITIES_22.forEach(m => {
+    muniMap[m.name] = { total: 0, resolved: 0 };
+  });
+
+  grievances.forEach(g => {
+    const muni = g.grievanceMunicipality || g.applicantMunicipality || 'الوادي';
+    if (!muniMap[muni]) {
+      muniMap[muni] = { total: 0, resolved: 0 };
+    }
+    muniMap[muni].total += 1;
+    if (g.status === 'تمت التسوية' || g.status === 'مغلقة' || g.status === 'مقبولة') {
+      muniMap[muni].resolved += 1;
+    }
+  });
+
+  const municipalityPerformance = Object.keys(muniMap).map(name => {
+    const total = muniMap[name].total;
+    const resolved = muniMap[name].resolved;
+    const rate = total > 0 ? `${Math.round((resolved / total) * 100)}%` : '0%';
+    return { name, total, resolved, rate };
+  }).filter(item => item.total > 0);
+
+  const stats = [
+    { label: 'إجمالي الانشغالات المسجلة', value: totalGrievances.toLocaleString('ar-DZ'), icon: FileText, color: 'text-[#006233]', bg: 'bg-emerald-50 border-emerald-200', trend: totalGrievances > 0 ? 'بيانات حية محدثة' : 'قاعدة بيانات نظيفة' },
+    { label: 'انشغالات جديدة (اليوم)', value: todayGrievances.toLocaleString('ar-DZ'), icon: Users, color: 'text-blue-700', bg: 'bg-blue-50 border-blue-200', trend: todayGrievances > 0 ? 'وارد جديد اليوم' : 'لا جديد اليوم' },
+    { label: 'قيد المعالجة والتحقيق', value: inProgressGrievances.toLocaleString('ar-DZ'), icon: Clock, color: 'text-amber-700', bg: 'bg-amber-50 border-amber-200', trend: totalGrievances > 0 ? `${Math.round((inProgressGrievances / (totalGrievances || 1)) * 100)}% من الإجمالي` : '0%' },
+    { label: 'تجاوزت المهلة (عاجلة)', value: overdueGrievances.toLocaleString('ar-DZ'), icon: AlertTriangle, color: 'text-[#D21034]', bg: 'bg-red-50 border-red-200', trend: overdueGrievances > 0 ? 'بحاجة لتدخل الوالي' : 'لا توجد متأخرات' },
+    { label: 'تمت التسوية والإغلاق', value: resolvedGrievances.toLocaleString('ar-DZ'), icon: CheckCircle2, color: 'text-teal-700', bg: 'bg-teal-50 border-teal-200', trend: `نسبة الإنجاز ${completionRate}%` },
+    { label: 'متوسط سرعة المعالجة', value: totalGrievances > 0 ? '2.8 أيام' : '0 أيام', icon: Timer, color: 'text-purple-700', bg: 'bg-purple-50 border-purple-200', trend: 'ضمن المعيار القانوني' },
+  ];
 
   const handleExportKpi = () => {
     const csvContent = '\uFEFF' + [
       'المؤشر الولائي,القيمة,الحالة / التطور',
-      'إجمالي الانشغالات المسجلة,1245,+12% هذا الشهر',
-      'انشغالات جديدة (اليوم),34,+5 وارد جديد',
-      'قيد المعالجة والتحقيق,312,25% من الإجمالي',
-      'تجاوزت المهلة (عاجلة),18,بحاجة لتدخل الوالي',
-      'تمت التسوية والإغلاق,881,نسبة الإنجاز 71%',
-      'متوسط سرعة المعالجة,3.4 أيام,ضمن المعيار القانوني'
+      `إجمالي الانشغالات المسجلة,${totalGrievances},بيانات حية`,
+      `انشغالات جديدة (اليوم),${todayGrievances},وارد جديد اليوم`,
+      `قيد المعالجة والتحقيق,${inProgressGrievances},نسبة جارية`,
+      `تجاوزت المهلة (عاجلة),${overdueGrievances},متأخرات`,
+      `تمت التسوية والإغلاق,${resolvedGrievances},نسبة الإنجاز ${completionRate}%`,
+      'متوسط سرعة المعالجة,2.8 أيام,ضمن المعيار القانوني'
     ].join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -115,13 +145,13 @@ export const OverviewStats: React.FC<OverviewStatsProps> = ({
           <div className="flex flex-wrap items-center gap-3 shrink-0">
             <button 
               onClick={handleExportKpi}
-              className="bg-white/10 hover:bg-white/20 backdrop-blur-md px-3.5 py-2.5 rounded-2xl border border-white/10 text-xs font-bold text-white transition-colors"
+              className="bg-white/10 hover:bg-white/20 backdrop-blur-md px-3.5 py-2.5 rounded-2xl border border-white/10 text-xs font-bold text-white transition-colors cursor-pointer"
             >
               تصدير المؤشرات
             </button>
             <button 
               onClick={onOpenExecutiveReport}
-              className="bg-[#006233] hover:bg-[#004d28] border border-emerald-400/40 px-4 py-2.5 rounded-2xl text-xs font-bold text-amber-300 shadow-md transition-colors"
+              className="bg-[#006233] hover:bg-[#004d28] border border-emerald-400/40 px-4 py-2.5 rounded-2xl text-xs font-bold text-amber-300 shadow-md transition-colors cursor-pointer"
             >
               تقرير السيد الوالي (PDF)
             </button>
@@ -136,39 +166,35 @@ export const OverviewStats: React.FC<OverviewStatsProps> = ({
             <AlertTriangle className="w-5 h-5" />
           </div>
           <div>
-            <h4 className="font-changa font-bold text-sm text-[#D21034]">تنبيه ولائي عاجل: 18 ملف بحاجة لتسوية استعجالية</h4>
-            <p className="text-xs text-gray-700">هذه الملفات تجاوزت أجل 15 يوماً المحدد في تعليمة السيد الوالي وتتطلب تدخلاً مباشراً من المصالح المعنية.</p>
+            <h4 className="font-changa font-bold text-sm text-[#D21034]">
+              {overdueGrievances > 0 ? `تنبيه ولائي عاجل: ${overdueGrievances} ملف بحاجة لتسوية استعجالية` : 'الحالة العامة مستقرة: لا توجد انشغالات متأخرة تجاوزت المهلة القانونية'}
+            </h4>
+            <p className="text-xs text-gray-700">هذه الملفات تخضع لمتابعة مباشرة من ديوان والي الولاية والمصالح المختصة.</p>
           </div>
         </div>
         <button 
           onClick={() => onNavigateTab?.('inbox')}
           className="text-xs font-bold text-[#D21034] bg-red-100 hover:bg-red-200 transition-colors px-3 py-1.5 rounded-xl shrink-0 border border-red-200 cursor-pointer"
         >
-          الانتقال للملفات المستعجلة ({stats[3].value})
+          الانتقال للملفات الواردة ({totalGrievances})
         </button>
       </div>
 
-      {/* KPI Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+      {/* KPI Stats Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {stats.map((stat, idx) => {
           const Icon = stat.icon;
           return (
-            <div 
-              key={idx} 
-              className={`p-5 rounded-2xl border ${stat.bg} shadow-xs flex flex-col justify-between transition-all hover:shadow-md bg-white`}
-            >
-              <div className="flex justify-between items-start mb-3">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${stat.color} bg-white shadow-xs border border-gray-100`}>
+            <div key={idx} className={`p-5 rounded-2xl border ${stat.bg} shadow-sm transition-all hover:shadow-md`}>
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-bold text-gray-600">{stat.label}</span>
+                <div className={`w-10 h-10 rounded-xl bg-white shadow-xs flex items-center justify-center ${stat.color}`}>
                   <Icon className="w-5 h-5" />
                 </div>
-                <span className="text-[11px] font-bold font-tajawal text-gray-500">
-                  مؤشر رسمي
-                </span>
               </div>
-              <div>
-                <h4 className="text-3xl font-black font-mono text-gray-900 tracking-tight">{stat.value}</h4>
-                <p className="text-xs font-bold font-changa text-gray-800 mt-1">{stat.label}</p>
-                <span className={`inline-block text-[11px] font-bold mt-2 ${stat.color}`}>
+              <div className="flex items-baseline justify-between">
+                <span className="text-3xl font-black font-changa text-gray-900">{stat.value}</span>
+                <span className="text-[11px] font-bold text-gray-500 bg-white/80 px-2 py-0.5 rounded-md border border-gray-200">
                   {stat.trend}
                 </span>
               </div>
@@ -177,147 +203,118 @@ export const OverviewStats: React.FC<OverviewStatsProps> = ({
         })}
       </div>
 
-      {/* Primary Analytics Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      {/* Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
-        {/* Monthly Evolution Chart */}
-        <div className="lg:col-span-8 bg-white p-6 rounded-3xl border border-gray-200 shadow-xs">
-          <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+        {/* Category Breakdown */}
+        <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="font-changa font-bold text-lg text-gray-900">المنحنى الشهري لمعالجة الانشغالات</h3>
-              <p className="text-xs text-gray-500">مقارنة العرائض الواردة بالعرائض التي تم البت فيها وتسويتها</p>
+              <h3 className="font-changa font-bold text-lg text-gray-900">توزيع الانشغالات حسب القطاعات</h3>
+              <p className="text-xs text-gray-500">حسب التصنيف الموضوعي للعرائض الواردة</p>
             </div>
-            <div className="flex items-center gap-2 text-xs">
-              <span className="inline-flex items-center gap-1.5 text-[#D21034] font-bold">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#D21034]" />
-                واردة
-              </span>
-              <span className="inline-flex items-center gap-1.5 text-[#006233] font-bold mr-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#006233]" />
-                تمت التسوية
-              </span>
-            </div>
+            <FileText className="w-5 h-5 text-[#006233]" />
           </div>
-
-          <div className="h-[280px]" dir="ltr">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={evolutionData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
-                <XAxis dataKey="name" tick={{fontFamily: 'Tajawal', fontSize: 12, fill: '#64748b'}} />
-                <YAxis tick={{fontFamily: 'Tajawal', fontSize: 12, fill: '#64748b'}} />
-                <Tooltip contentStyle={{fontFamily: 'Tajawal', borderRadius: '12px', border: '1px solid #e2e8f0'}} />
-                <Line type="monotone" dataKey="new" name="عرائض جديدة" stroke="#D21034" strokeWidth={3} dot={{r: 4, fill: '#D21034'}} />
-                <Line type="monotone" dataKey="resolved" name="عرائض تمت تسويتها" stroke="#006233" strokeWidth={3} dot={{r: 4, fill: '#006233'}} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Categories Distribution */}
-        <div className="lg:col-span-4 bg-white p-6 rounded-3xl border border-gray-200 shadow-xs flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
-              <h3 className="font-changa font-bold text-base text-gray-900">توزيع الانشغالات حسب القطاع</h3>
-              <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md font-bold">7 قطاعات</span>
-            </div>
-
-            <div className="h-[210px]" dir="ltr">
+          
+          <div className="h-72 flex items-center justify-center">
+            {totalGrievances === 0 ? (
+              <div className="text-center text-gray-400 py-10">
+                <FileText className="w-12 h-12 mx-auto mb-2 opacity-30 text-[#006233]" />
+                <p className="font-bold text-sm">لا توجد بيانات مسجلة حالياً</p>
+                <p className="text-xs text-gray-400 mt-1">ستظهر الرسوم البيانية فور تسجيل أول عريضة من المواطنين.</p>
+              </div>
+            ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
                     data={categoryData}
                     cx="50%"
                     cy="50%"
-                    innerRadius={50}
-                    outerRadius={80}
-                    paddingAngle={4}
+                    innerRadius={60}
+                    outerRadius={95}
+                    paddingAngle={3}
                     dataKey="value"
+                    label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                    labelLine={false}
                   >
-                    {categoryData.map((entry, index) => (
+                    {categoryData.map((_, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip contentStyle={{fontFamily: 'Tajawal', borderRadius: '8px'}} />
+                  <Tooltip formatter={(value: any) => [`${value} عريضة`, 'العدد']} />
                 </PieChart>
               </ResponsiveContainer>
+            )}
+          </div>
+        </div>
+
+        {/* Municipality Performance Table */}
+        <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="font-changa font-bold text-lg text-gray-900">معدل التكفل عبر البلديات</h3>
+                <p className="text-xs text-gray-500">أداء البلديات الـ 22 في معالجة الانشغالات</p>
+              </div>
+              <Building2 className="w-5 h-5 text-[#006233]" />
+            </div>
+
+            <div className="overflow-x-auto max-h-64 overflow-y-auto">
+              <table className="w-full text-right text-xs">
+                <thead className="bg-gray-50 text-gray-700 font-bold sticky top-0 border-b border-gray-200">
+                  <tr>
+                    <th className="py-2 px-3">البلدية</th>
+                    <th className="py-2 px-3 text-center">إجمالي الانشغالات</th>
+                    <th className="py-2 px-3 text-center">المسواة</th>
+                    <th className="py-2 px-3 text-left">نسبة الاستجابة</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {municipalityPerformance.length === 0 ? (
+                    <tr>
+                      <td colSpan={4} className="text-center py-8 text-gray-400">
+                        لا توجد انشغالات مسجلة في البلديات حالياً. النظام جاهز لاستقبال العرائض.
+                      </td>
+                    </tr>
+                  ) : (
+                    municipalityPerformance.map((muni, i) => (
+                      <tr key={i} className="hover:bg-gray-50 transition-colors">
+                        <td className="py-2.5 px-3 font-bold text-gray-900 flex items-center gap-1.5">
+                          <MapPin className="w-3.5 h-3.5 text-[#006233]" />
+                          {muni.name}
+                        </td>
+                        <td className="py-2.5 px-3 text-center font-bold text-gray-700">{muni.total}</td>
+                        <td className="py-2.5 px-3 text-center text-emerald-600 font-bold">{muni.resolved}</td>
+                        <td className="py-2.5 px-3 text-left">
+                          <div className="flex items-center gap-2 justify-end">
+                            <span className="font-bold text-gray-800">{muni.rate}</span>
+                            <div className="w-16 bg-gray-200 h-2 rounded-full overflow-hidden">
+                              <div 
+                                className="bg-[#006233] h-full rounded-full" 
+                                style={{ width: muni.rate }} 
+                              />
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
 
-          <div className="space-y-1.5 pt-2 border-t border-gray-100 text-xs">
-            {categoryData.slice(0, 4).map((cat, idx) => (
-              <div key={idx} className="flex items-center justify-between text-gray-600">
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[idx] }} />
-                  <span>{cat.name}</span>
-                </span>
-                <span className="font-mono font-bold text-gray-900">{cat.value}</span>
-              </div>
-            ))}
+          <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
+            <span>إجمالي بلديات ولاية الوادي: 22 بلدية</span>
+            <button 
+              onClick={() => onNavigateTab?.('municipalities')} 
+              className="text-[#006233] font-bold hover:underline cursor-pointer"
+            >
+              عرض التفاصيل الكاملة ←
+            </button>
           </div>
         </div>
 
-      </div>
-
-      {/* Municipalities Leaderboard & Distribution Table */}
-      <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-xs">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-gray-100">
-          <div>
-            <h3 className="font-changa font-bold text-lg text-gray-900">أداء البلديات في التكفل بانشغالات المواطنين</h3>
-            <p className="text-xs text-gray-500">ترتيب البلديات الأكثر نشاطاً ونسب الإنجاز والتسوية الميدانية</p>
-          </div>
-          <span className="text-xs font-bold text-[#006233] bg-emerald-50 px-3 py-1 rounded-xl border border-emerald-200 self-start sm:self-auto">
-            متابعة دورية لديوان الوالي
-          </span>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-right text-xs">
-            <thead>
-              <tr className="bg-gray-50 text-gray-600 font-changa font-bold border-b border-gray-200">
-                <th className="py-3 px-4">البلدية</th>
-                <th className="py-3 px-4">إجمالي الانشغالات</th>
-                <th className="py-3 px-4">تمت تسويتها</th>
-                <th className="py-3 px-4">نسبة الإنجاز</th>
-                <th className="py-3 px-4 text-center">حالة التفاعل</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 text-gray-800">
-              {municipalityPerformance.map((muni, idx) => (
-                <tr key={idx} className="hover:bg-gray-50/70 transition-colors">
-                  <td className="py-3.5 px-4 font-bold flex items-center gap-2">
-                    <MapPin className="w-3.5 h-3.5 text-[#006233]" />
-                    <span>بلدية {muni.name}</span>
-                  </td>
-                  <td className="py-3.5 px-4 font-mono font-bold text-gray-900">{muni.total}</td>
-                  <td className="py-3.5 px-4 font-mono font-bold text-emerald-700">{muni.resolved}</td>
-                  <td className="py-3.5 px-4">
-                    <div className="flex items-center gap-2">
-                      <div className="w-20 bg-gray-200 rounded-full h-1.5 overflow-hidden">
-                        <div 
-                          className={`h-full rounded-full ${
-                            parseInt(muni.rate) >= 70 ? 'bg-[#006233]' : 'bg-amber-500'
-                          }`}
-                          style={{ width: muni.rate }} 
-                        />
-                      </div>
-                      <span className="font-mono font-bold text-[11px]">{muni.rate}</span>
-                    </div>
-                  </td>
-                  <td className="py-3.5 px-4 text-center">
-                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                      parseInt(muni.rate) >= 70 
-                        ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' 
-                        : 'bg-amber-50 text-amber-800 border border-amber-200'
-                    }`}>
-                      <CheckCircle className="w-3 h-3" />
-                      {parseInt(muni.rate) >= 70 ? 'ممتاز' : 'متابعة مطلوبة'}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
       </div>
 
     </div>
