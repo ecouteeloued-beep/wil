@@ -148,6 +148,7 @@ export const UsersView: React.FC<UsersViewProps> = ({ user, addToast }) => {
         department: formData.department,
         role: formData.role,
         isActive: editingUser.status === 'نشط',
+        permissions: formData.permissions,
       });
       if (!remoteResult.success) {
         addToast?.({ type: 'error', title: 'تعذر حفظ التعديل', message: remoteResult.error || 'فشل تحديث الحساب في Supabase.' });
