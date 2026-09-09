@@ -3,81 +3,72 @@
 **Date:** 2026-09-09  
 **Repository:** `nadjimlab/wil`  
 **Branch:** `security/foundation-20260909`  
-**Safety-point commit:** `45a57474baf6f4c8a82bb33005f7da50ccfd3111`
+**Commit:** `c5b463f`  
+**Supabase project inspected:** `Wil` (`tprybrdeipnhvcwjuwxz`)
 
 ## Completed
 
-Implemented the first security-foundation slice on a dedicated branch without touching Production:
+Implemented and locally verified the security-foundation slice on a dedicated branch. The branch removes localStorage-based privileged session state, adds Supabase Auth session/profile validation, replaces the client complaint upsert path with an insert-only RPC contract, narrows complaint projections, removes sensitive realtime mapping, and adds a rollback-documented migration.
 
-- Added `src/services/authService.ts` as the single client-side Supabase Auth session/profile adapter.
-- Removed the App and admin-login writes to `wilaya_eloued_current_session_user`.
-- Removed the App's local admin-session restoration path.
-- Added Supabase Auth bootstrap, `onAuthStateChange`, active-profile validation, role validation, and Supabase sign-out.
-- Disabled legacy `AdminService` local authentication helpers so they cannot grant privileged access.
-- Replaced client-side complaint `upsert` with a planned insert-only `submit_complaint(jsonb)` RPC call.
-- Replaced the broad complaint query with an explicit column projection.
-- Removed NIN, phone, and PIN/hash mapping from the realtime complaint payload.
-- Removed local complaint persistence from `GrievanceService`; production submission now fails closed when Supabase is unavailable.
-- Added `supabase/migrations/20260909233000_secure_public_complaint_submission.sql` containing additive submission and scoped transition RPCs with rollback comments.
-- Preserved citizen-side attachment previews in memory only; persistent attachment storage remains blocked until private Storage policies are implemented.
+A read-only inspection of the actual Supabase project was also completed. The project is active and healthy. The observed non-sensitive baseline was six Auth users, six public staff profiles, one complaint, zero internal notes, and zero audit log rows. No storage buckets were returned by the inspected storage catalog query.
 
 ## Fixed
 
-The following verified code-level issues were addressed on this branch:
+The following changes are committed in `c5b463f`:
 
-- Browser-local admin state is no longer used by the main application as proof of authorization.
-- Login success no longer serializes the authenticated staff profile to localStorage.
-- Public complaint submission no longer calls `.upsert()` from the client.
-- Complaint cloud reads no longer use `select('*')` in `SupabaseService.fetchComplaints()`.
-- Realtime mapping no longer copies `row.pin_hash`, `row.citizen_nin`, or `row.citizen_phone` into the browser.
-- Local complaint writes are no longer treated as a production source of truth.
+- Supabase Auth is the only active application-level privileged session authority.
+- Admin login no longer serializes a user profile into localStorage.
+- Complaint submission calls `submit_complaint(jsonb)` rather than client-side `upsert`.
+- Complaint reads use explicit fields rather than `select('*')`.
+- Realtime mapping no longer copies phone, NIN, or PIN/hash fields.
+- Local complaint persistence is removed from `GrievanceService` for the cloud path.
+- A versioned migration defines additive submission and scoped transition RPCs.
 
 ## Tested
 
 | Check | Result |
 |---|---|
-| `npm run lint` (`tsc --noEmit`) | Passed after implementation |
-| `npm run build` | Passed after implementation |
+| `npm run lint` | Passed |
+| `npm run build` | Passed |
 | `git diff --check` | Passed |
-| Privileged local-auth scan | No active local auth reads/writes found in application paths after cleanup |
-| Broad complaint read/upsert scan | No `select('*')` or client complaint `upsert` found in the changed service/migration paths |
-| Production database inspection | Not performed; no Supabase project connector is configured in this sandbox |
-| Migration execution | Not performed |
-| Staging smoke test | Not performed |
-| Production deployment | Not performed |
+| Supabase deployed policy inventory | Completed read-only |
+| Supabase function inventory | Completed read-only |
+| Supabase index/trigger/realtime inventory | Completed read-only |
+| Storage bucket inventory | No buckets returned |
+| Vercel linked-project inventory | No project linked to `nadjimlab/wil` |
+| Production backup/restore | Not available through configured tools |
+| Migration execution | Not executed |
+| Staging test | Not executed; no staging project discovered |
+| Production deployment | Not executed |
+
+## Actual production blockers
+
+1. **Backup gate is not satisfied.** The available Supabase connector exposes project inspection and migration execution, but no backup/restore operation. The protocol requires a restorable safety point before a production-affecting database change.
+2. **Staging is not available.** Supabase project discovery returned one active project and no separate staging project.
+3. **Vercel is not linked to this repository.** The configured Vercel team contains only the unrelated `souf360` project linked to `ouedna-web`. No `wil` deployment target exists.
+4. **The deployed RLS state needs further remediation.** The inspection found duplicate permissive complaint INSERT policies, broad direct UPDATE policy behavior, and `public.complaints` in the `supabase_realtime` publication.
+5. **The new frontend expects an RPC that is not yet installed.** Deploying the branch before applying and testing the migration would break real complaint submission.
+6. **Storage is unconfigured or not exposed through the inspected catalog.** Attachment persistence cannot be safely enabled without a private bucket and policies.
 
 ## Database changes
 
-No database changes were executed. The new migration is a repository artifact only. It must be applied first in an isolated staging project after a deployed-state inventory and backup. The application now expects the `submit_complaint` RPC for real cloud submission, so deployment must be coordinated with migration application; the current production database must not receive the new frontend build before that RPC is installed and tested.
+None were executed. The production database remains unchanged. This was required because no restorable backup or staging environment was available. The migration remains a repository artifact and must be applied in staging first, then Production only after backup and role/RLS tests pass.
 
-## Security changes
+## Deployment status
 
-The authentication and public-write surfaces improved. The following remain open:
-
-- `AdminService` still contains legacy local operational repositories used by dashboard compatibility paths.
-- The actual deployed RLS policy set is still unknown and must be exported before policy cleanup.
-- Plaintext `citizen_phone` and `citizen_nin` columns remain in the schema and existing data model; new RPC writes do not populate them.
-- Storage bucket and object policies remain unverified; attachments are not durably uploaded by the new path.
-- Public tracking rate limiting and anti-enumeration controls remain unverified server-side.
-- The transition RPC is planned but not deployed or tested against real JWTs.
-- Realtime publication membership and authorization remain unverified in Supabase.
-- Dashboard reads, workflow mutations, audit enforcement, health checks, monitoring, and disaster recovery remain open.
+The branch was pushed to GitHub for review. It was not merged into `main` and was not deployed to Vercel. No Vercel deployment was created because there is no linked project or verified environment configuration for this repository.
 
 ## Remaining
 
-1. Configure or authorize a Supabase connector, then perform a read-only deployed-state inventory.
-2. Create and verify a restorable backup before any production-affecting SQL.
-3. Apply and test the new migration in staging, including RPC grants and rollback.
-4. Consolidate effective RLS policies and add real-JWT role regression tests.
-5. Replace remaining dashboard local repositories and direct mutation paths with scoped RPCs.
-6. Implement private Storage and signed attachment URLs.
-7. Add server-side rate limiting, health checks, monitoring, and disaster recovery.
-8. Run staging smoke tests and only then assess production promotion.
+- Provision or identify a restorable backup mechanism.
+- Create a separate Supabase staging project or approved isolated clone.
+- Create/link a Vercel project for `nadjimlab/wil` with verified staging and production environment variables.
+- Refactor remaining direct complaint mutations before removing broad UPDATE policies.
+- Apply and test the migration in staging.
+- Consolidate duplicate INSERT policies and replace direct UPDATE with transition/assignment RPCs.
+- Implement private Storage and attachment policies.
+- Add server-side rate limiting, RLS JWT regression tests, smoke tests, health checks, monitoring, and disaster recovery.
 
-## Next priority
+## Final status
 
-**P0:** establish the actual Supabase deployed-state inventory and staging project. Do not deploy this branch until the migration exists in staging and the security/RLS test matrix passes.
-
-## Release status
-
-**Implemented on branch; not verified in staging or Production.** Build and typecheck pass locally. Production deployment is intentionally blocked because no Supabase backup, deployed-state inventory, migration execution, or production smoke verification has occurred.
+**Code corrected on branch and locally verified. Not deployed. Production deployment is blocked for safety and would be unsafe until the backup, staging, migration, RLS, Storage, and Vercel gates are satisfied.**
