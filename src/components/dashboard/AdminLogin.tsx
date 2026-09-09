@@ -205,7 +205,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onCancel }) => 
                     <p className="text-xs text-gray-400 mt-0.5">الدخول الفوري المباشر بصلاحيات المنصب</p>
                   </div>
                   <span className="text-[11px] font-mono bg-white/10 text-emerald-300 px-2.5 py-1 rounded-md border border-white/10">
-                    4 مناصب مفوضة
+                    {SEED_USERS.length} مناصب وهيئات معتمدة
                   </span>
                 </div>
 

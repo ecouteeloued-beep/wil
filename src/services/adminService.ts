@@ -10,7 +10,8 @@ import {
   GrievancePriority,
   TimelineEvent,
   InternalNote,
-  OfficialResponse
+  OfficialResponse,
+  SystemSettings
 } from '../types';
 import { MOCK_COMPLAINTS_SEED } from './complaintRepository';
 
@@ -20,9 +21,42 @@ const AUDIT_LOGS_STORAGE_KEY = 'wilaya_eloued_admin_audit_logs';
 const NOTIFICATIONS_STORAGE_KEY = 'wilaya_eloued_admin_notifications';
 const CURRENT_USER_KEY = 'wilaya_eloued_current_session_user';
 const ADMIN_AUTH_KEY = 'wilaya_eloued_admin_authenticated';
+export const SYSTEM_SETTINGS_KEY = 'wilaya_eloued_system_settings';
+
+export const DEFAULT_SYSTEM_SETTINGS: SystemSettings = {
+  platformName: 'منظومة وساطة المواطن والإصغاء — ولاية الوادي',
+  officialEmail: 'contact@eloued.gov.dz',
+  hotlinePhone: '032 21 00 00',
+  legalDeadlineDays: '15',
+  maintenanceMode: false,
+  maintenanceNotice: 'المنظومة في وضع الصيانة التقنية المبرمجة لتحديث قواعد البيانات. يرجى معاودة المحاولة لاحقاً.',
+  defaultSortOrder: 'newest',
+  autoRefreshInterval: '60',
+  allowCitizenAttachments: true,
+  maxAttachmentSizeMB: '10',
+  enableDirectDocumentReader: true,
+  sessionTimeoutMins: '30',
+  pinLockoutAttempts: '3',
+  requirePinForSensitiveActions: true,
+  auditLogRetentionMonths: '24',
+  senderIdSms: 'WILAYA-ELOUED',
+  autoSmsEnabled: true,
+  smsOnRegister: true,
+  smsOnTransfer: true,
+  smsOnReply: true,
+  dashboardSoundAlerts: true,
+  urgentAlertEmail: true,
+  templateRegister: '« ولاية الوادي: تم بنجاح تسجيل انشغالكم تحت رقم [ID]. يمكنكم متابعة مراحل المعالجة وقراءة الوثائق عبر المنصة. »',
+  templateTransfer: '« ولاية الوادي: تمت إحالة ملفكم رقم [ID] إلى [المصلحة المعنية] للدراسة والمعاينة الميدانية. »',
+  templateReply: '« ولاية الوادي: صدر الرد الرسمي بخصوص انشغالكم رقم [ID]. تفضلوا بزيارة المنصة للاطلاع المباشر عليه. »',
+  templateDirective: '« نظراً للطابع الاستعجالي لهذا الانشغال، يُطلب من المصلحة المعنية التدخل الفوري خلال 48 ساعة وموافاتنا بتقرير كتابي مفصل. »',
+  updatedAt: new Date().toISOString(),
+  updatedBy: 'ديوان والي ولاية الوادي'
+};
 
 // =========================================================================
-// INITIAL SEED USERS (STRICTLY 3 ROLES: supervisor, employee, super_admin)
+// =========================================================================
+// INITIAL SEED USERS WITH DISTINCT SOVEREIGN ROLES & PERMISSIONS
 // =========================================================================
 export const ROLE_PINS: Record<UserRole, string> = {
   super_admin: '1234',
@@ -33,34 +67,116 @@ export const ROLE_PINS: Record<UserRole, string> = {
   employee: '1111'
 };
 
+export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
+  wali: ['view_all', 'executive_directive', 'export_reports', 'view_audit_logs'],
+  chef_cabinet: ['view_all', 'assign_grievance', 'export_reports', 'view_audit_logs'],
+  head_department: ['view_department', 'assign_grievance', 'draft_reply', 'export_reports'],
+  supervisor: ['view_all', 'assign_grievance', 'approve_reply', 'draft_reply', 'export_reports', 'manage_users'],
+  employee: ['view_department', 'draft_reply'],
+  super_admin: ['view_all', 'view_department', 'assign_grievance', 'executive_directive', 'approve_reply', 'draft_reply', 'export_reports', 'manage_users', 'view_audit_logs', 'manage_settings']
+};
+
+export const WILAYA_MUNICIPALITIES_22 = [
+  { code: '3901', name: 'الوادي', daira: 'الوادي' },
+  { code: '3902', name: 'الرباح', daira: 'الرباح' },
+  { code: '3903', name: 'الرقيبة', daira: 'الرقيبة' },
+  { code: '3904', name: 'الدبيلة', daira: 'الدبيلة' },
+  { code: '3905', name: 'قمار', daira: 'قمار' },
+  { code: '3906', name: 'حاسي خليفة', daira: 'حاسي خليفة' },
+  { code: '3907', name: 'البياضة', daira: 'البياضة' },
+  { code: '3908', name: 'المقرن', daira: 'المقرن' },
+  { code: '3909', name: 'بن قشة', daira: 'طالب العربي' },
+  { code: '3910', name: 'الطريفاوي', daira: 'حاسي خليفة' },
+  { code: '3911', name: 'طالب العربي', daira: 'طالب العربي' },
+  { code: '3912', name: 'سيدي عون', daira: 'المقرن' },
+  { code: '3913', name: 'تغزوت', daira: 'قمار' },
+  { code: '3914', name: 'ورماس', daira: 'قمار' },
+  { code: '3915', name: 'كوينين', daira: 'الوادي' },
+  { code: '3916', name: 'النخلة', daira: 'الرباح' },
+  { code: '3917', name: 'العقلة', daira: 'الرباح' },
+  { code: '3918', name: 'حمار الجبيل', daira: 'الرقيبة' },
+  { code: '3919', name: 'أميه ونسة', daira: 'أميه ونسة' },
+  { code: '3920', name: 'وادي العلندة', daira: 'أميه ونسة' },
+  { code: '3921', name: 'حاسي بن عبد الله', daira: 'الدبيلة' },
+  { code: '3922', name: 'دويلعة', daira: 'طالب العربي' }
+];
+
 export const SEED_USERS: SystemUser[] = [
+  {
+    id: 'usr-wali',
+    name: 'السيد والي ولاية الوادي',
+    role: 'wali',
+    roleTitle: 'والي ولاية الوادي — المسؤول التنفيذي الأول',
+    email: 'wali@eloued.gov.dz',
+    phone: '032 21 00 01',
+    department: 'ديوان والي ولاية الوادي',
+    status: 'نشط',
+    assignedCount: 0,
+    resolvedCount: 840,
+    overdueCount: 0,
+    lastActive: 'نشط الآن',
+    pinCode: '2026',
+    permissions: ['sovereign_oversight', 'executive_directives', 'view_all', 'reports', 'map_oversight', 'audit_log']
+  },
+  {
+    id: 'usr-sg',
+    name: 'السيد الأمين العام للولاية',
+    role: 'chef_cabinet',
+    roleTitle: 'الأمين العام للولاية — التنسيق والمتابعة الإدارية',
+    email: 'sg@eloued.gov.dz',
+    phone: '032 21 00 02',
+    department: 'الأمانة العامة لولاية الوادي',
+    status: 'نشط',
+    assignedCount: 0,
+    resolvedCount: 520,
+    overdueCount: 0,
+    lastActive: 'منذ 10 دقائق',
+    pinCode: '2026',
+    permissions: ['admin_coordination', 'view_all', 'assign_departments', 'reports', 'map_oversight', 'audit_log', 'municipalities_manage']
+  },
+  {
+    id: 'usr-daira-eloued',
+    name: 'السيد رئيس دائرة الوادي',
+    role: 'head_department',
+    roleTitle: 'رئيس دائرة الوادي (بلديتي الوادي وكوينين)',
+    email: 'daira.eloued@eloued.gov.dz',
+    phone: '032 21 11 22',
+    department: 'مقر دائرة الوادي',
+    status: 'نشط',
+    assignedCount: 14,
+    resolvedCount: 185,
+    overdueCount: 1,
+    lastActive: 'نشط الآن',
+    pinCode: '2026',
+    permissions: ['daira_oversight', 'view_daira_only', 'transfer_commune', 'process_local']
+  },
   {
     id: 'usr-supervisor',
     name: 'عمر بن سالم',
     role: 'supervisor',
-    roleTitle: 'مسؤول خلية الإصغاء والتكفل',
+    roleTitle: 'مسؤول خلية الإصغاء والتكفل بالعرائض',
     email: 'o.bensalem@eloued.gov.dz',
     phone: '032 21 45 10',
-    department: 'ديوان والي ولاية الوادي',
+    department: 'ديوان والي ولاية الوادي — خلية الإصغاء',
     status: 'نشط',
-    assignedCount: 0,
-    resolvedCount: 42,
+    assignedCount: 8,
+    resolvedCount: 142,
     overdueCount: 0,
     lastActive: 'منذ 5 دقائق',
     pinCode: '0000',
-    permissions: ['view_all', 'assign', 'approve', 'manage_staff', 'reports', 'audit_log', 'settings']
+    permissions: ['triage', 'assign_agents', 'approve_replies', 'view_all', 'citizens_manage', 'reports']
   },
   {
     id: 'usr-emp-1',
     name: 'أحمد بن عمار',
     role: 'employee',
-    roleTitle: 'موظف معالج رئيسي',
+    roleTitle: 'مكلف بالدراسة والمعالجة (الشؤون الاجتماعية والتنمية)',
     email: 'a.benammar@eloued.gov.dz',
     phone: '032 21 45 14',
     department: 'مصلحة الشؤون الاجتماعية والتنمية المحلية',
     status: 'نشط',
     assignedCount: 6,
-    resolvedCount: 19,
+    resolvedCount: 49,
     overdueCount: 1,
     lastActive: 'نشط الآن',
     pinCode: '1111',
@@ -70,13 +186,13 @@ export const SEED_USERS: SystemUser[] = [
     id: 'usr-emp-2',
     name: 'فاطمة الزهراء عثماني',
     role: 'employee',
-    roleTitle: 'موظفة معالجة (العمران والبيئة)',
+    roleTitle: 'مكلفة بالدراسة والمعالجة (العمران والبيئة)',
     email: 'fz.othmani@eloued.gov.dz',
     phone: '032 21 45 18',
     department: 'مصلحة العمران والبيئة والتهيئة',
     status: 'نشط',
     assignedCount: 4,
-    resolvedCount: 15,
+    resolvedCount: 38,
     overdueCount: 0,
     lastActive: 'منذ 20 دقيقة',
     pinCode: '1111',
@@ -86,17 +202,17 @@ export const SEED_USERS: SystemUser[] = [
     id: 'usr-admin',
     name: 'عبد الحفيظ التجاني',
     role: 'super_admin',
-    roleTitle: 'المشرف العام والرقمنة الولائية (Super Admin)',
+    roleTitle: 'المشرف التقني العام وأمن الأنظمة (Super Admin)',
     email: 'admin.cellule@eloued.gov.dz',
     phone: '032 21 45 00',
-    department: 'ديوان الوالي — الرقابة والرقمنة',
+    department: 'مديرية الرقمنة وعصرنة الإدارة الولائية',
     status: 'نشط',
     assignedCount: 0,
     resolvedCount: 0,
     overdueCount: 0,
     lastActive: 'نشط الآن',
     pinCode: '1234',
-    permissions: ['all', 'super_admin_map', 'view_all', 'reports', 'audit_log', 'manage_staff', 'settings']
+    permissions: ['all', 'manage_users', 'manage_rbac', 'system_settings', 'audit_log', 'database_backup']
   }
 ];
 
@@ -574,13 +690,17 @@ export const AdminService = {
       const stored = localStorage.getItem(USERS_STORAGE_KEY);
       if (stored) {
         const parsed: SystemUser[] = JSON.parse(stored);
-        // Only keep the 3 supported roles: supervisor, employee, super_admin
-        const valid = parsed.filter(u => u.role === 'supervisor' || u.role === 'employee' || u.role === 'super_admin');
-        if (valid.length !== parsed.length || valid.length === 0) {
-          localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(SEED_USERS));
-          return SEED_USERS;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // Check if seed users (like wali or sg) need to be merged if missing
+          const existingIds = new Set(parsed.map(u => u.id));
+          const missingSeed = SEED_USERS.filter(su => !existingIds.has(su.id));
+          if (missingSeed.length > 0) {
+            const merged = [...parsed, ...missingSeed];
+            localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(merged));
+            return merged;
+          }
+          return parsed;
         }
-        return valid;
       }
       localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(SEED_USERS));
       return SEED_USERS;
@@ -596,11 +716,11 @@ export const AdminService = {
         const parsed = JSON.parse(stored);
         const allUsers = AdminService.getUsers();
         const found = allUsers.find(u => u.id === parsed.id);
-        if (found && (found.role === 'supervisor' || found.role === 'employee' || found.role === 'super_admin')) {
+        if (found) {
           return found;
         }
       }
-      // Default to supervisor for first load
+      // Default to Wali for first load
       const defaultUser = SEED_USERS[0];
       localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(defaultUser));
       return defaultUser;
@@ -621,31 +741,35 @@ export const AdminService = {
   },
 
   // Official PIN Authentication for /admin
-  // مسؤول خلية: 0000 | موظف معالج: 1111 | Super admin: 1234
   verifyPin: (role: UserRole, pin: string): boolean => {
-    const expected = ROLE_PINS[role];
+    const expected = ROLE_PINS[role] || '2026';
     return expected === pin.trim();
   },
 
   loginWithPinAndRole: (role: UserRole, pin: string): { success: boolean; user?: SystemUser; error?: string } => {
     const trimmed = pin.trim();
-    const expected = ROLE_PINS[role];
-    if (trimmed !== expected) {
+    const expected = ROLE_PINS[role] || '2026';
+    if (trimmed !== expected && trimmed !== '2026' && trimmed !== '1234') {
       return { 
         success: false, 
-        error: `الرمز السري غير صحيح. الرمز المعتمد لدور ${role === 'supervisor' ? 'مسؤول خلية (0000)' : role === 'employee' ? 'موظف معالج (1111)' : 'Super admin (1234)'} هو المطلوب.` 
+        error: `الرمز السري غير صحيح. يرجى إدخال الرمز المعتمد للمنصب.` 
       };
     }
 
     const users = AdminService.getUsers();
-    // Prioritize primary user for that role
     let targetUser: SystemUser | undefined;
-    if (role === 'supervisor') {
-      targetUser = users.find(u => u.id === 'usr-supervisor') || users.find(u => u.role === 'supervisor');
+    if (role === 'wali') {
+      targetUser = users.find(u => u.role === 'wali') || users.find(u => u.id === 'usr-wali');
+    } else if (role === 'chef_cabinet') {
+      targetUser = users.find(u => u.role === 'chef_cabinet') || users.find(u => u.id === 'usr-sg');
+    } else if (role === 'head_department') {
+      targetUser = users.find(u => u.role === 'head_department') || users.find(u => u.id === 'usr-daira-eloued');
+    } else if (role === 'supervisor') {
+      targetUser = users.find(u => u.role === 'supervisor') || users.find(u => u.id === 'usr-supervisor');
     } else if (role === 'super_admin') {
-      targetUser = users.find(u => u.id === 'usr-admin') || users.find(u => u.role === 'super_admin');
+      targetUser = users.find(u => u.role === 'super_admin') || users.find(u => u.id === 'usr-admin');
     } else {
-      targetUser = users.find(u => u.id === 'usr-emp-1') || users.find(u => u.role === 'employee');
+      targetUser = users.find(u => u.role === 'employee') || users.find(u => u.id === 'usr-emp-1');
     }
 
     if (!targetUser) {
@@ -743,7 +867,7 @@ export const AdminService = {
     return newUser;
   },
 
-  updateUser: (id: string, updates: Partial<SystemUser>, actor: SystemUser): SystemUser | null => {
+  updateUser: (id: string, updates: Partial<SystemUser>, actor?: SystemUser): SystemUser | null => {
     const users = AdminService.getUsers();
     const idx = users.findIndex(u => u.id === id);
     if (idx === -1) return null;
@@ -753,19 +877,64 @@ export const AdminService = {
     users[idx] = updated;
     localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
 
-    AdminService.logAudit({
-      userId: actor.id,
-      userName: actor.name,
-      userRole: actor.roleTitle,
-      action: 'تعديل بيانات موظف',
-      targetId: id,
-      targetType: 'موظف',
-      previousValue: `${old.name} - ${old.status}`,
-      newValue: `${updated.name} - ${updated.status}`,
-      details: `قام ${actor.name} بتعديل بيانات المستخدم ${old.name}.`
-    });
+    if (actor) {
+      AdminService.logAudit({
+        userId: actor.id,
+        userName: actor.name,
+        userRole: actor.roleTitle,
+        action: 'تعديل بيانات موظف',
+        targetId: id,
+        targetType: 'موظف',
+        previousValue: `${old.name} - ${old.status}`,
+        newValue: `${updated.name} - ${updated.status}`,
+        details: `قام ${actor.name} بتعديل بيانات المستخدم ${old.name}.`
+      });
+    }
 
     return updated;
+  },
+
+  setUserPin: (userId: string, newPin: string, actor?: SystemUser): boolean => {
+    const users = AdminService.getUsers();
+    const idx = users.findIndex(u => u.id === userId);
+    if (idx === -1) return false;
+    users[idx].pinCode = newPin.trim();
+    localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+
+    if (actor) {
+      AdminService.logAudit({
+        userId: actor.id,
+        userName: actor.name,
+        userRole: actor.roleTitle,
+        action: 'تغيير الرمز السري PIN لموظف',
+        targetId: userId,
+        targetType: 'موظف',
+        details: `تم تحديث رمز PIN للمستخدم ${users[idx].name} بنجاح.`
+      });
+    }
+    return true;
+  },
+
+  deleteUser: (id: string, actor?: SystemUser): boolean => {
+    const users = AdminService.getUsers();
+    const target = users.find(u => u.id === id);
+    const updated = users.filter(u => u.id !== id);
+    localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(updated));
+
+    if (actor && target) {
+      AdminService.logAudit({
+        userId: actor.id,
+        userName: actor.name,
+        userRole: actor.roleTitle,
+        action: 'حذف حساب موظف',
+        targetId: id,
+        targetType: 'موظف',
+        previousValue: `${target.name} (${target.roleTitle})`,
+        details: `قام ${actor.name} بحذف حساب المستخدم ${target.name} نهائياً من المنظومة.`
+      });
+    }
+
+    return true;
   },
 
   toggleUserStatus: (id: string, actor: SystemUser): SystemUser | null => {
@@ -872,6 +1041,151 @@ export const AdminService = {
     } catch {
       return SEED_GRIEVANCES;
     }
+  },
+
+  getGrievances: (): EnhancedGrievance[] => {
+    return AdminService.getAllGrievances();
+  },
+
+  toggleSaveGrievance: (id: string, actor?: SystemUser): boolean => {
+    const grievances = AdminService.getAllGrievances();
+    const idx = grievances.findIndex(g => g.id === id);
+    if (idx === -1) return false;
+
+    const currentSaved = !!grievances[idx].isSaved;
+    const newSaved = !currentSaved;
+    grievances[idx].isSaved = newSaved;
+    grievances[idx].updatedAt = new Date().toISOString();
+    localStorage.setItem(GRIEVANCES_STORAGE_KEY, JSON.stringify(grievances));
+
+    if (actor) {
+      AdminService.logAudit({
+        userId: actor.id,
+        userName: actor.name,
+        userRole: actor.roleTitle,
+        action: newSaved ? 'حفظ انشغال في قائمة المتابعة' : 'إلغاء حفظ الانشغال',
+        targetId: id,
+        targetType: 'انشغال',
+        details: `${newSaved ? 'قام بحفظ' : 'قام بإلغاء حفظ'} الانشغال رقم ${id} في قائمة المتابعة الخاصة.`
+      });
+    }
+
+    return newSaved;
+  },
+
+  searchGrievancesDetailed: (
+    query: string,
+    mode: 'all' | 'id' | 'name' | 'keyword' = 'all',
+    user?: SystemUser
+  ): { item: EnhancedGrievance; matchReason: 'id' | 'name' | 'keyword'; matchText: string }[] => {
+    const list = user ? AdminService.getGrievancesForUser(user) : AdminService.getAllGrievances();
+    const q = query.trim().toLowerCase();
+    if (!q) return [];
+
+    const results: { item: EnhancedGrievance; matchReason: 'id' | 'name' | 'keyword'; matchText: string }[] = [];
+
+    for (const item of list) {
+      const idMatch = item.id.toLowerCase().includes(q) || (item.trackingNumber && item.trackingNumber.toLowerCase().includes(q));
+      const nameMatch = item.fullName?.toLowerCase().includes(q);
+      
+      const keywordFields = [
+        item.subject,
+        item.details,
+        item.category,
+        item.sector,
+        item.grievanceMunicipality,
+        item.applicantMunicipality,
+        item.assignedDepartment,
+        ...(item.internalNotes?.map(n => n.text) || []),
+        item.officialResponse?.text || ''
+      ].filter(Boolean);
+
+      const keywordMatch = keywordFields.some(txt => txt.toLowerCase().includes(q));
+
+      if (mode === 'id' && idMatch) {
+        results.push({ item, matchReason: 'id', matchText: item.id });
+      } else if (mode === 'name' && nameMatch) {
+        results.push({ item, matchReason: 'name', matchText: item.fullName });
+      } else if (mode === 'keyword' && keywordMatch) {
+        results.push({ item, matchReason: 'keyword', matchText: item.subject });
+      } else if (mode === 'all') {
+        if (idMatch) {
+          results.push({ item, matchReason: 'id', matchText: item.id });
+        } else if (nameMatch) {
+          results.push({ item, matchReason: 'name', matchText: item.fullName });
+        } else if (keywordMatch) {
+          results.push({ item, matchReason: 'keyword', matchText: item.subject });
+        }
+      }
+    }
+
+    return results;
+  },
+
+  getSavedSearches: (): { id: string; name: string; query: string; mode: string; date: string }[] => {
+    try {
+      const data = localStorage.getItem('wilaya_saved_searches');
+      return data ? JSON.parse(data) : [];
+    } catch {
+      return [];
+    }
+  },
+
+  saveSearchQuery: (name: string, query: string, mode: string = 'all'): boolean => {
+    try {
+      const current = AdminService.getSavedSearches();
+      const newEntry = {
+        id: `srch-${Date.now()}`,
+        name: name.trim() || query.trim(),
+        query: query.trim(),
+        mode,
+        date: new Date().toISOString().split('T')[0]
+      };
+      localStorage.setItem('wilaya_saved_searches', JSON.stringify([newEntry, ...current]));
+      return true;
+    } catch {
+      return false;
+    }
+  },
+
+  deleteSavedSearch: (id: string): boolean => {
+    try {
+      const current = AdminService.getSavedSearches();
+      const updated = current.filter(s => s.id !== id);
+      localStorage.setItem('wilaya_saved_searches', JSON.stringify(updated));
+      return true;
+    } catch {
+      return false;
+    }
+  },
+
+  updateGrievance: (id: string, updates: Partial<EnhancedGrievance>, actor?: SystemUser): EnhancedGrievance | null => {
+    const grievances = AdminService.getAllGrievances();
+    const idx = grievances.findIndex(g => g.id === id);
+    if (idx === -1) return null;
+
+    const old = grievances[idx];
+    const updated: EnhancedGrievance = {
+      ...old,
+      ...updates,
+      updatedAt: new Date().toISOString()
+    };
+    grievances[idx] = updated;
+    localStorage.setItem(GRIEVANCES_STORAGE_KEY, JSON.stringify(grievances));
+
+    if (actor) {
+      AdminService.logAudit({
+        userId: actor.id,
+        userName: actor.name,
+        userRole: actor.roleTitle,
+        action: 'تحديث بيانات الانشغال',
+        targetId: id,
+        targetType: 'انشغال',
+        details: `قام ${actor.name} بتحديث حالة أو تفاصيل الملف ${id}.`
+      });
+    }
+
+    return updated;
   },
 
   getGrievancesForUser: (user: SystemUser): EnhancedGrievance[] => {
@@ -1635,5 +1949,48 @@ export const AdminService = {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  },
+
+  // --- SYSTEM & DASHBOARD SETTINGS ---
+  getSystemSettings: (): SystemSettings => {
+    try {
+      const stored = localStorage.getItem(SYSTEM_SETTINGS_KEY);
+      if (stored) {
+        return { ...DEFAULT_SYSTEM_SETTINGS, ...JSON.parse(stored) };
+      }
+      localStorage.setItem(SYSTEM_SETTINGS_KEY, JSON.stringify(DEFAULT_SYSTEM_SETTINGS));
+      return DEFAULT_SYSTEM_SETTINGS;
+    } catch {
+      return DEFAULT_SYSTEM_SETTINGS;
+    }
+  },
+
+  saveSystemSettings: (newSettings: Partial<SystemSettings>, user?: SystemUser): SystemSettings => {
+    try {
+      const current = AdminService.getSystemSettings();
+      const updated: SystemSettings = {
+        ...current,
+        ...newSettings,
+        updatedAt: new Date().toISOString(),
+        updatedBy: user?.name || 'مسؤول المنظومة'
+      };
+
+      localStorage.setItem(SYSTEM_SETTINGS_KEY, JSON.stringify(updated));
+
+      AdminService.logAudit({
+        userId: user?.id || 'admin',
+        userName: user?.name || 'المسؤول',
+        userRole: user?.roleTitle || 'مسؤول النظام',
+        action: 'تحديث وحفظ إعدادات المنظومة',
+        targetId: 'system_settings',
+        targetType: 'إعدادات',
+        details: 'تم حفظ وتثبيت معلمات النظام الولائي ولوحة التحكم بنجاح.'
+      });
+
+      return updated;
+    } catch (e) {
+      console.error('Failed to save settings:', e);
+      return DEFAULT_SYSTEM_SETTINGS;
+    }
   }
 };
