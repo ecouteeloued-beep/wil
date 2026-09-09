@@ -55,7 +55,7 @@ create table if not exists public.complaints (
   assigned_department text,
   assigned_user_id uuid references public.users(id),
   deadline timestamp with time zone default (now() + interval '15 days'),
-  pin_hash text not null default '2026', -- الرمز السري للبحث والمتابعة
+  pin_hash text, -- الرمز السري للبحث والمتابعة
   attachments jsonb default '[]'::jsonb, -- المرفقات والوثائق الرسمية المرفقة
   official_response jsonb,               -- الرد الإداري الرسمي
   timeline jsonb default '[]'::jsonb,    -- السجل الزمني للإجراءات
@@ -137,39 +137,55 @@ drop policy if exists "Allow public read on municipalities" on public.municipali
 create policy "Allow public read on municipalities" on public.municipalities
   for select using (true);
 
--- 2. إرسال العرائض (متاح لجميع المواطنين بدون تسجيل دخول مسبق)
+-- 2. إرسال العرائض: الإدراج العام فقط، دون قراءة أو تعديل مباشر.
 drop policy if exists "Allow citizens to submit new complaints" on public.complaints;
 create policy "Allow citizens to submit new complaints" on public.complaints
   for insert to anon, authenticated
-  with check (tracking_id is not null and subject is not null and category is not null);
+  with check (tracking_id is not null and citizen_name is not null and phone_encrypted is not null and subject is not null and category is not null);
 
--- 3. قراءة العرائض (متاح للتتبع برقم الملف ولوحة القيادة المركزية)
-drop policy if exists "Allow viewing complaints for tracking and dashboard" on public.complaints;
-create policy "Allow viewing complaints for tracking and dashboard" on public.complaints
-  for select to anon, authenticated
-  using (true);
+-- الموظفون الموثقون فقط يمكنهم قراءة وتعديل الشكاوى.
+drop policy if exists "Allow staff to read complaints" on public.complaints;
+create policy "Allow staff to read complaints" on public.complaints
+  for select to authenticated
+  using (exists (select 1 from public.users u where u.id = auth.uid() and u.is_active = true));
 
--- 4. تحديث العرائض (تسجيل الإجراءات والردود والمزامنة)
-drop policy if exists "Allow updating complaints" on public.complaints;
-create policy "Allow updating complaints" on public.complaints
-  for update to anon, authenticated
-  using (true);
+drop policy if exists "Allow staff to update complaints" on public.complaints;
+create policy "Allow staff to update complaints" on public.complaints
+  for update to authenticated
+  using (exists (select 1 from public.users u where u.id = auth.uid() and u.is_active = true))
+  with check (exists (select 1 from public.users u where u.id = auth.uid() and u.is_active = true));
 
--- 5. الملاحظات الداخلية والتدقيق
+-- تتبع المواطن يتم عبر دالة محدودة تعيد السجل المطابق للرقم والهاتف فقط.
+create or replace function public.track_complaint(p_tracking_id text, p_phone text)
+returns setof public.complaints
+language sql
+security definer
+set search_path = public
+as $$
+  select c.* from public.complaints c
+  where upper(c.tracking_id) = upper(trim(p_tracking_id))
+    and c.phone_encrypted = trim(p_phone)
+  limit 1;
+$$;
+revoke all on function public.track_complaint(text, text) from public;
+grant execute on function public.track_complaint(text, text) to anon, authenticated;
+
+-- البيانات الداخلية لا تكون مكشوفة للزوار.
 drop policy if exists "Allow staff read/write internal notes" on public.internal_notes;
 create policy "Allow staff read/write internal notes" on public.internal_notes
-  for all to anon, authenticated
-  using (true);
+  for all to authenticated
+  using (exists (select 1 from public.users u where u.id = auth.uid() and u.is_active = true))
+  with check (exists (select 1 from public.users u where u.id = auth.uid() and u.is_active = true));
 
 drop policy if exists "Allow insert audit logs" on public.audit_logs;
-create policy "Allow insert audit logs" on public.audit_logs
-  for insert to anon, authenticated
-  with check (true);
+create policy "Allow staff to insert audit logs" on public.audit_logs
+  for insert to authenticated
+  with check (user_id = auth.uid()::text);
 
 drop policy if exists "Allow read audit logs" on public.audit_logs;
-create policy "Allow read audit logs" on public.audit_logs
-  for select to anon, authenticated
-  using (true);
+create policy "Allow staff to read audit logs" on public.audit_logs
+  for select to authenticated
+  using (exists (select 1 from public.users u where u.id = auth.uid() and u.is_active = true));
 
 -- =========================================================================
 -- بيانات أولية: بلديات ولاية الوادي الـ 22

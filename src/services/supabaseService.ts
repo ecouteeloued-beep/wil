@@ -48,7 +48,7 @@ export const SupabaseService = {
         status: complaint.status === 'قيد المعالجة' ? 'قيد المعالجة' : (complaint.status || 'جديد'),
         priority: complaint.priority === 'عاجل' ? 'عاجل' : (complaint.priority === 'متوسط' ? 'متوسط' : 'عادي'),
         deadline: complaint.dueDate || new Date(Date.now() + 15 * 86400000).toISOString(),
-        pin_hash: complaint.secretPin || '2026',
+        pin_hash: complaint.secretPin || '',
         created_at: complaint.createdAt || new Date().toISOString(),
         updated_at: complaint.updatedAt || new Date().toISOString()
       };
@@ -108,7 +108,7 @@ export const SupabaseService = {
         return {
           id: trackingId,
           trackingNumber: trackingId,
-          secretPin: row.pin_hash || '2026',
+          secretPin: row.pin_hash || '',
           statusCode,
           nin: row.national_id_encrypted || '',
           fullName: row.citizen_name || 'مواطن',
@@ -160,55 +160,46 @@ export const SupabaseService = {
 
     try {
       const cleanId = trackingId.trim().toUpperCase();
-      let query = supabase
-        .from('complaints')
-        .select('*')
-        .ilike('tracking_id', cleanId);
-
-      const { data, error } = await query.maybeSingle();
-      if (error || !data) {
+      if (!phone) return null;
+      const { data, error } = await supabase.rpc('track_complaint', {
+        p_tracking_id: cleanId,
+        p_phone: phone.trim(),
+      });
+      const row = Array.isArray(data) ? data[0] : data;
+      if (error || !row) {
         return null;
       }
 
-      // Check phone match if provided
-      if (phone) {
-        const cleanPhone = phone.trim();
-        if (data.phone_encrypted && !data.phone_encrypted.includes(cleanPhone)) {
-          // Phone mismatch
-          return null;
-        }
-      }
-
-      const statusArabic: GrievanceStatus = (data.status as GrievanceStatus) || 'جديد';
+      const statusArabic: GrievanceStatus = (row.status as GrievanceStatus) || 'جديد';
       return {
-        id: data.tracking_id || data.id,
-        trackingNumber: data.tracking_id || data.id,
-        secretPin: data.pin_hash || '2026',
-        fullName: data.citizen_name || 'مواطن',
-        nin: data.national_id_encrypted || '',
-        phone: data.phone_encrypted || '',
-        applicantDaira: data.municipality || 'الوادي',
-        applicantMunicipality: data.municipality || 'الوادي',
+        id: row.tracking_id || row.id,
+        trackingNumber: row.tracking_id || row.id,
+        secretPin: row.pin_hash || '',
+        fullName: row.citizen_name || 'مواطن',
+        nin: row.national_id_encrypted || '',
+        phone: row.phone_encrypted || '',
+        applicantDaira: row.municipality || 'الوادي',
+        applicantMunicipality: row.municipality || 'الوادي',
         applicantNeighborhood: 'حي سكني',
-        subject: data.subject || 'انشغال',
-        grievanceDaira: data.municipality || 'الوادي',
-        grievanceMunicipality: data.municipality || 'الوادي',
-        category: data.category || 'أخرى',
+        subject: row.subject || 'انشغال',
+        grievanceDaira: row.municipality || 'الوادي',
+        grievanceMunicipality: row.municipality || 'الوادي',
+        category: row.category || 'أخرى',
         sector: 'الشؤون الإدارية العامة',
-        details: data.description || '',
-        createdAt: data.created_at || new Date().toISOString(),
-        updatedAt: data.updated_at || new Date().toISOString(),
+        details: row.description || '',
+        createdAt: row.created_at || new Date().toISOString(),
+        updatedAt: row.updated_at || new Date().toISOString(),
         status: statusArabic,
-        priority: (data.priority as any) || 'عادي',
+        priority: (row.priority as any) || 'عادي',
         specialFlags: [],
-        dueDate: data.deadline || new Date().toISOString(),
+        dueDate: row.deadline || new Date().toISOString(),
         isOverdue: false,
         timeline: [
           {
             id: `t-${Date.now()}`,
-            date: (data.created_at || new Date().toISOString()).split('T')[0],
+            date: (row.created_at || new Date().toISOString()).split('T')[0],
             time: '09:00',
-            author: data.citizen_name || 'مواطن',
+            author: row.citizen_name || 'مواطن',
             authorRole: 'مواطن',
             action: 'تم تسجيل العريضة رسمياً بالمنظومة السحابية'
           }
@@ -242,7 +233,7 @@ export const SupabaseService = {
               const mapped: EnhancedGrievance = {
                 id: trackingId,
                 trackingNumber: trackingId,
-                secretPin: row.pin_hash || '2026',
+                secretPin: row.pin_hash || '',
                 statusCode: 'NEW',
                 nin: row.national_id_encrypted || '',
                 fullName: row.citizen_name || 'مواطن',
