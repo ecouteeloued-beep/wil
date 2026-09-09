@@ -11,11 +11,13 @@ import { PrivacyPolicy } from './components/PrivacyPolicy';
 import { SplashScreen } from './components/SplashScreen';
 import { ProjectVision } from './components/ProjectVision';
 import { DashboardLayout } from './components/dashboard/DashboardLayout';
-import { GrievanceCategory } from './types';
+import { AdminLogin } from './components/dashboard/AdminLogin';
+import { GrievanceCategory, SystemUser } from './types';
 
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
   const [currentView, setCurrentView] = useState<'home' | 'privacy' | 'vision' | 'admin_dashboard'>('home');
+  const [adminUser, setAdminUser] = useState<SystemUser | null>(null);
   const [formActiveTab, setFormActiveTab] = useState<'new' | 'track'>('new');
   const [selectedCategory, setSelectedCategory] = useState<GrievanceCategory>('الحالة المدنية');
 
@@ -41,12 +43,39 @@ export default function App() {
     handleScrollToForm('new');
   };
 
+  const DemoBanner = () => (
+    <div className="bg-amber-100 border-b border-amber-200 text-amber-800 text-xs sm:text-sm font-tajawal font-bold text-center py-2 px-4 shadow-sm z-[9999] relative">
+      ⚠️ نسخة تجريبية للعرض - قبل الربط بالنظام المعلوماتي وقاعدة البيانات الرسمية
+    </div>
+  );
+
   if (currentView === 'admin_dashboard') {
-    return <DashboardLayout onLogout={() => setCurrentView('home')} />;
+    if (!adminUser) {
+      return (
+        <>
+          <DemoBanner />
+          <AdminLogin 
+            onLogin={(user) => setAdminUser(user)} 
+            onCancel={() => setCurrentView('home')} 
+          />
+        </>
+      );
+    }
+
+    return (
+      <>
+        <DemoBanner />
+        <DashboardLayout 
+          user={adminUser} 
+          onLogout={() => { setAdminUser(null); setCurrentView('home'); }} 
+        />
+      </>
+    );
   }
 
   return (
     <>
+      <DemoBanner />
       <SplashScreen 
         isOpen={showSplash}
         onClose={() => setShowSplash(false)}

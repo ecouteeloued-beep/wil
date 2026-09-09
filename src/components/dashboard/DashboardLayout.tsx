@@ -11,24 +11,50 @@ import {
   X,
   User,
   Bell,
-  Search
+  Search,
+  UsersRound,
+  ShieldAlert,
+  Building2,
+  MapPin,
+  FileClock
 } from 'lucide-react';
 import { OverviewStats } from './OverviewStats';
 import { InboxView } from './InboxView';
+import { MapView } from './MapView';
+import { ReportsView } from './ReportsView';
+import { SettingsView } from './SettingsView';
+import { AuditLogView } from './AuditLogView';
+import { UsersView } from './UsersView';
+import { CitizensView } from './CitizensView';
+import { PermissionsView } from './PermissionsView';
+import { DepartmentsView } from './DepartmentsView';
+import { MunicipalitiesView } from './MunicipalitiesView';
+import { SystemUser } from '../../types';
 
-type DashboardView = 'overview' | 'inbox' | 'map' | 'reports' | 'settings';
+type DashboardView = 'overview' | 'inbox' | 'map' | 'reports' | 'users' | 'citizens' | 'permissions' | 'departments' | 'municipalities' | 'audit_log' | 'settings';
 
-export const DashboardLayout: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
+export const DashboardLayout: React.FC<{ user: SystemUser; onLogout: () => void }> = ({ user, onLogout }) => {
   const [currentView, setCurrentView] = useState<DashboardView>('overview');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const menuItems = [
+  const menuItems: { id: DashboardView; icon: any; label: string; roles?: string[] }[] = [
     { id: 'overview', icon: LayoutDashboard, label: 'الرئيسية (الإحصائيات)' },
     { id: 'inbox', icon: Inbox, label: 'صندوق الانشغالات' },
+    { id: 'citizens', icon: UsersRound, label: 'سجل المواطنين' },
     { id: 'map', icon: MapIcon, label: 'الخريطة التفاعلية' },
     { id: 'reports', icon: BarChart3, label: 'التقارير والإحصائيات' },
-    { id: 'settings', icon: Settings, label: 'الإعدادات والصلاحيات' },
+    { id: 'users', icon: ShieldAlert, label: 'إدارة المستخدمين', roles: ['super_admin'] },
+    { id: 'permissions', icon: ShieldAlert, label: 'إدارة الصلاحيات', roles: ['super_admin'] },
+    { id: 'departments', icon: Building2, label: 'الهيكل والمصالح', roles: ['super_admin', 'admin'] },
+    { id: 'municipalities', icon: MapPin, label: 'البلديات والقطاعات', roles: ['super_admin', 'admin'] },
+    { id: 'audit_log', icon: FileClock, label: 'سجل العمليات (Audit Log)', roles: ['super_admin', 'admin'] },
+    { id: 'settings', icon: Settings, label: 'إعدادات النظام', roles: ['super_admin'] },
   ];
+
+  // Filter menu based on user role
+  const visibleMenuItems = menuItems.filter(item => 
+    !item.roles || item.roles.includes(user.role) || user.role === 'wali'
+  );
 
   return (
     <div className="min-h-screen bg-gray-50 flex" dir="rtl">
@@ -68,7 +94,7 @@ export const DashboardLayout: React.FC<{ onLogout: () => void }> = ({ onLogout }
         </div>
 
         <div className="p-4 flex flex-col gap-1 flex-1 overflow-y-auto">
-          {menuItems.map((item) => {
+          {visibleMenuItems.map((item) => {
             const Icon = item.icon;
             const isActive = currentView === item.id;
             return (
@@ -96,9 +122,9 @@ export const DashboardLayout: React.FC<{ onLogout: () => void }> = ({ onLogout }
             <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-[#006233]">
               <User className="w-5 h-5" />
             </div>
-            <div className="flex-1">
-              <p className="font-tajawal font-bold text-sm text-gray-900">محمد أمين</p>
-              <p className="font-tajawal text-xs text-gray-500">Super Admin</p>
+            <div className="flex-1 overflow-hidden">
+              <p className="font-tajawal font-bold text-sm text-gray-900 truncate">{user.name}</p>
+              <p className="font-tajawal text-xs text-gray-500 truncate uppercase">{user.role}</p>
             </div>
           </div>
           <button
@@ -154,20 +180,15 @@ export const DashboardLayout: React.FC<{ onLogout: () => void }> = ({ onLogout }
             >
               {currentView === 'overview' && <OverviewStats />}
               {currentView === 'inbox' && <InboxView />}
-              {currentView === 'map' && (
-                <div className="flex flex-col items-center justify-center h-full text-gray-400">
-                  <MapIcon className="w-16 h-16 mb-4 text-gray-300" />
-                  <h2 className="font-changa text-xl font-bold text-gray-600">الخريطة التفاعلية (قريباً)</h2>
-                  <p className="font-tajawal text-sm mt-2">جاري العمل على ربط الخريطة التفصيلية للبلديات</p>
-                </div>
-              )}
-              {currentView === 'reports' && (
-                <div className="flex flex-col items-center justify-center h-full text-gray-400">
-                  <BarChart3 className="w-16 h-16 mb-4 text-gray-300" />
-                  <h2 className="font-changa text-xl font-bold text-gray-600">نظام التقارير (قريباً)</h2>
-                  <p className="font-tajawal text-sm mt-2">تصدير التقارير بصيغة PDF و Excel قيد التطوير</p>
-                </div>
-              )}
+              {currentView === 'citizens' && <CitizensView />}
+              {currentView === 'map' && <MapView />}
+              {currentView === 'reports' && <ReportsView />}
+              {currentView === 'users' && <UsersView />}
+              {currentView === 'permissions' && <PermissionsView />}
+              {currentView === 'departments' && <DepartmentsView />}
+              {currentView === 'municipalities' && <MunicipalitiesView />}
+              {currentView === 'audit_log' && <AuditLogView />}
+              {currentView === 'settings' && <SettingsView />}
             </motion.div>
           </AnimatePresence>
         </div>

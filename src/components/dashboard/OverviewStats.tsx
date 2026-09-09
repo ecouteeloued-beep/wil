@@ -3,7 +3,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, LineChart, Line, Legend
 } from 'recharts';
-import { Users, FileText, CheckCircle2, Clock, AlertTriangle } from 'lucide-react';
+import { Users, FileText, CheckCircle2, Clock, AlertTriangle, Timer } from 'lucide-react';
 
 const stats = [
   { label: 'إجمالي الانشغالات', value: '1,245', icon: FileText, color: 'bg-blue-500', trend: '+12%' },
@@ -11,6 +11,7 @@ const stats = [
   { label: 'قيد المعالجة', value: '312', icon: Clock, color: 'bg-amber-500', trend: '-2%' },
   { label: 'ملفات متأخرة', value: '18', icon: AlertTriangle, color: 'bg-[#D21034]', trend: '+1%' },
   { label: 'تم الحل والإغلاق', value: '881', icon: CheckCircle2, color: 'bg-teal-500', trend: '+15%' },
+  { label: 'متوسط مدة المعالجة', value: '3 أيام', icon: Timer, color: 'bg-purple-500', trend: '-1 يوم' },
 ];
 
 const categoryData = [
@@ -52,7 +53,7 @@ export const OverviewStats: React.FC = () => {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         {stats.map((stat, idx) => {
           const Icon = stat.icon;
           return (
@@ -116,6 +117,29 @@ export const OverviewStats: React.FC = () => {
                 <Tooltip contentStyle={{fontFamily: 'Tajawal', borderRadius: '8px'}} />
                 <Legend layout="vertical" verticalAlign="middle" align="right" wrapperStyle={{fontFamily: 'Tajawal', fontSize: '12px'}} />
               </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Municipalities Bar Chart */}
+        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm lg:col-span-2">
+          <h3 className="font-changa font-bold text-lg mb-6">توزيع الانشغالات حسب البلديات (الأكثر تسجيلاً)</h3>
+          <div className="h-[300px]" dir="ltr">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={[
+                { name: 'الوادي', count: 320 },
+                { name: 'قمار', count: 210 },
+                { name: 'البياضة', count: 180 },
+                { name: 'الرباح', count: 150 },
+                { name: 'الدبيلة', count: 90 },
+                { name: 'الرقيبة', count: 85 }
+              ]}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                <XAxis dataKey="name" tick={{fontFamily: 'Tajawal', fontSize: 12}} />
+                <YAxis tick={{fontFamily: 'Tajawal', fontSize: 12}} />
+                <Tooltip contentStyle={{fontFamily: 'Tajawal', borderRadius: '8px'}} cursor={{fill: '#f3f4f6'}} />
+                <Bar dataKey="count" name="عدد الانشغالات" fill="#006233" radius={[4, 4, 0, 0]} barSize={40} />
+              </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
