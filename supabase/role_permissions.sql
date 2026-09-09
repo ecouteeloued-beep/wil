@@ -2,10 +2,12 @@
 -- الصلاحيات الحكومية الدقيقة — ولاية الوادي
 -- ============================================================
 -- النموذج المعتمد:
--- wali: وصول شامل وقراءة/توجيه/رد واعتماد.
--- super_admin: إدارة تقنية وأمن النظام فقط، دون تحكم في الشكاوى أو قرارات الولاية.
--- supervisor: رقابة ومعالجة وتوجيه ورفع/اعتماد الردود ضمن نطاق الخلية.
--- employee: الملفات المسندة إليه فقط، مع معالجة وإعداد رد دون اعتماد نهائي.
+-- wali: صاحب السلطة الإدارية الشاملة.
+-- chef_cabinet: الأمين العام، إدارة ومتابعة شاملة نيابة عن السلطة التنفيذية.
+-- head_department: رئيس الديوان، إدارة ملفات الديوان ونطاقه.
+-- supervisor: رئيس الخلية، فرز وتوجيه ومراجعة ملفات الخلية.
+-- employee: الموظف المكلف، الملفات المسندة إليه فقط.
+-- super_admin: المشرف التقني، النظام والأمن فقط دون القرار الإداري.
 --
 -- نفّذ هذا الملف بعد schema.sql من Supabase SQL Editor.
 -- لا تعتمد على إخفاء الأزرار في الواجهة؛ RLS هو الحاجز الأمني الحقيقي.
@@ -53,7 +55,7 @@ as $$
     join public.users u on u.id = auth.uid() and u.is_active = true
     where c.id = p_complaint_id
       and (
-        u.role = 'wali'
+        u.role in ('wali', 'chef_cabinet')
         or (u.role = 'supervisor' and (
           c.assigned_user_id = u.id
           or c.assigned_department = u.department
@@ -92,7 +94,7 @@ drop policy if exists "Scoped internal notes update" on public.internal_notes;
 drop policy if exists "Staff insert own audit logs" on public.audit_logs;
 drop policy if exists "Authorized audit log read" on public.audit_logs;
 
--- ملفات المستخدمين: كل موظف يرى ملفه؛ الوالي وsuper_admin يديران المستخدمين.
+-- ملفات المستخدمين: كل موظف يرى ملفه؛ الوالي والأمين العام يديران المستخدمين إداريًا، والمشرف التقني تقنيًا.
 create policy "Staff read own profile" on public.users
   for select to authenticated
   using (id = auth.uid() and is_active = true);
@@ -125,7 +127,11 @@ create policy "Public submits complaints" on public.complaints
 create policy "Role scoped complaint read" on public.complaints
   for select to authenticated
   using (
-    public.current_staff_role() = 'wali'
+    public.current_staff_role() in ('wali', 'chef_cabinet')
+    or (
+      public.current_staff_role() = 'head_department'
+      and assigned_department = (select department from public.users where id = auth.uid())
+    )
     or (
       public.current_staff_role() = 'supervisor'
       and (assigned_user_id = auth.uid()
@@ -141,7 +147,9 @@ create policy "Role scoped complaint read" on public.complaints
 create policy "Role scoped complaint update" on public.complaints
   for update to authenticated
   using (
-    public.current_staff_role() = 'wali'
+    public.current_staff_role() in ('wali', 'chef_cabinet')
+    or (public.current_staff_role() = 'head_department'
+      and assigned_department = (select department from public.users where id = auth.uid()))
     or (public.current_staff_role() = 'supervisor' and (
       assigned_user_id = auth.uid()
       or assigned_department = (select department from public.users where id = auth.uid())
@@ -149,7 +157,7 @@ create policy "Role scoped complaint update" on public.complaints
     ))
     or (public.current_staff_role() in ('employee', 'head_department') and assigned_user_id = auth.uid())
   )
-  with check (public.current_staff_role() in ('wali', 'super_admin', 'supervisor', 'employee', 'head_department'));
+  with check (public.current_staff_role() in ('wali', 'chef_cabinet', 'head_department', 'supervisor', 'employee')); 
 
 -- حذف الشكاوى ممنوع على جميع الأدوار من أجل سلامة السجل الإداري.
 drop policy if exists "Allow deleting complaints" on public.complaints;
