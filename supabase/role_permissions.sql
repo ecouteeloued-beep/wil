@@ -3,7 +3,7 @@
 -- ============================================================
 -- النموذج المعتمد:
 -- wali: وصول شامل وقراءة/توجيه/رد واعتماد.
--- super_admin: إدارة تقنية ورقابة وقراءة الشكاوى دون انتحال دور الوالي.
+-- super_admin: إدارة تقنية وأمن النظام فقط، دون تحكم في الشكاوى أو قرارات الولاية.
 -- supervisor: رقابة ومعالجة وتوجيه ورفع/اعتماد الردود ضمن نطاق الخلية.
 -- employee: الملفات المسندة إليه فقط، مع معالجة وإعداد رد دون اعتماد نهائي.
 --
@@ -53,7 +53,7 @@ as $$
     join public.users u on u.id = auth.uid() and u.is_active = true
     where c.id = p_complaint_id
       and (
-        u.role in ('wali', 'super_admin')
+        u.role = 'wali'
         or (u.role = 'supervisor' and (
           c.assigned_user_id = u.id
           or c.assigned_department = u.department
@@ -111,7 +111,7 @@ create policy "Public submits complaints" on public.complaints
 create policy "Role scoped complaint read" on public.complaints
   for select to authenticated
   using (
-    public.current_staff_role() in ('wali', 'super_admin')
+    public.current_staff_role() = 'wali'
     or (
       public.current_staff_role() = 'supervisor'
       and (assigned_user_id = auth.uid()
@@ -127,7 +127,7 @@ create policy "Role scoped complaint read" on public.complaints
 create policy "Role scoped complaint update" on public.complaints
   for update to authenticated
   using (
-    public.current_staff_role() in ('wali', 'super_admin')
+    public.current_staff_role() = 'wali'
     or (public.current_staff_role() = 'supervisor' and (
       assigned_user_id = auth.uid()
       or assigned_department = (select department from public.users where id = auth.uid())

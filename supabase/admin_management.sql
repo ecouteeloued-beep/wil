@@ -79,3 +79,10 @@ select tracking_id, status, assigned_user_id, assigned_department, updated_at
 from public.complaints
 where tracking_id = 'WL-2026-000000'
 limit 1;
+
+
+-- تحويل الحساب الحالي إلى والي صاحب الصلاحية الإدارية الشاملة.
+-- استبدل البريد إذا كان مختلفاً ثم نفّذ الأمر.
+-- update public.users
+-- set role = 'wali', is_active = true
+-- where email = 'wali@wilya.dz';
