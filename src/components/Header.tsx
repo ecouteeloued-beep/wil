@@ -11,11 +11,7 @@ import {
   X, 
   Building2, 
   Globe, 
-  Sparkles,
-  Facebook,
-  Youtube,
-  Twitter,
-  Instagram
+  Sparkles
 } from 'lucide-react';
 import { DAIRAS, DAIRAS_MUNICIPALITIES } from '../data';
 
@@ -179,24 +175,6 @@ export const Header: React.FC<HeaderProps> = ({ onNavigateToForm, onOpenWelcome,
                   معكـــــــــم
                 </span>
                 
-                {/* Social media icons (identical to interieur.gov.dz) */}
-                <div className="flex items-center gap-2.5 mt-2 text-gray-500">
-                  <a href="https://www.facebook.com/" target="_blank" rel="noreferrer" title="Facebook" className="hover:text-[#1877F2] transition-colors">
-                    <Facebook className="w-3.5 h-3.5" />
-                  </a>
-                  <a href="https://www.youtube.com/" target="_blank" rel="noreferrer" title="YouTube" className="hover:text-[#FF0000] transition-colors">
-                    <Youtube className="w-3.5 h-3.5" />
-                  </a>
-                  <a href="https://twitter.com/" target="_blank" rel="noreferrer" title="X / Twitter" className="hover:text-black transition-colors">
-                    <Twitter className="w-3.5 h-3.5" />
-                  </a>
-                  <a href="https://www.instagram.com/" target="_blank" rel="noreferrer" title="Instagram" className="hover:text-[#E4405F] transition-colors">
-                    <Instagram className="w-3.5 h-3.5" />
-                  </a>
-                  <a href="https://www.interieur.gov.dz/" target="_blank" rel="noreferrer" title="البوابة الرسمية" className="hover:text-[#006233] transition-colors">
-                    <Globe className="w-3.5 h-3.5" />
-                  </a>
-                </div>
               </div>
 
               {/* Vertical divider */}
