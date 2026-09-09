@@ -48,7 +48,7 @@ export const SupabaseService = {
     if (!isSupabaseConfigured || !supabase) return [];
     const { data, error } = await supabase
       .from('users')
-      .select('id,username,name,email,role,department,phone,is_active,created_at')
+      .select('id,username,name,email,role,department,phone,is_active,permissions,created_at')
       .order('created_at', { ascending: true });
     if (error || !Array.isArray(data)) return [];
     const roleTitles: Record<string, string> = {
@@ -73,13 +73,13 @@ export const SupabaseService = {
       resolvedCount: 0,
       overdueCount: 0,
       lastActive: row.created_at || '',
-      permissions: [],
+      permissions: Array.isArray(row.permissions) ? row.permissions : [],
     }));
   },
 
   updateStaffAccount: async (payload: {
     id: string; username: string; name: string; email: string; phone: string;
-    department: string; role: UserRole; isActive: boolean;
+    department: string; role: UserRole; isActive: boolean; permissions?: string[];
   }): Promise<{ success: boolean; error?: string }> => {
     if (!isSupabaseConfigured || !supabase) return { success: false, error: 'Supabase غير مهيأ.' };
     const { error } = await supabase.rpc('admin_update_staff_account', {
@@ -87,7 +87,12 @@ export const SupabaseService = {
       p_phone: payload.phone, p_department: payload.department,
       p_role: payload.role, p_is_active: payload.isActive,
     });
-    return error ? { success: false, error: error.message } : { success: true };
+    if (error) return { success: false, error: error.message };
+    const { error: permissionsError } = await supabase.rpc('admin_update_staff_permissions', {
+      p_user_id: payload.id,
+      p_permissions: payload.permissions || [],
+    });
+    return permissionsError ? { success: false, error: permissionsError.message } : { success: true };
   },
 
   resetStaffPassword: async (userId: string, newPassword: string): Promise<{ success: boolean; error?: string }> => {

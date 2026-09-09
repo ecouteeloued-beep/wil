@@ -16,6 +16,7 @@ create table if not exists public.users (
   department text,
   municipality text,
   phone text,
+  permissions jsonb not null default '[]'::jsonb,
   is_active boolean default true,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
