@@ -22,9 +22,19 @@ export default function App() {
   const [selectedCategory, setSelectedCategory] = useState<GrievanceCategory>('الحالة المدنية');
 
   useEffect(() => {
-    // Check URL parameters for secure hidden admin access e.g. ?portal=admin
+    // Check pathname, hash, and query params for admin access: e.g. /admin, #/admin, ?portal=admin
+    const pathname = window.location.pathname.toLowerCase();
+    const hash = window.location.hash.toLowerCase();
     const params = new URLSearchParams(window.location.search);
-    if (params.get('portal') === 'admin' || params.get('admin') === 'true') {
+    
+    if (
+      pathname === '/admin' ||
+      pathname.startsWith('/admin/') ||
+      pathname.includes('/admin') ||
+      hash.includes('admin') ||
+      params.get('portal') === 'admin' ||
+      params.get('admin') === 'true'
+    ) {
       setCurrentView('admin_dashboard');
     }
 
