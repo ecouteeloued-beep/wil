@@ -7,6 +7,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { SystemUser, SystemSettings } from '../../types';
 import { AdminService, DEFAULT_SYSTEM_SETTINGS } from '../../services/adminService';
+import { validateBackupSchema } from '../../utils/security';
 
 interface SettingsViewProps {
   user?: SystemUser;
@@ -234,10 +235,44 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ user, addToast }) =>
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Security Check: File Size Limit (Max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      addToast?.({
+        type: 'error',
+        title: 'حجم الملف كبير جداً',
+        message: 'حجم ملف النسخة الاحتياطية يتجاوز الحد الأقصى الآمن (5 ميغابايت).'
+      });
+      return;
+    }
+
+    // Security Check: Extension Whitelist
+    if (!file.name.toLowerCase().endsWith('.json')) {
+      addToast?.({
+        type: 'error',
+        title: 'صيغة ملف غير مقبولة',
+        message: 'يرجى اختيار ملف نسخة احتياطية بصيغة JSON حصراً.'
+      });
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = (event) => {
       try {
-        const data = JSON.parse(event.target?.result as string);
+        const rawJson = JSON.parse(event.target?.result as string);
+        
+        // Defensive Schema & Integrity Validation
+        const validation = validateBackupSchema(rawJson);
+        if (!validation.valid || !validation.cleanData) {
+          addToast?.({
+            type: 'error',
+            title: 'فشل التحقق الأمني للنسخة',
+            message: validation.error || 'الملف يحتوي على بيانات غير متطابقة أو غير آمنة.'
+          });
+          return;
+        }
+
+        const data = validation.cleanData;
+
         if (data.settings) {
           AdminService.saveSystemSettings(data.settings, user);
         }
@@ -250,24 +285,21 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ user, addToast }) =>
         if (data.auditLogs && Array.isArray(data.auditLogs)) {
           localStorage.setItem('wilaya_eloued_admin_audit_logs', JSON.stringify(data.auditLogs));
         }
-        if (data.permissions) {
-          localStorage.setItem('wilaya_eloued_role_permissions', typeof data.permissions === 'string' ? data.permissions : JSON.stringify(data.permissions));
-        }
 
         AdminService.logAudit({
           userId: user?.id || 'admin',
           userName: user?.name || 'المسؤول',
           userRole: user?.roleTitle || 'مسؤول النظام',
-          action: 'استعادة نسخة احتياطية',
+          action: 'استعادة نسخة احتياطية موثوقة',
           targetId: 'backup_restore',
           targetType: 'أمن',
-          details: `تمت استعادة البيانات بنجاح من الملف (${file.name}).`
+          details: `تم التدقيق الأمني واستعادة البيانات الموثقة بنجاح من الملف (${file.name}).`
         });
 
         addToast?.({
           type: 'success',
           title: 'تمت استعادة البيانات بنجاح',
-          message: 'تم استرجاع السجلات والمستخدمين والانشغالات والإعدادات بنجاح.'
+          message: 'تم فحص ملف النسخة الاحتياطية وتثبيت كافة السجلات والإعدادات بأمان.'
         });
 
         setTimeout(() => {
@@ -277,7 +309,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ user, addToast }) =>
         addToast?.({
           type: 'error',
           title: 'فشل استعادة البيانات',
-          message: 'الملف المختار غير صالح أو تالف. يرجى اختيار ملف JSON مطابق.'
+          message: 'الملف المختار غير صالح أو تالف أو يحتوي على صيغة JSON غير سليمة.'
         });
       }
     };

@@ -93,11 +93,20 @@ create table public.notifications (
 -- ROW LEVEL SECURITY (RLS) POLICIES
 -- =========================================================================
 
+alter table public.departments enable row level security;
+alter table public.municipalities enable row level security;
 alter table public.users enable row level security;
 alter table public.complaints enable row level security;
 alter table public.internal_notes enable row level security;
 alter table public.audit_logs enable row level security;
 alter table public.notifications enable row level security;
+
+-- Public Reference Data Policies
+create policy "Allow public read on departments" on public.departments
+  for select using (true);
+
+create policy "Allow public read on municipalities" on public.municipalities
+  for select using (true);
 
 -- Users policies
 create policy "Allow users to read own profile or admins read all" on public.users
@@ -107,6 +116,12 @@ create policy "Allow users to read own profile or admins read all" on public.use
   );
 
 -- Complaints policies
+-- 1. Anonymous Citizen Complaint Submission (Insert-Only)
+create policy "Allow citizens to submit new complaints" on public.complaints
+  for insert to anon, authenticated
+  with check (tracking_id is not null and subject is not null and category is not null);
+
+-- 2. Staff & Admins Viewing Complaints
 create policy "Admins and assigned agents can view complaints" on public.complaints
   for select using (
     exists (
@@ -115,15 +130,22 @@ create policy "Admins and assigned agents can view complaints" on public.complai
     )
   );
 
-create policy "Admins and authorized agents can insert/update complaints" on public.complaints
-  for all using (
+-- 3. Staff & Admins Updating Complaints
+create policy "Admins and authorized agents can update complaints" on public.complaints
+  for update using (
     exists (
       select 1 from public.users 
       where id = auth.uid() and role in ('super_admin', 'admin', 'agent')
     )
   );
 
--- Audit logs policies (Super Admin only)
+-- Internal Notes (Staff only)
+create policy "Staff can read and write internal notes" on public.internal_notes
+  for all using (
+    exists (select 1 from public.users where id = auth.uid())
+  );
+
+-- Audit logs policies (Super Admin and Wali only)
 create policy "Only Super Admin and Wali can view audit logs" on public.audit_logs
   for select using (
     exists (
@@ -131,3 +153,39 @@ create policy "Only Super Admin and Wali can view audit logs" on public.audit_lo
       where id = auth.uid() and role in ('super_admin', 'wali')
     )
   );
+
+-- Secure RPC Function for Citizen Status Tracking (Masks sensitive internal fields)
+create or replace function public.track_complaint(
+  p_tracking_id text,
+  p_phone text
+)
+returns table (
+  tracking_id text,
+  category text,
+  municipality text,
+  subject text,
+  status complaint_status_enum,
+  priority complaint_priority_enum,
+  created_at timestamp with time zone,
+  deadline timestamp with time zone
+)
+language plpgsql
+security definer
+as $$
+begin
+  return query
+  select 
+    c.tracking_id,
+    c.category,
+    c.municipality,
+    c.subject,
+    c.status,
+    c.priority,
+    c.created_at,
+    c.deadline
+  from public.complaints c
+  where upper(trim(c.tracking_id)) = upper(trim(p_tracking_id))
+    and (c.phone_encrypted = p_phone or p_phone is null);
+end;
+$$;
+
