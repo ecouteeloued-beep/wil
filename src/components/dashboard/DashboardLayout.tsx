@@ -78,9 +78,22 @@ export const DashboardLayout: React.FC<{ user: SystemUser; onLogout: () => void 
       });
     }, 6500);
 
+    const handleComplaintsUpdated = (e: any) => {
+      if (e?.detail?.complaint) {
+        addToast({
+          type: 'success',
+          title: 'عريضة جديدة واردة عبر البوابة الرقمية',
+          message: `تم تسجيل الانشغال رقم ${e.detail.complaint.id} للمواطن (${e.detail.complaint.fullName}) ببلدية ${e.detail.complaint.grievanceMunicipality || 'الوادي'}.`
+        });
+      }
+    };
+
+    window.addEventListener('complaints_updated', handleComplaintsUpdated);
+
     return () => {
       clearTimeout(timer1);
       clearTimeout(timer2);
+      window.removeEventListener('complaints_updated', handleComplaintsUpdated);
     };
   }, []);
 

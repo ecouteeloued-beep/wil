@@ -1,33 +1,62 @@
-import { GrievanceSubmission } from '../types';
+import { GrievanceSubmission, EnhancedGrievance, AttachmentFile } from '../types';
 import { AdminService, SEED_GRIEVANCES } from './adminService';
 import { ComplaintService } from './complaintService';
 import { complaintRepository } from './complaintRepository';
+import { SupabaseService } from './supabaseService';
 
 const STORAGE_KEY = 'wilaya_eloued_grievances';
 
 export const GrievanceService = {
-  save: (data: Omit<GrievanceSubmission, 'id' | 'status' | 'createdAt'>): GrievanceSubmission => {
+  save: (data: {
+    nin?: string;
+    fullName: string;
+    phone: string;
+    email?: string;
+    applicantDaira: string;
+    applicantMunicipality: string;
+    applicantNeighborhood: string;
+    subject: string;
+    grievanceDaira: string;
+    grievanceMunicipality: string;
+    category: any;
+    details: string;
+    attachments?: AttachmentFile[];
+  }): GrievanceSubmission => {
     const existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    // Generate official tracking code and confidential PIN
+    // Generate unified official tracking code and confidential PIN
     const trackingId = ComplaintService.generateTrackingNumber();
     const secretPin = ComplaintService.generateSecretPin();
-    
+    const now = new Date();
+    const nowIso = now.toISOString();
+    const dateFormatted = now.toLocaleDateString('ar-DZ', { year: 'numeric', month: 'long', day: 'numeric' });
+    const timeFormatted = now.toLocaleTimeString('ar-DZ', { hour: '2-digit', minute: '2-digit' });
+
     const newGrievance: GrievanceSubmission = {
       ...data,
       id: trackingId,
       secretPin,
-      status: 'قيد المعالجة', // default status
-      createdAt: new Date().toISOString()
+      status: 'قيد المعالجة', // default status for citizen view
+      createdAt: nowIso
     };
     
-    existing.push(newGrievance);
+    existing.unshift(newGrievance);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
     
-    // Also add directly to the repository
-    ComplaintService.create({
+    // SLA Deadline (+15 days)
+    const dueDate = new Date(now.getTime() + 15 * 24 * 60 * 60 * 1000).toISOString();
+
+    // 1. Build complete EnhancedGrievance for Admin Dashboard
+    const enhancedGrievance: EnhancedGrievance = {
+      id: trackingId,
+      trackingNumber: trackingId,
+      secretPin,
+      statusCode: 'NEW',
+      status: 'جديد',
+      priority: 'عادي',
       fullName: data.fullName,
-      nin: data.nin,
+      nin: data.nin || '',
       phone: data.phone,
+      email: data.email || '',
       applicantDaira: data.applicantDaira,
       applicantMunicipality: data.applicantMunicipality,
       applicantNeighborhood: data.applicantNeighborhood,
@@ -35,17 +64,54 @@ export const GrievanceService = {
       grievanceDaira: data.grievanceDaira,
       grievanceMunicipality: data.grievanceMunicipality,
       category: data.category,
+      sector: 'المعاملات الإدارية والميدانية',
       details: data.details,
-      secretPin,
-    }).catch(err => console.warn('Failed to sync new complaint to repository:', err));
+      createdAt: nowIso,
+      updatedAt: nowIso,
+      dueDate,
+      isOverdue: false,
+      specialFlags: [],
+      attachments: data.attachments || [],
+      timeline: [
+        {
+          id: `tl-${Date.now()}`,
+          date: dateFormatted,
+          time: timeFormatted,
+          author: data.fullName || 'مواطن',
+          authorRole: 'منصة المواطن',
+          action: 'تم تسجيل العريضة بنجاح عبر البوابة الإلكترونية',
+          note: `تم إيداع الانشغال وإعطاء رقم التتبع الرسمي: ${trackingId}`
+        }
+      ],
+      internalNotes: []
+    };
 
-    // Also track the last submission time for rate limiting (simple anti-spam)
+    // 2. Direct instant save into Admin Service (wilaya_eloued_admin_grievances)
+    try {
+      AdminService.addGrievanceDirectly(enhancedGrievance);
+    } catch (err) {
+      console.warn('Could not add to AdminService directly:', err);
+    }
+
+    // 3. Direct save into Mock Complaint Repository
+    complaintRepository.create(enhancedGrievance).catch(err => {
+      console.warn('Failed to sync to local repository:', err);
+    });
+
+    // 4. Asynchronous Cloud Sync to Supabase (if configured)
+    if (SupabaseService.isConfigured()) {
+      SupabaseService.insertComplaint(enhancedGrievance).catch(err => {
+        console.warn('Supabase background sync failed:', err);
+      });
+    }
+
+    // Track the last submission time for rate limiting (anti-spam)
     localStorage.setItem('last_submit_time', Date.now().toString());
     
     return newGrievance;
   },
 
-  findByTrackingId: (id: string): any => {
+  findByTrackingId: async (id: string, phone?: string): Promise<any> => {
     const cleanId = id.trim().toUpperCase();
     if (!cleanId) return null;
 
@@ -57,76 +123,34 @@ export const GrievanceService = {
         (g.trackingNumber && g.trackingNumber.trim().toUpperCase() === cleanId)
       );
       if (adminFound) {
-        return {
-          id: adminFound.id,
-          trackingNumber: adminFound.trackingNumber || adminFound.id,
-          secretPin: adminFound.secretPin || '2026',
-          nin: adminFound.nin,
-          fullName: adminFound.fullName,
-          phone: adminFound.phone,
-          applicantDaira: adminFound.applicantDaira,
-          applicantMunicipality: adminFound.applicantMunicipality,
-          applicantNeighborhood: adminFound.applicantNeighborhood,
-          subject: adminFound.subject,
-          grievanceDaira: adminFound.grievanceDaira,
-          grievanceMunicipality: adminFound.grievanceMunicipality,
-          category: adminFound.category,
-          details: adminFound.details,
-          createdAt: adminFound.createdAt,
-          updatedAt: adminFound.updatedAt,
-          statusCode: adminFound.statusCode,
-          status: adminFound.status,
-          priority: adminFound.priority,
-          assignedDepartment: adminFound.assignedDepartment,
-          assignedToName: adminFound.assignedToName,
-          officialResponse: adminFound.officialResponse,
-          citizenActionRequired: adminFound.citizenActionRequired,
-          citizenRating: adminFound.citizenRating,
-          publicMessages: adminFound.publicMessages,
-          timeline: adminFound.timeline
-        };
+        return adminFound;
       }
     } catch (e) {
       console.warn('Error querying admin service for tracking', e);
     }
 
-    // 2. Direct fallback to SEED_GRIEVANCES if not initialized yet
+    // 2. Check Supabase Remote Database (for cross-device citizen tracking)
+    if (SupabaseService.isConfigured()) {
+      try {
+        const cloudFound = await SupabaseService.trackComplaint(cleanId, phone);
+        if (cloudFound) {
+          return cloudFound;
+        }
+      } catch (e) {
+        console.warn('Error checking Supabase for complaint tracking:', e);
+      }
+    }
+
+    // 3. Direct fallback to SEED_GRIEVANCES if not initialized yet
     const seedFound = SEED_GRIEVANCES.find(g => 
       g.id.trim().toUpperCase() === cleanId || 
       (g.trackingNumber && g.trackingNumber.trim().toUpperCase() === cleanId)
     );
     if (seedFound) {
-      return {
-        id: seedFound.id,
-        trackingNumber: seedFound.trackingNumber || seedFound.id,
-        secretPin: (seedFound as any).secretPin || '2026',
-        nin: seedFound.nin,
-        fullName: seedFound.fullName,
-        phone: seedFound.phone,
-        applicantDaira: seedFound.applicantDaira,
-        applicantMunicipality: seedFound.applicantMunicipality,
-        applicantNeighborhood: seedFound.applicantNeighborhood,
-        subject: seedFound.subject,
-        grievanceDaira: seedFound.grievanceDaira,
-        grievanceMunicipality: seedFound.grievanceMunicipality,
-        category: seedFound.category,
-        details: seedFound.details,
-        createdAt: seedFound.createdAt,
-        updatedAt: seedFound.updatedAt,
-        statusCode: seedFound.statusCode,
-        status: seedFound.status,
-        priority: seedFound.priority,
-        assignedDepartment: seedFound.assignedDepartment,
-        assignedToName: seedFound.assignedToName,
-        officialResponse: seedFound.officialResponse,
-        citizenActionRequired: seedFound.citizenActionRequired,
-        citizenRating: seedFound.citizenRating,
-        publicMessages: seedFound.publicMessages,
-        timeline: seedFound.timeline
-      };
+      return seedFound;
     }
 
-    // 3. Check client submissions in local storage
+    // 4. Check client submissions in local storage
     const existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
     const match = existing.find((g: GrievanceSubmission) => g.id.trim().toUpperCase() === cleanId);
     return match || null;

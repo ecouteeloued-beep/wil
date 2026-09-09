@@ -4,10 +4,12 @@ import {
   ArrowLeft, User, Briefcase, History, MessageSquare, MoreVertical, 
   FileText, Paperclip, Download, ImageIcon, Send, Clock, AlertTriangle,
   Printer, ShieldAlert, Sparkles, X, ChevronDown, Check, Forward, Award,
-  Star, Bookmark, Save, Edit, Trash2, Tag, CheckCheck, ListFilter
+  Star, Bookmark, Save, Edit, Trash2, Tag, CheckCheck, ListFilter,
+  RefreshCw, Cloud, Database
 } from 'lucide-react';
 import { EnhancedGrievance, SystemUser, AttachmentFile } from '../../types';
 import { AdminService, WILAYA_MUNICIPALITIES_22 } from '../../services/adminService';
+import { SupabaseService } from '../../services/supabaseService';
 import { motion, AnimatePresence } from 'motion/react';
 import { DocumentReaderModal } from './DocumentReaderModal';
 
@@ -172,6 +174,10 @@ export const InboxView: React.FC<InboxViewProps> = ({
     setIsDocumentReaderOpen(true);
   };
 
+  // Cloud synchronization state
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [lastSyncTime, setLastSyncTime] = useState<string>('');
+
   // Load grievances on mount and whenever changed
   const loadData = () => {
     const list = AdminService.getGrievances();
@@ -186,7 +192,109 @@ export const InboxView: React.FC<InboxViewProps> = ({
   useEffect(() => {
     loadData();
     setSavedSearches(AdminService.getSavedSearches());
+
+    // 1. Initial Cloud Sync if Supabase is configured
+    if (SupabaseService.isConfigured()) {
+      setIsSyncing(true);
+      AdminService.syncWithSupabase().then(res => {
+        loadData();
+        setLastSyncTime(new Date().toLocaleTimeString('ar-DZ', { hour: '2-digit', minute: '2-digit' }));
+        setIsSyncing(false);
+        if (res.newAdded > 0) {
+          addToast?.({
+            type: 'info',
+            title: 'تمت المزامنة مع السحابة المركزية',
+            message: `تم جلب ${res.newAdded} عريضة جديدة واردة عبر منصة المواطن.`
+          });
+        }
+      }).catch(() => setIsSyncing(false));
+    }
+
+    // 2. Listen to custom event dispatched when complaints are added or updated in real-time
+    const handleComplaintsUpdated = (e: any) => {
+      loadData();
+      if (e?.detail?.complaint) {
+        addToast?.({
+          type: 'info',
+          title: 'عريضة جديدة واردة عبر البوابة الإلكترونية',
+          message: `تم استلام العريضة رقم ${e.detail.complaint.id} للمواطن (${e.detail.complaint.fullName || 'مواطن'}).`
+        });
+      }
+    };
+
+    // 3. Listen to browser storage changes across tabs
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'wilaya_eloued_admin_grievances' || e.key === 'wilaya_eloued_grievances') {
+        loadData();
+      }
+    };
+
+    window.addEventListener('complaints_updated', handleComplaintsUpdated);
+    window.addEventListener('storage', handleStorageChange);
+
+    // 4. Supabase Realtime channel subscription
+    const unsubscribeSupabase = SupabaseService.subscribeToComplaints((newComplaint) => {
+      AdminService.addGrievanceDirectly(newComplaint);
+      loadData();
+      addToast?.({
+        type: 'success',
+        title: 'عريضة جديدة سحابية (مباشر)',
+        message: `تم استلام عريضة جديدة رقم ${newComplaint.id} في قطاع (${newComplaint.category}).`
+      });
+    });
+
+    // 5. Background periodic sync every 30 seconds
+    const interval = setInterval(() => {
+      if (SupabaseService.isConfigured()) {
+        AdminService.syncWithSupabase().then(res => {
+          if (res.newAdded > 0) {
+            loadData();
+          }
+        });
+      }
+    }, 30000);
+
+    return () => {
+      window.removeEventListener('complaints_updated', handleComplaintsUpdated);
+      window.removeEventListener('storage', handleStorageChange);
+      unsubscribeSupabase();
+      clearInterval(interval);
+    };
   }, []);
+
+  const handleManualSync = async () => {
+    setIsSyncing(true);
+    try {
+      if (SupabaseService.isConfigured()) {
+        const res = await AdminService.syncWithSupabase();
+        loadData();
+        const timeNow = new Date().toLocaleTimeString('ar-DZ', { hour: '2-digit', minute: '2-digit' });
+        setLastSyncTime(timeNow);
+        addToast?.({
+          type: 'success',
+          title: 'اكتملت المزامنة السحابية',
+          message: res.newAdded > 0 
+            ? `تم تحديث البيانات وجلب ${res.newAdded} عريضة جديدة بنجاح.` 
+            : `البيانات متطابقة ومحدثة بالكامل مع قاعدة بيانات ولاية الوادي (${timeNow}).`
+        });
+      } else {
+        loadData();
+        addToast?.({
+          type: 'info',
+          title: 'تحديث البيانات المحلية',
+          message: 'تم إعادة فحص وتحديث قائمة العرائض المخزنة محلياً بنجاح.'
+        });
+      }
+    } catch (e) {
+      addToast?.({
+        type: 'error',
+        title: 'فشل في المزامنة',
+        message: 'تعذر الاتصال بقاعدة البيانات السحابية.'
+      });
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   useEffect(() => {
     if (initialSearchQuery) {
@@ -715,6 +823,34 @@ export const InboxView: React.FC<InboxViewProps> = ({
                 <span>تصفية متقدمة</span>
                 {(filterMunicipality || filterCategory || filterPriority) && (
                   <span className="w-2 h-2 rounded-full bg-[#006233]" />
+                )}
+              </button>
+
+              {/* Cloud Sync / Live Refresh Button */}
+              <button
+                onClick={handleManualSync}
+                disabled={isSyncing}
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all border shadow-xs ${
+                  SupabaseService.isConfigured()
+                    ? 'bg-emerald-50/80 text-emerald-800 border-emerald-300 hover:bg-emerald-100'
+                    : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
+                }`}
+                title={
+                  SupabaseService.isConfigured() 
+                    ? `مزامنة حية مع قاعدة بيانات Supabase (آخر مزامنة: ${lastSyncTime || 'الآن'})` 
+                    : 'تحديث قائمة الانشغالات المحلية'
+                }
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin text-emerald-600' : 'text-emerald-700'}`} />
+                <span>{isSyncing ? 'جاري المزامنة...' : 'تحديث ومزامنة'}</span>
+                {SupabaseService.isConfigured() ? (
+                  <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] bg-emerald-600 text-white font-mono">
+                    سحابي
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] bg-amber-100 text-amber-800 font-mono">
+                    محلي
+                  </span>
                 )}
               </button>
 

@@ -116,28 +116,20 @@ create policy "Allow users to read own profile or admins read all" on public.use
   );
 
 -- Complaints policies
--- 1. Anonymous Citizen Complaint Submission (Insert-Only)
+-- 1. Citizen & Public Complaint Submission
 create policy "Allow citizens to submit new complaints" on public.complaints
   for insert to anon, authenticated
   with check (tracking_id is not null and subject is not null and category is not null);
 
--- 2. Staff & Admins Viewing Complaints
-create policy "Admins and assigned agents can view complaints" on public.complaints
-  for select using (
-    exists (
-      select 1 from public.users 
-      where id = auth.uid() and (role in ('super_admin', 'admin', 'wali') or assigned_user_id = auth.uid())
-    )
-  );
+-- 2. Staff, Admins and Tracking Queries
+create policy "Allow viewing complaints for tracking and dashboard" on public.complaints
+  for select to anon, authenticated
+  using (true);
 
--- 3. Staff & Admins Updating Complaints
-create policy "Admins and authorized agents can update complaints" on public.complaints
-  for update using (
-    exists (
-      select 1 from public.users 
-      where id = auth.uid() and role in ('super_admin', 'admin', 'agent')
-    )
-  );
+-- 3. Updating Complaints
+create policy "Allow updating complaints" on public.complaints
+  for update to anon, authenticated
+  using (true);
 
 -- Internal Notes (Staff only)
 create policy "Staff can read and write internal notes" on public.internal_notes

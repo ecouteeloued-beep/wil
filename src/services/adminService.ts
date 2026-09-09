@@ -15,6 +15,7 @@ import {
 } from '../types';
 import { MOCK_COMPLAINTS_SEED } from './complaintRepository';
 import { SecurityRateLimiter, sanitizeInput } from '../utils/security';
+import { SupabaseService } from './supabaseService';
 
 const USERS_STORAGE_KEY = 'wilaya_eloued_admin_users';
 const GRIEVANCES_STORAGE_KEY = 'wilaya_eloued_admin_grievances';
@@ -1085,6 +1086,108 @@ export const AdminService = {
       return grievances;
     } catch {
       return SEED_GRIEVANCES;
+    }
+  },
+
+  addGrievanceDirectly: (newGrievance: EnhancedGrievance): EnhancedGrievance => {
+    try {
+      const grievances = AdminService.getAllGrievances();
+      const cleanId = newGrievance.id.trim().toUpperCase();
+      const existingIdx = grievances.findIndex(g => 
+        g.id.toUpperCase() === cleanId || 
+        (g.trackingNumber && g.trackingNumber.toUpperCase() === cleanId)
+      );
+
+      if (existingIdx !== -1) {
+        grievances[existingIdx] = { ...grievances[existingIdx], ...newGrievance };
+      } else {
+        grievances.unshift(newGrievance);
+      }
+
+      localStorage.setItem(GRIEVANCES_STORAGE_KEY, JSON.stringify(grievances));
+
+      // Create instant notification for dashboard users
+      try {
+        const storedNotifs = localStorage.getItem('wilaya_eloued_notifications');
+        const notifs = storedNotifs ? JSON.parse(storedNotifs) : [];
+        const newNotif = {
+          id: `notif-${Date.now()}`,
+          title: 'عريضة جديدة واردة عبر البوابة الرقمية',
+          message: `تم إيداع عريضة جديدة للمواطن (${newGrievance.fullName}) برقم ${newGrievance.id} في قطاع (${newGrievance.category}).`,
+          targetRole: 'supervisor',
+          grievanceId: newGrievance.id,
+          read: false,
+          createdAt: new Date().toISOString(),
+          type: newGrievance.priority === 'عاجل' ? 'urgent' : 'assignment'
+        };
+        localStorage.setItem('wilaya_eloued_notifications', JSON.stringify([newNotif, ...notifs]));
+      } catch (err) {
+        console.warn('Error saving notification:', err);
+      }
+
+      // Log system audit
+      try {
+        AdminService.logAudit({
+          userId: 'portal_system',
+          userName: newGrievance.fullName || 'مواطن',
+          userRole: 'مواطن',
+          action: 'تسجيل عريضة عبر البوابة',
+          targetId: newGrievance.id,
+          targetType: 'انشغال',
+          newValue: `${newGrievance.subject} (${newGrievance.category})`,
+          details: `تم إيداع عريضة جديدة بنجاح وتوليد رقم التتبع ${newGrievance.id}.`
+        });
+      } catch (err) {
+        console.warn('Error logging audit:', err);
+      }
+
+      // Notify open dashboard tabs/components
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('complaints_updated', { detail: { complaint: newGrievance } }));
+      }
+
+      return newGrievance;
+    } catch (e) {
+      console.error('Failed to add grievance directly:', e);
+      return newGrievance;
+    }
+  },
+
+  syncWithSupabase: async (): Promise<{ total: number; newAdded: number }> => {
+    try {
+      if (!SupabaseService.isConfigured()) {
+        return { total: 0, newAdded: 0 };
+      }
+
+      const remoteComplaints = await SupabaseService.fetchComplaints();
+      if (!remoteComplaints || remoteComplaints.length === 0) {
+        return { total: 0, newAdded: 0 };
+      }
+
+      const grievances = AdminService.getAllGrievances();
+      const existingIds = new Set(grievances.map(g => (g.trackingNumber || g.id).toUpperCase()));
+      let added = 0;
+
+      for (const remote of remoteComplaints) {
+        const remoteId = (remote.trackingNumber || remote.id).toUpperCase();
+        if (!existingIds.has(remoteId)) {
+          grievances.unshift(remote);
+          existingIds.add(remoteId);
+          added++;
+        }
+      }
+
+      if (added > 0) {
+        localStorage.setItem(GRIEVANCES_STORAGE_KEY, JSON.stringify(grievances));
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('complaints_updated', { detail: { count: added } }));
+        }
+      }
+
+      return { total: remoteComplaints.length, newAdded: added };
+    } catch (e) {
+      console.warn('Sync with Supabase encountered an error:', e);
+      return { total: 0, newAdded: 0 };
     }
   },
 
