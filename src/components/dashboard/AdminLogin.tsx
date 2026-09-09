@@ -21,7 +21,7 @@ const ROLE_TITLES: Record<string, string> = {
 
 const ROLE_PERMISSIONS: Record<string, string[]> = {
   wali: ['view_all', 'assign_grievance', 'draft_reply', 'approve_reply', 'manage_users', 'view_audit_logs', 'manage_settings'],
-  super_admin: ['view_all', 'assign_grievance', 'draft_reply', 'manage_users', 'view_audit_logs', 'manage_settings'],
+  super_admin: ['manage_users', 'view_audit_logs', 'manage_settings'],
   supervisor: ['view_department', 'assign_grievance', 'draft_reply', 'approve_reply', 'view_audit_logs'],
   head_department: ['view_department', 'assign_grievance', 'draft_reply', 'view_audit_logs'],
   employee: ['view_assigned', 'draft_reply'],
