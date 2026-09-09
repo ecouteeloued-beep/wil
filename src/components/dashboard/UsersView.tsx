@@ -391,11 +391,11 @@ export const UsersView: React.FC<UsersViewProps> = ({ user, addToast }) => {
 
                   <td className="px-6 py-4 text-center">
                     <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold ${
-                      u.status === 'active' 
+                      u.status === 'نشط'
                         ? 'bg-emerald-100 text-emerald-800' 
                         : 'bg-red-100 text-red-800'
                     }`}>
-                      {u.status === 'active' ? 'نشط ومفعل' : 'معطل مؤقتاً'}
+                      {u.status === 'نشط' ? 'نشط ومفعل' : 'معطل مؤقتاً'}
                     </span>
                   </td>
 
