@@ -133,6 +133,7 @@ export interface SystemUser {
   name: string;
   role: UserRole;
   roleTitle: string;
+  username?: string;
   email: string;
   phone: string;
   department: string;
@@ -392,4 +393,3 @@ export interface SystemSettings {
   updatedAt?: string;
   updatedBy?: string;
 }
-

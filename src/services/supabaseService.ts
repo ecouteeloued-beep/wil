@@ -25,12 +25,20 @@ export const SupabaseService = {
     return isSupabaseConfigured && Boolean(supabase);
   },
 
+  resolveLoginIdentifier: async (identifier: string): Promise<string | null> => {
+    if (!isSupabaseConfigured || !supabase) return null;
+    if (identifier.includes('@')) return identifier.trim().toLowerCase();
+    const { data, error } = await supabase.rpc('resolve_login_identifier', { p_identifier: identifier.trim() });
+    if (error || !Array.isArray(data) || !data[0]?.email) return null;
+    return data[0].email.toLowerCase();
+  },
+
   /** Load active staff profiles for the administrative users directory. */
   fetchStaffUsers: async (): Promise<SystemUser[]> => {
     if (!isSupabaseConfigured || !supabase) return [];
     const { data, error } = await supabase
       .from('users')
-      .select('id,name,email,role,department,phone,is_active,created_at')
+      .select('id,username,name,email,role,department,phone,is_active,created_at')
       .order('created_at', { ascending: true });
     if (error || !Array.isArray(data)) return [];
     const roleTitles: Record<string, string> = {
@@ -43,6 +51,7 @@ export const SupabaseService = {
     };
     return data.map(row => ({
       id: row.id,
+      username: row.username,
       name: row.name,
       role: row.role as UserRole,
       roleTitle: roleTitles[row.role] || row.role,
@@ -59,12 +68,12 @@ export const SupabaseService = {
   },
 
   updateStaffAccount: async (payload: {
-    id: string; name: string; email: string; phone: string;
+    id: string; username: string; name: string; email: string; phone: string;
     department: string; role: UserRole; isActive: boolean;
   }): Promise<{ success: boolean; error?: string }> => {
     if (!isSupabaseConfigured || !supabase) return { success: false, error: 'Supabase غير مهيأ.' };
     const { error } = await supabase.rpc('admin_update_staff_account', {
-      p_user_id: payload.id, p_name: payload.name, p_email: payload.email,
+      p_user_id: payload.id, p_username: payload.username, p_name: payload.name, p_email: payload.email,
       p_phone: payload.phone, p_department: payload.department,
       p_role: payload.role, p_is_active: payload.isActive,
     });
