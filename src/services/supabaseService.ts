@@ -1,5 +1,5 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
-import { EnhancedGrievance, ComplaintStatusCode, GrievanceStatus, SystemUser, UserRole } from '../types';
+import { EnhancedGrievance, ComplaintStatusCode, GrievanceStatus, SystemUser, UserRole, AttachmentFile } from '../types';
 
 export interface SupabaseComplaintRow {
   id?: string;
@@ -17,6 +17,7 @@ export interface SupabaseComplaintRow {
   pin_hash?: string;
   created_at?: string;
   updated_at?: string;
+  attachments?: AttachmentFile[];
   meta_data?: any;
 }
 
@@ -112,6 +113,7 @@ export const SupabaseService = {
         priority: complaint.priority === 'عاجل' ? 'عاجل' : (complaint.priority === 'متوسط' ? 'متوسط' : 'عادي'),
         deadline: complaint.dueDate || new Date(Date.now() + 15 * 86400000).toISOString(),
         pin_hash: complaint.secretPin || '',
+        attachments: complaint.attachments || [],
         created_at: complaint.createdAt || new Date().toISOString(),
         updated_at: complaint.updatedAt || new Date().toISOString()
       };
@@ -202,7 +204,7 @@ export const SupabaseService = {
             }
           ],
           internalNotes: [],
-          attachments: []
+          attachments: Array.isArray(row.attachments) ? row.attachments : []
         };
       });
     } catch (err: any) {
@@ -266,7 +268,7 @@ export const SupabaseService = {
           }
         ],
         internalNotes: [],
-        attachments: []
+        attachments: Array.isArray(row.attachments) ? row.attachments : []
       };
     } catch {
       return null;
@@ -326,7 +328,7 @@ export const SupabaseService = {
                   }
                 ],
                 internalNotes: [],
-                attachments: []
+                attachments: Array.isArray(row.attachments) ? row.attachments : []
               };
               onNewComplaint(mapped);
             }
