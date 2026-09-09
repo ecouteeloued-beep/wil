@@ -40,6 +40,7 @@ export const UsersView: React.FC<UsersViewProps> = ({ user, addToast }) => {
   // Form states for Add / Edit
   const [formData, setFormData] = useState({
     name: '',
+    username: '',
     roleTitle: '',
     email: '',
     phone: '',
@@ -84,6 +85,7 @@ export const UsersView: React.FC<UsersViewProps> = ({ user, addToast }) => {
   const handleOpenAdd = () => {
     setFormData({
       name: '',
+      username: '',
       roleTitle: '',
       email: '',
       phone: '',
@@ -100,6 +102,7 @@ export const UsersView: React.FC<UsersViewProps> = ({ user, addToast }) => {
     setEditingUser(targetUser);
     setFormData({
       name: targetUser.name,
+      username: targetUser.username || '',
       roleTitle: targetUser.roleTitle || '',
       email: targetUser.email,
       phone: targetUser.phone || '',
@@ -138,6 +141,7 @@ export const UsersView: React.FC<UsersViewProps> = ({ user, addToast }) => {
     if (editingUser) {
       const remoteResult = await SupabaseService.updateStaffAccount({
         id: editingUser.id,
+        username: formData.username,
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
@@ -152,6 +156,7 @@ export const UsersView: React.FC<UsersViewProps> = ({ user, addToast }) => {
       // Update existing
       AdminService.updateUser(editingUser.id, {
         name: formData.name,
+        username: formData.username,
         roleTitle: formData.roleTitle,
         email: formData.email,
         phone: formData.phone,
@@ -383,7 +388,7 @@ export const UsersView: React.FC<UsersViewProps> = ({ user, addToast }) => {
                             </span>
                           )}
                         </div>
-                        <div className="text-[11px] text-gray-400 font-mono mt-0.5">{u.email}</div>
+                        <div className="text-[11px] text-gray-400 font-mono mt-0.5">{u.username || '—'} · {u.email}</div>
                       </div>
                     </div>
                   </td>
@@ -485,6 +490,10 @@ export const UsersView: React.FC<UsersViewProps> = ({ user, addToast }) => {
 
               <form onSubmit={handleSaveUser} className="p-6 overflow-y-auto space-y-5 text-xs">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block font-bold text-gray-700 mb-1">اسم المستخدم للدخول</label>
+                    <input type="text" required pattern="[A-Za-z0-9._-]{3,40}" value={formData.username} onChange={(e) => setFormData({ ...formData, username: e.target.value.toLowerCase() })} placeholder="wali" className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-[#006233] outline-none font-mono" />
+                  </div>
                   <div>
                     <label className="block font-bold text-gray-700 mb-1">الاسم واللقب</label>
                     <input

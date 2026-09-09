@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { AlertCircle, ArrowRight, Eye, EyeOff, KeyRound, Lock, ShieldCheck, User as UserIcon } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
+import { SupabaseService } from '../../services/supabaseService';
 import { SecurityRateLimiter } from '../../utils/security';
 import { SystemUser, UserRole } from '../../types';
 
@@ -45,6 +46,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onCancel }) => 
     }
 
     const identifier = email.trim().toLowerCase();
+    const loginEmail = await SupabaseService.resolveLoginIdentifier(identifier);
     const limit = SecurityRateLimiter.checkLimit('admin-login', identifier || 'anonymous');
     if (limit.isLocked) {
       setError(limit.message || 'تم إيقاف المحاولات مؤقتاً لأسباب أمنية.');
@@ -53,20 +55,20 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onCancel }) => 
 
     setIsVerifying(true);
     const { data, error: authError } = await supabase.auth.signInWithPassword({
-      email: identifier,
+      email: loginEmail || identifier,
       password,
     });
 
     if (authError || !data.user) {
       SecurityRateLimiter.registerFailure('admin-login', identifier || 'anonymous');
       setIsVerifying(false);
-      setError('بيانات الدخول غير صحيحة أو الحساب غير مخول للوصول إلى لوحة الإدارة.');
+      setError('اسم المستخدم أو البريد المهني أو كلمة المرور غير صحيحة.');
       return;
     }
 
     const { data: profile, error: profileError } = await supabase
       .from('users')
-      .select('id,name,email,role,department,phone,is_active')
+      .select('id,username,name,email,role,department,phone,is_active')
       .eq('id', data.user.id)
       .maybeSingle();
 
@@ -82,6 +84,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onCancel }) => 
     const role = (profile.role || 'employee') as UserRole;
     onLogin({
       id: profile.id,
+      username: profile.username,
       name: profile.name,
       role,
       roleTitle: ROLE_TITLES[role] || 'موظف النظام',
@@ -128,7 +131,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onCancel }) => 
             <div>
               <label className="block text-xs font-bold text-gray-300 mb-1.5">البريد الإلكتروني المهني</label>
               <div className="relative"><UserIcon className="w-4 h-4 text-gray-400 absolute right-3.5 top-1/2 -translate-y-1/2" />
-                <input type="email" required autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-black/40 border border-white/10 focus:border-emerald-500 rounded-xl pr-10 pl-4 py-3 text-sm text-white font-mono outline-none" placeholder="name@example.gov.dz" />
+                <input type="text" required autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-black/40 border border-white/10 focus:border-emerald-500 rounded-xl pr-10 pl-4 py-3 text-sm text-white font-mono outline-none" placeholder="اسم المستخدم أو name@example.gov.dz" />
               </div>
             </div>
             <div>
