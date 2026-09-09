@@ -114,7 +114,7 @@ export default function App() {
         }}
       />
 
-      <div className="min-h-screen flex flex-col bg-[#F8F9FA] text-gray-900 font-tajawal selection:bg-[#006233]/20 selection:text-[#006233]">
+      <div className="min-h-screen flex flex-col bg-[#f4ebda] text-[#26352f] font-tajawal selection:bg-[#c67d2a]/20 selection:text-[#2f5d45]">
         <Header 
           onNavigateToForm={handleScrollToForm} 
           onOpenWelcome={() => setShowSplash(true)}
