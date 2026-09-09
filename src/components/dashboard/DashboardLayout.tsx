@@ -475,7 +475,7 @@ export const DashboardLayout: React.FC<{ user: SystemUser; onLogout: () => void 
               {/* Official Algerian Republic Header */}
               <div className="text-center border-b-2 border-[#006233] pb-6">
                 <h3 className="font-changa font-bold text-base text-gray-900">الجمهورية الجزائرية الديمقراطية الشعبية</h3>
-                <h4 className="font-changa font-bold text-sm text-[#006233] mt-1">وزارة الداخلية والجماعات المحلية والتهيئة العمرانية</h4>
+                <h4 className="font-changa font-bold text-sm text-[#006233] mt-1">وزارة الداخلية والجماعات المحلية والنقل</h4>
                 <div className="flex items-center justify-center gap-4 my-3">
                   <div className="w-14 h-14">
                     <img src="/assets/algeria-emblem.png" alt="شعار الجمهورية" className="w-full h-full object-contain mx-auto" />

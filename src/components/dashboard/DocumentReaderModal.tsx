@@ -119,7 +119,7 @@ export const DocumentReaderModal: React.FC<DocumentReaderModalProps> = ({
 
     if (name.includes('هوية') || name.includes('بيومترية')) {
       return `الجمهورية الجزائرية الديمقراطية الشعبية
-وزارة الداخلية والجماعات المحلية والتهيئة العمرانية
+وزارة الداخلية والجماعات المحلية والنقل
 بطاقة التعريف الوطنية البيومترية الإلكترونية
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 اللقب والاسم: ${citizenName}
@@ -486,7 +486,7 @@ ${details || 'وثيقة إدارية ثبوتية مؤيدة للعريضة ا�
                   {/* Header: Republic of Algeria */}
                   <div className="text-center pb-6 border-b-2 border-double border-gray-300 space-y-1">
                     <h2 className="font-amiri font-bold text-lg text-gray-900">الجمهورية الجزائرية الديمقراطية الشعبية</h2>
-                    <h3 className="font-cairo font-bold text-sm text-gray-700">وزارة الداخلية والجماعات المحلية والتهيئة العمرانية</h3>
+                    <h3 className="font-cairo font-bold text-sm text-gray-700">وزارة الداخلية والجماعات المحلية والنقل</h3>
                     <div className="flex items-center justify-between text-xs font-bold text-gray-600 pt-2 px-2">
                       <span>ولاية الوادي</span>
                       <span className="font-mono text-[#006233]">الرقم التعريفي: {grievance?.id || 'غير متوفر'}</span>
