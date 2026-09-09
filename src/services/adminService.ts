@@ -16,14 +16,12 @@ import {
 import { MOCK_COMPLAINTS_SEED } from './complaintRepository';
 import { SecurityRateLimiter, sanitizeInput } from '../utils/security';
 import { SupabaseService } from './supabaseService';
+import { supabase } from '../lib/supabase';
 
 const USERS_STORAGE_KEY = 'wilaya_eloued_admin_users';
 const GRIEVANCES_STORAGE_KEY = 'wilaya_eloued_admin_grievances_clean_2026';
 const AUDIT_LOGS_STORAGE_KEY = 'wilaya_eloued_admin_audit_logs';
 const NOTIFICATIONS_STORAGE_KEY = 'wilaya_eloued_admin_notifications';
-const CURRENT_USER_KEY = 'wilaya_eloued_current_session_user';
-const ADMIN_AUTH_KEY = 'wilaya_eloued_admin_authenticated';
-const ADMIN_AUTH_TIMESTAMP_KEY = 'wilaya_eloued_admin_auth_timestamp';
 export const SYSTEM_SETTINGS_KEY = 'wilaya_eloued_system_settings';
 
 
@@ -144,26 +142,11 @@ export const AdminService = {
   },
 
   getCurrentUser: (): SystemUser | null => {
-    try {
-      const stored = localStorage.getItem(CURRENT_USER_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        const allUsers = AdminService.getUsers();
-        const found = allUsers.find(u => u.id === parsed.id);
-        if (found) {
-          return found;
-        }
-      }
-      // Default to Wali for first load
-      return null;
-    } catch {
-      return null;
-    }
+    // Privileged identity comes from Supabase Auth and the active users profile.
+    return null;
   },
 
-  setCurrentUser: (user: SystemUser): void => {
-    localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
-  },
+  setCurrentUser: (_user: SystemUser): void => {},
 
   switchUserById: (userId: string): SystemUser | null => {
     const users = AdminService.getUsers();
@@ -179,48 +162,13 @@ export const AdminService = {
   loginWithPinAndRole: (_role: UserRole, _pin: string) => ({ success: false, error: 'استخدم مصادقة Supabase Auth.' }),
 
   isAdminLoggedIn: (): boolean => {
-    try {
-      const isAuth = localStorage.getItem(ADMIN_AUTH_KEY) === 'true';
-      if (!isAuth) return false;
-
-      // Check Session Expiration based on system settings
-      const authTimestamp = localStorage.getItem(ADMIN_AUTH_TIMESTAMP_KEY);
-      if (authTimestamp) {
-        const loginTime = parseInt(authTimestamp, 10);
-        const settings = AdminService.getSystemSettings();
-        const timeoutMins = parseInt(settings.sessionTimeoutMins || '30', 10) || 30;
-        const timeoutMs = timeoutMins * 60 * 1000;
-        
-        if (Date.now() - loginTime > timeoutMs) {
-          // Session has timed out - trigger secure logout
-          AdminService.logoutAdmin();
-          return false;
-        }
-      }
-      return true;
-    } catch {
-      return false;
-    }
+    return false;
   },
 
-  setAdminLoggedIn: (status: boolean): void => {
-    try {
-      if (status) {
-        localStorage.setItem(ADMIN_AUTH_KEY, 'true');
-        localStorage.setItem(ADMIN_AUTH_TIMESTAMP_KEY, Date.now().toString());
-      } else {
-        localStorage.removeItem(ADMIN_AUTH_KEY);
-        localStorage.removeItem(ADMIN_AUTH_TIMESTAMP_KEY);
-      }
-    } catch {}
-  },
+  setAdminLoggedIn: (_status: boolean): void => {},
 
   logoutAdmin: (): void => {
-    try {
-      localStorage.removeItem(ADMIN_AUTH_KEY);
-      localStorage.removeItem(ADMIN_AUTH_TIMESTAMP_KEY);
-      localStorage.removeItem(CURRENT_USER_KEY);
-    } catch {}
+    void supabase?.auth.signOut();
   },
 
   loginWithPinUniversal: (_pin: string) => ({ success: false, error: 'استخدم مصادقة Supabase Auth.' }),

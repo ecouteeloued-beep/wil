@@ -4,6 +4,8 @@ import { Hero } from './components/Hero';
 import { GrievanceForm } from './components/GrievanceForm';
 import { SplashScreen } from './components/SplashScreen';
 import { GrievanceCategory, SystemUser } from './types';
+import { supabase, isSupabaseConfigured } from './lib/supabase';
+import { getAuthenticatedStaff } from './services/authService';
 
 // Lazy loaded components (Code Splitting for performance)
 const Domains = React.lazy(() => import('./components/Domains').then(module => ({ default: module.Domains })));
@@ -26,44 +28,41 @@ const SectionLoader = () => (
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
   const [currentView, setCurrentView] = useState<'home' | 'privacy' | 'vision' | 'admin_dashboard'>('home');
-  const [adminUser, setAdminUser] = useState<SystemUser | null>(() => {
-    try {
-      const saved = window.localStorage.getItem('wilaya_eloued_current_session_user');
-      return saved ? JSON.parse(saved) as SystemUser : null;
-    } catch {
-      return null;
-    }
-  });
+  const [adminUser, setAdminUser] = useState<SystemUser | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
   const [formActiveTab, setFormActiveTab] = useState<'new' | 'track'>('new');
   const [selectedCategory, setSelectedCategory] = useState<GrievanceCategory>('الحالة المدنية');
 
   useEffect(() => {
-    // Check pathname, hash, and query params for admin access: e.g. /admin, #/admin, ?portal=admin
+    // Admin navigation is discoverable by design; authorization is enforced by Supabase Auth/RLS.
     const pathname = window.location.pathname.toLowerCase();
-    const hash = window.location.hash.toLowerCase();
-    const params = new URLSearchParams(window.location.search);
-    
-    if (
-      pathname === '/admin' ||
-      pathname.startsWith('/admin/') ||
-      pathname.includes('/admin') ||
-      hash.includes('admin') ||
-      params.get('portal') === 'admin' ||
-      params.get('admin') === 'true'
-    ) {
+    if (pathname === '/admin' || pathname.startsWith('/admin/')) {
       setCurrentView('admin_dashboard');
     }
 
-    // Secret keyboard shortcut: Ctrl + Shift + A (or Cmd + Shift + A)
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'a') {
-        e.preventDefault();
-        setCurrentView('admin_dashboard');
-      }
-    };
+    if (!isSupabaseConfigured || !supabase) {
+      setAuthChecked(true);
+      return;
+    }
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    let mounted = true;
+    void getAuthenticatedStaff().then((user) => {
+      if (mounted) {
+        setAdminUser(user);
+        setAuthChecked(true);
+      }
+    });
+
+    const { data: authListener } = supabase.auth.onAuthStateChange(() => {
+      void getAuthenticatedStaff().then((user) => {
+        if (mounted) setAdminUser(user);
+      });
+    });
+
+    return () => {
+      mounted = false;
+      authListener.subscription.unsubscribe();
+    };
   }, []);
 
   const handleSelectTab = (tab: 'new' | 'track') => {
@@ -89,6 +88,10 @@ export default function App() {
   };
 
   if (currentView === 'admin_dashboard') {
+    if (!authChecked) {
+      return <SectionLoader />;
+    }
+
     if (!adminUser) {
       return (
         <Suspense fallback={<SectionLoader />}>
@@ -104,8 +107,8 @@ export default function App() {
       <Suspense fallback={<SectionLoader />}>
         <DashboardLayout 
           user={adminUser} 
-          onLogout={() => {
-            window.localStorage.removeItem('wilaya_eloued_current_session_user');
+          onLogout={async () => {
+            await supabase?.auth.signOut();
             setAdminUser(null);
             setCurrentView('home');
           }}

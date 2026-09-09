@@ -4,30 +4,13 @@ import { AlertCircle, ArrowRight, Eye, EyeOff, KeyRound, Lock, ShieldCheck, User
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { SupabaseService } from '../../services/supabaseService';
 import { SecurityRateLimiter } from '../../utils/security';
-import { SystemUser, UserRole } from '../../types';
+import { SystemUser } from '../../types';
+import { getAuthenticatedStaff } from '../../services/authService';
 
 interface AdminLoginProps {
   onLogin: (user: SystemUser) => void;
   onCancel: () => void;
 }
-
-const ROLE_TITLES: Record<string, string> = {
-  super_admin: 'المشرف التقني العام',
-  wali: 'والي الولاية',
-  chef_cabinet: 'الأمين العام للولاية',
-  head_department: 'رئيس الديوان',
-  supervisor: 'رئيس خلية الإصغاء والتكفل',
-  employee: 'الموظف المكلف',
-};
-
-const ROLE_PERMISSIONS: Record<string, string[]> = {
-  wali: ['view_all', 'assign_grievance', 'draft_reply', 'approve_reply', 'manage_users', 'view_audit_logs', 'manage_settings'],
-  chef_cabinet: ['view_all', 'assign_grievance', 'draft_reply', 'approve_reply', 'view_audit_logs'],
-  super_admin: ['manage_users', 'view_audit_logs', 'manage_settings'],
-  supervisor: ['view_department', 'assign_grievance', 'draft_reply', 'approve_reply', 'view_audit_logs'],
-  head_department: ['view_department', 'assign_grievance', 'draft_reply', 'view_audit_logs'],
-  employee: ['view_assigned', 'draft_reply'],
-};
 
 export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onCancel }) => {
   const [email, setEmail] = useState('');
@@ -66,13 +49,8 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onCancel }) => 
       return;
     }
 
-    const { data: profile, error: profileError } = await supabase
-      .from('users')
-      .select('id,username,name,email,role,department,phone,is_active')
-      .eq('id', data.user.id)
-      .maybeSingle();
-
-    if (profileError || !profile || !profile.is_active) {
+    const authenticatedUser = await getAuthenticatedStaff();
+    if (!authenticatedUser) {
       await supabase.auth.signOut();
       SecurityRateLimiter.registerFailure('admin-login', identifier || 'anonymous');
       setIsVerifying(false);
@@ -81,24 +59,6 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onCancel }) => 
     }
 
     SecurityRateLimiter.reset('admin-login', identifier || 'anonymous');
-    const role = (profile.role || 'employee') as UserRole;
-    const authenticatedUser: SystemUser = {
-      id: profile.id,
-      username: profile.username,
-      name: profile.name,
-      role,
-      roleTitle: ROLE_TITLES[role] || 'موظف النظام',
-      email: profile.email,
-      phone: profile.phone || '',
-      department: profile.department || '',
-      status: 'نشط',
-      assignedCount: 0,
-      resolvedCount: 0,
-      overdueCount: 0,
-      lastActive: new Date().toISOString(),
-      permissions: ROLE_PERMISSIONS[role] || [],
-    };
-    localStorage.setItem('wilaya_eloued_current_session_user', JSON.stringify(authenticatedUser));
     onLogin(authenticatedUser);
   };
 
