@@ -11,10 +11,6 @@ import {
   ExternalLink,
   Sparkles,
   X,
-  Facebook,
-  Youtube,
-  Twitter,
-  Instagram,
   Globe
 } from 'lucide-react';
 
@@ -83,7 +79,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
                     ⵜⴰⴳⴷⵓⴷⴰ ⵜⴰⵣⵣⴰⵢⵔⵉⵜ ⵜⴰⵎⴰⴳⴷⴰⵢⵜ ⵜⴰⵖⴻⵔⴼⴰⵏⵜ
                   </p>
                   <p className="font-tajawal font-bold text-[11px] sm:text-xs text-[#907b00] mt-0.5">
-                    وزارة الداخليـــة و الجماعـــات المحليـــة و التهيئة العمرانية
+                    وزارة الداخليـــة و الجماعـــات المحليـــة و النقل
                   </p>
                   <p className="font-changa font-extrabold text-base sm:text-xl text-[#006233] leading-none mt-0.5">
                     ولايــــــــــــــة الــــــــــــــــوادي
@@ -100,13 +96,6 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
                   <span className="text-[#0b9a39] font-black text-2xl sm:text-3xl font-noto leading-none mt-0.5 tracking-tight">
                     معكـــــــــم
                   </span>
-                  <div className="flex items-center gap-2 mt-1 text-gray-400 text-xs">
-                    <Facebook className="w-3 h-3 hover:text-blue-600 transition-colors" />
-                    <Youtube className="w-3 h-3 hover:text-red-600 transition-colors" />
-                    <Twitter className="w-3 h-3 hover:text-black transition-colors" />
-                    <Instagram className="w-3 h-3 hover:text-pink-600 transition-colors" />
-                    <Globe className="w-3 h-3 hover:text-emerald-700 transition-colors" />
-                  </div>
                 </div>
               </div>
 

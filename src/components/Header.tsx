@@ -140,7 +140,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigateToForm, onOpenWelcome,
                 </p>
                 {/* 3. Ministère */}
                 <p className="font-tajawal font-bold text-xs sm:text-sm text-[#907b00] leading-snug mt-0.5">
-                  وزارة الداخليـــة و الجماعـــات المحليـــة و التهيئة العمرانية
+                  وزارة الداخليـــة و الجماعـــات المحليـــة و النقل
                 </p>
                 {/* 4. Wilaya d'El Oued in bold Algerian Green */}
                 <div className="flex items-baseline gap-2 mt-0.5">
