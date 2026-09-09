@@ -14,13 +14,14 @@ const ROLE_TITLES: Record<string, string> = {
   super_admin: 'المشرف التقني العام',
   wali: 'والي الولاية',
   chef_cabinet: 'الأمين العام للولاية',
-  head_department: 'رئيس المصلحة',
-  supervisor: 'مسؤول الخلية',
-  employee: 'موظف معالجة',
+  head_department: 'رئيس الديوان',
+  supervisor: 'رئيس خلية الإصغاء والتكفل',
+  employee: 'الموظف المكلف',
 };
 
 const ROLE_PERMISSIONS: Record<string, string[]> = {
   wali: ['view_all', 'assign_grievance', 'draft_reply', 'approve_reply', 'manage_users', 'view_audit_logs', 'manage_settings'],
+  chef_cabinet: ['view_all', 'assign_grievance', 'draft_reply', 'approve_reply', 'view_audit_logs'],
   super_admin: ['manage_users', 'view_audit_logs', 'manage_settings'],
   supervisor: ['view_department', 'assign_grievance', 'draft_reply', 'approve_reply', 'view_audit_logs'],
   head_department: ['view_department', 'assign_grievance', 'draft_reply', 'view_audit_logs'],
