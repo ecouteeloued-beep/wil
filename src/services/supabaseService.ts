@@ -58,6 +58,27 @@ export const SupabaseService = {
     }));
   },
 
+  updateStaffAccount: async (payload: {
+    id: string; name: string; email: string; phone: string;
+    department: string; role: UserRole; isActive: boolean;
+  }): Promise<{ success: boolean; error?: string }> => {
+    if (!isSupabaseConfigured || !supabase) return { success: false, error: 'Supabase غير مهيأ.' };
+    const { error } = await supabase.rpc('admin_update_staff_account', {
+      p_user_id: payload.id, p_name: payload.name, p_email: payload.email,
+      p_phone: payload.phone, p_department: payload.department,
+      p_role: payload.role, p_is_active: payload.isActive,
+    });
+    return error ? { success: false, error: error.message } : { success: true };
+  },
+
+  resetStaffPassword: async (userId: string, newPassword: string): Promise<{ success: boolean; error?: string }> => {
+    if (!isSupabaseConfigured || !supabase) return { success: false, error: 'Supabase غير مهيأ.' };
+    const { error } = await supabase.rpc('admin_reset_staff_password', {
+      p_user_id: userId, p_new_password: newPassword,
+    });
+    return error ? { success: false, error: error.message } : { success: true };
+  },
+
   /**
    * Insert or Upsert a complaint to Supabase remote database
    */
