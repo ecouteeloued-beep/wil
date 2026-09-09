@@ -226,7 +226,7 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
         }
       }
 
-      const newSubmission = GrievanceService.save({
+      const newSubmission = await GrievanceService.save({
         nin: cleanNin,
         fullName: cleanFullName,
         phone: cleanPhone,
@@ -245,7 +245,7 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
       setSubmittedTicket(newSubmission);
     } catch (err) {
       console.error('Submission error:', err);
-      setFormError('حدث خطأ أثناء حفظ العريضة، يرجى المحاولة لاحقاً');
+      setFormError(err instanceof Error ? err.message : 'حدث خطأ أثناء حفظ العريضة، يرجى المحاولة لاحقاً');
     } finally {
       setIsSubmitting(false);
     }
