@@ -26,6 +26,15 @@ export const SupabaseService = {
     return isSupabaseConfigured && Boolean(supabase);
   },
 
+  markComplaintViewed: async (trackingId: string): Promise<{ success: boolean; error?: string }> => {
+    if (!isSupabaseConfigured || !supabase) return { success: false, error: 'Supabase غير مهيأ.' };
+    const { error } = await supabase
+      .from('complaints')
+      .update({ status: 'تم الاطلاع', updated_at: new Date().toISOString() })
+      .eq('tracking_id', trackingId);
+    return error ? { success: false, error: error.message } : { success: true };
+  },
+
   resolveLoginIdentifier: async (identifier: string): Promise<string | null> => {
     if (!isSupabaseConfigured || !supabase) return null;
     if (identifier.includes('@')) return identifier.trim().toLowerCase();

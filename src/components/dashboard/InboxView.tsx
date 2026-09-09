@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { 
   Search, Filter, Eye, CheckCircle2, MapPin, Phone, Building2, Calendar, 
   ArrowLeft, User, Briefcase, History, MessageSquare, MoreVertical, 
@@ -75,6 +75,12 @@ export const InboxView: React.FC<InboxViewProps> = ({
   const [searchMode, setSearchMode] = useState<'all' | 'id' | 'name' | 'keyword'>(initialSearchMode);
   const [statusFilter, setStatusFilter] = useState<string>('الكل');
   const [selectedTicket, setSelectedTicket] = useState<EnhancedGrievance | null>(null);
+
+  const handleAttachmentViewed = useCallback(() => {
+    if (!selectedTicket) return;
+    void SupabaseService.markComplaintViewed(selectedTicket.id);
+    setSelectedTicket(previous => previous ? { ...previous, status: 'تم الاطلاع', statusCode: 'VIEWED' } : previous);
+  }, [selectedTicket]);
 
   // Saved Searches state
   const [savedSearches, setSavedSearches] = useState<{ id: string; name: string; query: string; mode: string; date: string }[]>([]);
@@ -2254,6 +2260,7 @@ export const InboxView: React.FC<InboxViewProps> = ({
           allAttachments={getTicketAttachments(selectedTicket)}
           grievance={selectedTicket}
           onSelectAttachment={(newAtt) => setReadingAttachment(newAtt)}
+          onViewed={handleAttachmentViewed}
           addToast={addToast}
         />
       )}
