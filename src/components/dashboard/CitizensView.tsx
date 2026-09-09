@@ -13,87 +13,8 @@ interface CitizensViewProps {
   addToast?: (toast: { type: 'success' | 'info' | 'warning' | 'error'; title: string; message: string }) => void;
 }
 
-// Mock Data for Citizens
-const INITIAL_CITIZENS = [
-  {
-    id: 'CIT-2026-001',
-    nin: '198501234567890123',
-    fullName: 'أحمد بن علي',
-    phone: '0655123456',
-    email: 'ahmed.ali@email.com',
-    municipality: 'الوادي',
-    neighborhood: 'حي 8 ماي',
-    registrationDate: '2026-01-15T10:30:00Z',
-    status: 'موثق',
-    filesCount: 3,
-    history: [
-      { id: 'WL-2026-000125', date: '2026-09-08', subject: 'طلب تسوية سكن ريفي', category: 'السكن', status: 'جديد' },
-      { id: 'WL-2025-004512', date: '2025-11-20', subject: 'إنارة عمومية', category: 'التنمية المحلية', status: 'مغلق' },
-      { id: 'WL-2024-001102', date: '2024-05-10', subject: 'تعبيد طريق', category: 'الطرقات', status: 'مغلق' }
-    ]
-  },
-  {
-    id: 'CIT-2026-002',
-    nin: '199009876543210987',
-    fullName: 'فاطمة الزهراء',
-    phone: '0544987654',
-    email: 'fatima.z@email.com',
-    municipality: 'قمار',
-    neighborhood: 'الوسط',
-    registrationDate: '2026-03-22T14:15:00Z',
-    status: 'موثق',
-    filesCount: 1,
-    history: [
-      { id: 'WL-2026-000124', date: '2026-09-07', subject: 'نقص الأدوية في المستوصف', category: 'الصحة', status: 'تم التوجيه للمصلحة المختصة' }
-    ]
-  },
-  {
-    id: 'CIT-2026-003',
-    nin: '197805554443332221',
-    fullName: 'يوسف منصوري',
-    phone: '0777123456',
-    email: 'youssef@email.com',
-    municipality: 'الرباح',
-    neighborhood: 'حي الشهداء',
-    registrationDate: '2026-06-10T09:00:00Z',
-    status: 'قيد التحقق',
-    filesCount: 2,
-    history: [
-      { id: 'WL-2026-000123', date: '2026-09-06', subject: 'تهيئة الطريق المؤدي للمدرسة', category: 'الطرقات', status: 'تم الحل' },
-      { id: 'WL-2026-000088', date: '2026-07-01', subject: 'تسرب مياه الشرب', category: 'البيئة', status: 'مغلق' }
-    ]
-  },
-  {
-    id: 'CIT-2026-004',
-    nin: '198204445556667778',
-    fullName: 'بلقاسم قدور',
-    phone: '0661223344',
-    email: 'b.kaddour@email.dz',
-    municipality: 'البياضة',
-    neighborhood: 'حي الفلاحين',
-    registrationDate: '2026-07-12T11:20:00Z',
-    status: 'موثق',
-    filesCount: 2,
-    history: [
-      { id: 'WL-2026-000140', date: '2026-09-05', subject: 'تزويد منطقة النشاطات بالكهرباء', category: 'الطاقة', status: 'قيد المعالجة' }
-    ]
-  },
-  {
-    id: 'CIT-2026-005',
-    nin: '199501112223334445',
-    fullName: 'مريم شريف',
-    phone: '0550334455',
-    email: 'm.cherif@email.dz',
-    municipality: 'الدبيلة',
-    neighborhood: 'حي النور',
-    registrationDate: '2026-08-01T08:45:00Z',
-    status: 'موثق',
-    filesCount: 1,
-    history: [
-      { id: 'WL-2026-000155', date: '2026-09-04', subject: 'توفير حافلة نقل مدرسي', category: 'التربية', status: 'جديد' }
-    ]
-  }
-];
+// Citizen records are loaded from the protected data service; the production build starts empty.
+const INITIAL_CITIZENS: any[] = [];
 
 export const CitizensView: React.FC<CitizensViewProps> = ({ user, addToast }) => {
   const [citizens, setCitizens] = useState(INITIAL_CITIZENS);

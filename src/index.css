@@ -97,3 +97,73 @@ body {
 .custom-scrollbar:hover::-webkit-scrollbar-thumb {
   background: #D1D5DB;
 }
+
+/* Dashboard readability theme: a low-glare dark workspace with an optional light mode. */
+.dashboard-theme {
+  min-height: 100vh;
+  transition: background-color 180ms ease, color 180ms ease;
+}
+
+.dashboard-dark {
+  background: #101923 !important;
+  color: #e5edf5 !important;
+}
+
+.dashboard-dark .bg-white,
+.dashboard-dark .bg-white\/95 {
+  background-color: #182431 !important;
+  color: #e5edf5;
+}
+
+.dashboard-dark .bg-gray-50,
+.dashboard-dark .bg-gray-50\/60,
+.dashboard-dark .bg-gray-100 {
+  background-color: #202e3c !important;
+}
+
+.dashboard-dark .text-gray-900,
+.dashboard-dark .text-gray-800,
+.dashboard-dark .text-gray-700 {
+  color: #e5edf5 !important;
+}
+
+.dashboard-dark .text-gray-600,
+.dashboard-dark .text-gray-500,
+.dashboard-dark .text-gray-400 {
+  color: #aebdca !important;
+}
+
+.dashboard-dark .border-gray-100,
+.dashboard-dark .border-gray-200,
+.dashboard-dark .border-gray-200\/80,
+.dashboard-dark .border-gray-300 {
+  border-color: #344657 !important;
+}
+
+.dashboard-dark input,
+.dashboard-dark textarea,
+.dashboard-dark select {
+  background-color: #182431 !important;
+  color: #e5edf5 !important;
+  border-color: #405466 !important;
+}
+
+.dashboard-dark input::placeholder,
+.dashboard-dark textarea::placeholder {
+  color: #8fa2b3 !important;
+}
+
+.dashboard-dark .hover\:bg-gray-50:hover,
+.dashboard-dark .hover\:bg-gray-100:hover {
+  background-color: #2b3b4b !important;
+}
+
+.dashboard-dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #496174;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-theme {
+    transition: none;
+  }
+}

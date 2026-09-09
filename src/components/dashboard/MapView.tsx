@@ -6,15 +6,7 @@ import { APIProvider, Map, AdvancedMarker, Pin } from '@vis.gl/react-google-maps
 export const MapView: React.FC = () => {
   const [selectedZone, setSelectedZone] = useState<any>(null);
 
-  const hotZones = [
-    { name: 'بلدية الوادي', count: 145, trend: '+12%', status: 'high', lat: 33.3667, lng: 6.8667, topSector: 'السكن والتعمير', resolved: 110 },
-    { name: 'بلدية قمار', count: 89, trend: '+5%', status: 'medium', lat: 33.4833, lng: 6.8000, topSector: 'المياه والصرف', resolved: 68 },
-    { name: 'بلدية البياضة', count: 67, trend: '-2%', status: 'medium', lat: 33.3000, lng: 6.8833, topSector: 'الكهرباء والغاز', resolved: 52 },
-    { name: 'بلدية الرباح', count: 112, trend: '+18%', status: 'high', lat: 33.2667, lng: 6.8833, topSector: 'الطرق والتهيئة', resolved: 82 },
-    { name: 'بلدية حاسي خليفة', count: 34, trend: '-5%', status: 'low', lat: 33.5667, lng: 6.9667, topSector: 'الصحة والتمريض', resolved: 28 },
-    { name: 'بلدية الدبيلة', count: 58, trend: '+3%', status: 'medium', lat: 33.5167, lng: 6.9000, topSector: 'النقل المدرسي', resolved: 41 },
-    { name: 'بلدية الرقيبة', count: 47, trend: '-1%', status: 'low', lat: 33.6000, lng: 6.7833, topSector: 'البيئة والنظافة', resolved: 39 }
-  ];
+  const hotZones: any[] = [];
 
   return (
     <div className="space-y-6 font-tajawal">

@@ -53,11 +53,9 @@ export const SupabaseService = {
         updated_at: complaint.updatedAt || new Date().toISOString()
       };
 
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('complaints')
-        .upsert(payload, { onConflict: 'tracking_id' })
-        .select()
-        .single();
+        .upsert(payload, { onConflict: 'tracking_id' });
 
       if (error) {
         console.warn('⚠️ Supabase complaint insert notice:', error.message);
@@ -65,7 +63,7 @@ export const SupabaseService = {
       }
 
       console.info('✅ Complaint successfully synchronized to Supabase Cloud:', trackingId);
-      return { success: true, data };
+      return { success: true };
     } catch (err: any) {
       console.warn('⚠️ Error communicating with Supabase:', err?.message || err);
       return { success: false, error: err?.message || 'Network error' };
@@ -108,11 +106,11 @@ export const SupabaseService = {
         return {
           id: trackingId,
           trackingNumber: trackingId,
-          secretPin: row.pin_hash || '',
+          secretPin: undefined,
           statusCode,
-          nin: row.national_id_encrypted || '',
+          nin: undefined,
           fullName: row.citizen_name || 'مواطن',
-          phone: row.phone_encrypted || '',
+          phone: '',
           email: '',
           applicantDaira: row.municipality || 'الوادي',
           applicantMunicipality: row.municipality || 'الوادي',
@@ -174,10 +172,10 @@ export const SupabaseService = {
       return {
         id: row.tracking_id || row.id,
         trackingNumber: row.tracking_id || row.id,
-        secretPin: row.pin_hash || '',
+        secretPin: undefined,
         fullName: row.citizen_name || 'مواطن',
-        nin: row.national_id_encrypted || '',
-        phone: row.phone_encrypted || '',
+        nin: undefined,
+        phone: '',
         applicantDaira: row.municipality || 'الوادي',
         applicantMunicipality: row.municipality || 'الوادي',
         applicantNeighborhood: 'حي سكني',

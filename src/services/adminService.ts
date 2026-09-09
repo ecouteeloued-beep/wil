@@ -96,576 +96,22 @@ export const WILAYA_MUNICIPALITIES_22 = [
   { code: '3922', name: 'دويلعة', daira: 'طالب العربي' }
 ];
 
-export const SEED_USERS: SystemUser[] = [
-  {
-    id: 'usr-wali',
-    name: 'السيد والي ولاية الوادي',
-    role: 'wali',
-    roleTitle: 'والي ولاية الوادي — المسؤول التنفيذي الأول',
-    email: 'wali@eloued.gov.dz',
-    phone: '032 21 00 01',
-    department: 'ديوان والي ولاية الوادي',
-    status: 'نشط',
-    assignedCount: 0,
-    resolvedCount: 840,
-    overdueCount: 0,
-    lastActive: 'نشط الآن',
-    permissions: ['sovereign_oversight', 'executive_directives', 'view_all', 'reports', 'map_oversight', 'audit_log']
-  },
-  {
-    id: 'usr-sg',
-    name: 'السيد الأمين العام للولاية',
-    role: 'chef_cabinet',
-    roleTitle: 'الأمين العام للولاية — التنسيق والمتابعة الإدارية',
-    email: 'sg@eloued.gov.dz',
-    phone: '032 21 00 02',
-    department: 'الأمانة العامة لولاية الوادي',
-    status: 'نشط',
-    assignedCount: 0,
-    resolvedCount: 520,
-    overdueCount: 0,
-    lastActive: 'منذ 10 دقائق',
-    permissions: ['admin_coordination', 'view_all', 'assign_departments', 'reports', 'map_oversight', 'audit_log', 'municipalities_manage']
-  },
-  {
-    id: 'usr-daira-eloued',
-    name: 'السيد رئيس دائرة الوادي',
-    role: 'head_department',
-    roleTitle: 'رئيس دائرة الوادي (بلديتي الوادي وكوينين)',
-    email: 'daira.eloued@eloued.gov.dz',
-    phone: '032 21 11 22',
-    department: 'مقر دائرة الوادي',
-    status: 'نشط',
-    assignedCount: 14,
-    resolvedCount: 185,
-    overdueCount: 1,
-    lastActive: 'نشط الآن',
-    permissions: ['daira_oversight', 'view_daira_only', 'transfer_commune', 'process_local']
-  },
-  {
-    id: 'usr-supervisor',
-    name: 'عمر بن سالم',
-    role: 'supervisor',
-    roleTitle: 'مسؤول خلية الإصغاء والتكفل بالعرائض',
-    email: 'o.bensalem@eloued.gov.dz',
-    phone: '032 21 45 10',
-    department: 'ديوان والي ولاية الوادي — خلية الإصغاء',
-    status: 'نشط',
-    assignedCount: 8,
-    resolvedCount: 142,
-    overdueCount: 0,
-    lastActive: 'منذ 5 دقائق',
-    permissions: ['triage', 'assign_agents', 'approve_replies', 'view_all', 'citizens_manage', 'reports']
-  },
-  {
-    id: 'usr-emp-1',
-    name: 'أحمد بن عمار',
-    role: 'employee',
-    roleTitle: 'مكلف بالدراسة والمعالجة (الشؤون الاجتماعية والتنمية)',
-    email: 'a.benammar@eloued.gov.dz',
-    phone: '032 21 45 14',
-    department: 'مصلحة الشؤون الاجتماعية والتنمية المحلية',
-    status: 'نشط',
-    assignedCount: 6,
-    resolvedCount: 49,
-    overdueCount: 1,
-    lastActive: 'نشط الآن',
-    permissions: ['view_assigned', 'process', 'draft_response', 'add_notes', 'request_info']
-  },
-  {
-    id: 'usr-emp-2',
-    name: 'فاطمة الزهراء عثماني',
-    role: 'employee',
-    roleTitle: 'مكلفة بالدراسة والمعالجة (العمران والبيئة)',
-    email: 'fz.othmani@eloued.gov.dz',
-    phone: '032 21 45 18',
-    department: 'مصلحة العمران والبيئة والتهيئة',
-    status: 'نشط',
-    assignedCount: 4,
-    resolvedCount: 38,
-    overdueCount: 0,
-    lastActive: 'منذ 20 دقيقة',
-    permissions: ['view_assigned', 'process', 'draft_response', 'add_notes', 'request_info']
-  },
-  {
-    id: 'usr-admin',
-    name: 'عبد الحفيظ التجاني',
-    role: 'super_admin',
-    roleTitle: 'المشرف التقني العام وأمن الأنظمة (Super Admin)',
-    email: 'admin.cellule@eloued.gov.dz',
-    phone: '032 21 45 00',
-    department: 'مديرية الرقمنة وعصرنة الإدارة الولائية',
-    status: 'نشط',
-    assignedCount: 0,
-    resolvedCount: 0,
-    overdueCount: 0,
-    lastActive: 'نشط الآن',
-    permissions: ['all', 'manage_users', 'manage_rbac', 'system_settings', 'audit_log', 'database_backup']
-  }
-];
+export const SEED_USERS: SystemUser[] = [];
 
 // =========================================================================
 // INITIAL SEED GRIEVANCES (Authentic for Wilaya d'El Oued)
 // =========================================================================
-export const SEED_GRIEVANCES: EnhancedGrievance[] = [
-  ...MOCK_COMPLAINTS_SEED,
-  {
-    id: 'WD-2026-00125',
-    nin: '198439010023456789',
-    fullName: 'بلقاسم مرزوقي',
-    phone: '0661234567',
-    email: 'b.marzouki@gmail.com',
-    applicantDaira: 'الوادي',
-    applicantMunicipality: 'الوادي',
-    applicantNeighborhood: 'حي 19 مارس / تكسبت',
-    subject: 'طلب ربط المحيط الفلاحي بشبكة الكهرباء الفلاحية',
-    grievanceDaira: 'حاسي خليفة',
-    grievanceMunicipality: 'حاسي خليفة',
-    category: 'العمران',
-    sector: 'الفلاحة والطاقة',
-    details: 'نحن فلاحو محيط الغربية بحاسي خليفة نطالب بتسريع وتيرة إنجاز المحول الكهربائي الريفي المسجل لتمكيننا من تشغيل مضخات السقي الفلاحي وتفادي تضرر محاصيل البطاطا والنخيل.',
-    createdAt: '2026-09-02T08:30:00.000Z',
-    updatedAt: '2026-09-07T14:15:00.000Z',
-    status: 'قيد المعالجة',
-    priority: 'عاجل',
-    specialFlags: ['عاجل'],
-    assignedToId: 'usr-emp-1',
-    assignedToName: 'أحمد بن عمار',
-    assignedDepartment: 'مصلحة الشؤون الاجتماعية والتنمية المحلية',
-    assignedAt: '2026-09-02T10:00:00.000Z',
-    dueDate: '2026-09-09T18:00:00.000Z',
-    isOverdue: false,
-    timeline: [
-      {
-        id: 't-1',
-        date: '2026-09-02',
-        time: '08:30',
-        author: 'المواطن بلقاسم مرزوقي',
-        authorRole: 'مواطن',
-        action: 'تم تسجيل الانشغال إلكترونياً عبر البوابة',
-        note: 'تسجيل رسمي للملف مع إرفاق بطاقة الفلاح ومخطط الموقع'
-      },
-      {
-        id: 't-2',
-        date: '2026-09-02',
-        time: '10:00',
-        author: 'عمر بن سالم',
-        authorRole: 'مسؤول الخلية',
-        action: 'تم توجيهه وإسناده للموظف المختص',
-        note: 'إسناد للمفتش أحمد بن عمار للمتابعة الميدانية مع مديرية المصالح الفلاحية ومؤسسة سونلغاز',
-        statusFrom: 'جديد',
-        statusTo: 'تم الإسناد'
-      },
-      {
-        id: 't-3',
-        date: '2026-09-03',
-        time: '11:20',
-        author: 'أحمد بن عمار',
-        authorRole: 'موظف معالجة',
-        action: 'بدأت المعالجة والاتصال بالقطاع المعني',
-        note: 'تمت مراسلة مديرية توزيع الكهرباء والغاز لولاية الوادي للاستفسار عن الحصة رقم 04 الخاصة بمحيط حاسي خليفة.',
-        statusFrom: 'تم الإسناد',
-        statusTo: 'قيد المعالجة'
-      }
-    ],
-    internalNotes: [
-      {
-        id: 'n-1',
-        author: 'أحمد بن عمار',
-        authorRole: 'موظف معالجة',
-        createdAt: '2026-09-04T09:15:00.000Z',
-        text: 'سونلغاز أفادت بأن المقاولة المكلفة بالربط باشرت غرس الأعمدة وسيتم الانتهاء بنهاية الأسبوع القادم.'
-      }
-    ],
-    attachments: [
-      { id: 'att-1', name: 'بطاقة_فلاح_معتمدة.pdf', size: '1.2 MB', type: 'application/pdf', uploadedAt: '2026-09-02' },
-      { id: 'att-2', name: 'مخطط_الموقع_الفلاحي.jpg', size: '850 KB', type: 'image/jpeg', uploadedAt: '2026-09-02' }
-    ]
-  },
-  {
-    id: 'WD-2026-00128',
-    nin: '197939020011223344',
-    fullName: 'عبد الرزاق عيفة',
-    phone: '0550987654',
-    email: 'a.aifa@yahoo.fr',
-    applicantDaira: 'البياضة',
-    applicantMunicipality: 'البياضة',
-    applicantNeighborhood: 'حي الرمال / طريق قمار القديم',
-    subject: 'تذبذب تزويد الحي بالماء الشروب وانخفاض الضغط',
-    grievanceDaira: 'البياضة',
-    grievanceMunicipality: 'البياضة',
-    category: 'البيئة',
-    sector: 'الموارد المائية',
-    details: 'يشهد الشطر الغربي من حي الرمال ببلدية البياضة انقطاعاً مستمراً لشبكة الماء الشروب منذ أربعة أيام متتالية، نلتمس تدخل مصالحكم لدى الجزائرية للمياه لتعديل برنامج التوزيع.',
-    createdAt: '2026-09-01T11:00:00.000Z',
-    updatedAt: '2026-09-06T16:00:00.000Z',
-    status: 'بانتظار المراجعة',
-    priority: 'عاجل',
-    specialFlags: ['عاجل'],
-    assignedToId: 'usr-emp-1',
-    assignedToName: 'أحمد بن عمار',
-    assignedDepartment: 'مصلحة الشؤون الاجتماعية والتنمية المحلية',
-    assignedAt: '2026-09-01T14:00:00.000Z',
-    dueDate: '2026-09-08T18:00:00.000Z',
-    isOverdue: false,
-    timeline: [
-      {
-        id: 't-4',
-        date: '2026-09-01',
-        time: '11:00',
-        author: 'المواطن عبد الرزاق عيفة',
-        authorRole: 'مواطن',
-        action: 'تم تسجيل الانشغال'
-      },
-      {
-        id: 't-5',
-        date: '2026-09-01',
-        time: '14:00',
-        author: 'عمر بن سالم',
-        authorRole: 'مسؤول الخلية',
-        action: 'تم توجيهه للموظف أحمد بن عمار'
-      },
-      {
-        id: 't-6',
-        date: '2026-09-02',
-        time: '09:00',
-        author: 'أحمد بن عمار',
-        authorRole: 'موظف معالجة',
-        action: 'بدأت المعالجة مع وحدة الجزائرية للمياه (ADE)'
-      },
-      {
-        id: 't-7',
-        date: '2026-09-06',
-        time: '15:45',
-        author: 'أحمد بن عمار',
-        authorRole: 'موظف معالجة',
-        action: 'تم إعداد الرد وإحالته لمراجعة واعتماد المسؤول',
-        note: 'تم إصلاح العطب بالقناة الرئيسية بقطر 300 ملم وإعادة الضخ تدريجياً، مع إعداد رد رسمي للمواطن.',
-        statusFrom: 'قيد المعالجة',
-        statusTo: 'بانتظار المراجعة'
-      }
-    ],
-    officialResponse: {
-      text: 'بناءً على الشكوى المقدمة بخصوص تذبذب التزويد بالمياه بحي الرمال ببلدية البياضة، نعلمكم أن المصالح التقنية لوحدة الجزائرية للمياه تدخلت بتاريخ 04 سبتمبر لإصلاح كسر في القناة الرئيسية المغذية للحوض المرتفع، وقد تم استئناف التزويد بصورة منتظمة وفق برنامج التوزيع المعمول به.',
-      preparedBy: 'أحمد بن عمار',
-      preparedAt: '2026-09-06T15:45:00.000Z',
-      approved: false
-    },
-    internalNotes: [],
-    attachments: []
-  },
-  {
-    id: 'WD-2026-00130',
-    nin: '199039040033445566',
-    fullName: 'سامية تجاني',
-    phone: '0770112233',
-    email: 's.tijani@gmail.com',
-    applicantDaira: 'قمار',
-    applicantMunicipality: 'قمار',
-    applicantNeighborhood: 'حي النور / طريق تغزوت',
-    subject: 'طلب توفير النقل المدرسي لتلاميذ قرية الدبيديبي',
-    grievanceDaira: 'قمار',
-    grievanceMunicipality: 'قمار',
-    category: 'النقل',
-    sector: 'التربية والنقل المدرسي',
-    details: 'أولياء تلاميذ الطور المتوسط بقرية الدبيديبي يعانون من غياب النقل المدرسي مما يضطر أبناءهم لقطع مسافة 4 كلم سيراً على الأقدام للوصول إلى متوسطة الشهيد علي بلقاسم.',
-    createdAt: '2026-08-28T09:00:00.000Z',
-    updatedAt: '2026-09-05T11:00:00.000Z',
-    status: 'مغلق',
-    priority: 'متوسط',
-    specialFlags: [],
-    assignedToId: 'usr-emp-3',
-    assignedToName: 'ياسين قدور',
-    assignedDepartment: 'مصلحة النقل والمرافق العمومية',
-    assignedAt: '2026-08-28T10:30:00.000Z',
-    dueDate: '2026-09-04T18:00:00.000Z',
-    isOverdue: false,
-    timeline: [
-      { id: 't-8', date: '2026-08-28', time: '09:00', author: 'سامية تجاني', authorRole: 'مواطن', action: 'تم تسجيل الانشغال' },
-      { id: 't-9', date: '2026-08-28', time: '10:30', author: 'عمر بن سالم', authorRole: 'مسؤول الخلية', action: 'تم التوجيه لياسين قدور' },
-      { id: 't-10', date: '2026-08-29', time: '11:00', author: 'ياسين قدور', authorRole: 'موظف معالجة', action: 'مراسلة مصالح بلدية قمار ومديرية التربية' },
-      { id: 't-11', date: '2026-09-04', time: '14:00', author: 'ياسين قدور', authorRole: 'موظف معالجة', action: 'تم إعداد الرد' },
-      { id: 't-12', date: '2026-09-05', time: '11:00', author: 'عمر بن سالم', authorRole: 'مسؤول الخلية', action: 'تم اعتماد الرد وغلق الانشغال', note: 'تم تخصيص حافلة إضافية تابعة لحضيرة البلدية ابتداء من الدخول المدرسي الجديد.' }
-    ],
-    officialResponse: {
-      text: 'استجابة لانشغالكم المسجل، يشرفنا إعلامكم أن السيد والي ولاية الوادي أسدى تعليمات لبلدية قمار بالتنسيق مع مديرية التربية لتسخير حافلة نقل مدرسي بسعة 30 مقعداً مخصصة لخط قرية الدبيديبي انطلاقاً من الأحد القادم.',
-      preparedBy: 'ياسين قدور',
-      preparedAt: '2026-09-04T14:00:00.000Z',
-      reviewedBy: 'عمر بن سالم',
-      reviewedAt: '2026-09-05T11:00:00.000Z',
-      approved: true,
-      letterNumber: '2026/خ.إ/849'
-    },
-    internalNotes: [],
-    attachments: []
-  },
-  {
-    id: 'WD-2026-00135',
-    nin: '198839050099887766',
-    fullName: 'حمزة مسعودي',
-    phone: '0662334455',
-    email: 'h.messaoudi@hotmail.com',
-    applicantDaira: 'الرقيبة',
-    applicantMunicipality: 'الرقيبة',
-    applicantNeighborhood: 'القرية الفلاحية / سيدي عمران',
-    subject: 'تأخر تسليم شهادة مطابقة البناء ورخصة السكن',
-    grievanceDaira: 'الرقيبة',
-    grievanceMunicipality: 'الرقيبة',
-    category: 'العمران',
-    sector: 'التعمير والبناء',
-    details: 'أودعت ملف طلب شهادة المطابقة للبناء بمكتب التعمير لبلدية الرقيبة بتاريخ 15 جوان 2026 تحت رقم إيداع 412/2026 وحتى تاريخ اليوم لم أتحصل على الرد رغم انقضاء الآجال القانونية المحددة بالمرسوم التنفيذي.',
-    createdAt: '2026-08-25T10:00:00.000Z',
-    updatedAt: '2026-09-07T09:00:00.000Z',
-    status: 'قيد المعالجة',
-    priority: 'قصوى',
-    specialFlags: ['متأخر'],
-    assignedToId: 'usr-emp-2',
-    assignedToName: 'فاطمة الزهراء عثماني',
-    assignedDepartment: 'مصلحة العمران والبيئة والتهيئة',
-    assignedAt: '2026-08-25T11:00:00.000Z',
-    dueDate: '2026-09-01T18:00:00.000Z',
-    isOverdue: true,
-    timeline: [
-      { id: 't-13', date: '2026-08-25', time: '10:00', author: 'حمزة مسعودي', authorRole: 'مواطن', action: 'تسجيل الانشغال' },
-      { id: 't-14', date: '2026-08-25', time: '11:00', author: 'عمر بن سالم', authorRole: 'مسؤول الخلية', action: 'توجيه للمتصرفة فاطمة الزهراء' },
-      { id: 't-15', date: '2026-08-26', time: '09:30', author: 'فاطمة الزهراء عثماني', authorRole: 'موظف معالجة', action: 'مراسلة رئيس المجلس الشعبي البلدي لبلدية الرقيبة' }
-    ],
-    internalNotes: [
-      {
-        id: 'n-2',
-        author: 'عمر بن سالم',
-        authorRole: 'مسؤول الخلية',
-        createdAt: '2026-09-03T08:30:00.000Z',
-        text: 'تنبيه: الملف تجاوز الأجل القانوني، يرجى استعجال مديرية التعمير والبناء لإيفاد معاينة تفتيشية فورية.'
-      }
-    ],
-    attachments: [
-      { id: 'att-3', name: 'وصل_إيداع_بلدية_الرقيبة.pdf', size: '640 KB', type: 'application/pdf', uploadedAt: '2026-08-25' }
-    ]
-  },
-  {
-    id: 'WD-2026-00140',
-    nin: '199539060012121212',
-    fullName: 'نوال غربي',
-    phone: '0555443322',
-    applicantDaira: 'الدبيلة',
-    applicantMunicipality: 'الدبيلة',
-    applicantNeighborhood: 'حي الزهور',
-    subject: 'طلب صيانة الإنارة العمومية وإصلاح الأسلاك المكشوفة',
-    grievanceDaira: 'الدبيلة',
-    grievanceMunicipality: 'الدبيلة',
-    category: 'البيئة',
-    sector: 'الصيانة والمرافق الحضرية',
-    details: 'أعمدة الإنارة العمومية معطلة في الشارع المؤدي للمستوصف منذ أكثر من شهر، وتوجد أسلاك كهربائية مكشوفة تشكل خطراً داهماً على سلامة الأطفال والمشاة ليلاً.',
-    createdAt: '2026-09-08T07:15:00.000Z',
-    updatedAt: '2026-09-08T07:15:00.000Z',
-    status: 'جديد',
-    priority: 'عاجل',
-    specialFlags: ['عاجل'],
-    dueDate: '2026-09-15T18:00:00.000Z',
-    isOverdue: false,
-    timeline: [
-      { id: 't-16', date: '2026-09-08', time: '07:15', author: 'المواطنة نوال غربي', authorRole: 'مواطن', action: 'تم تسجيل الانشغال إلكترونياً (بانتظار التوزيع والإسناد)' }
-    ],
-    internalNotes: [],
-    attachments: [
-      { id: 'att-4', name: 'صورة_الأسلاك_المكشوفة.jpg', size: '1.4 MB', type: 'image/jpeg', uploadedAt: '2026-09-08' }
-    ]
-  },
-  {
-    id: 'WD-2026-00142',
-    nin: '197539070055667788',
-    fullName: 'الطاهر لعموري',
-    phone: '0663778899',
-    applicantDaira: 'المقرن',
-    applicantMunicipality: 'سيدي عون',
-    applicantNeighborhood: 'القرية الفلاحية سيدي عون',
-    subject: 'تصحيح خطأ مادي في عقد الميلاد الإداري بسجل الحالة المدنية',
-    grievanceDaira: 'المقرن',
-    grievanceMunicipality: 'سيدي عون',
-    category: 'الحالة المدنية',
-    sector: 'الحالة المدنية والشؤون القانونية',
-    details: 'يوجد خطأ مادي في لقب الجد بسجل الحالة المدنية لبلدية سيدي عون لسنة 1948، أطلب تسهيل إجراءات تصحيحه إدارياً عملاً بالمنشور الوزاري المشترك دون تكبد عناء رفع دعوى قضائية.',
-    createdAt: '2026-09-05T12:00:00.000Z',
-    updatedAt: '2026-09-07T10:00:00.000Z',
-    status: 'بانتظار معلومات',
-    priority: 'عادي',
-    specialFlags: [],
-    assignedToId: 'usr-emp-1',
-    assignedToName: 'أحمد بن عمار',
-    assignedDepartment: 'مصلحة الشؤون الاجتماعية والتنمية المحلية',
-    assignedAt: '2026-09-05T13:30:00.000Z',
-    dueDate: '2026-09-12T18:00:00.000Z',
-    isOverdue: false,
-    timeline: [
-      { id: 't-17', date: '2026-09-05', time: '12:00', author: 'الطاهر لعموري', authorRole: 'مواطن', action: 'تسجيل الانشغال' },
-      { id: 't-18', date: '2026-09-05', time: '13:30', author: 'عمر بن سالم', authorRole: 'مسؤول الخلية', action: 'تم الإسناد لأحمد بن عمار' },
-      { id: 't-19', date: '2026-09-07', time: '10:00', author: 'أحمد بن عمار', authorRole: 'موظف معالجة', action: 'طلب وثائق تكميلية من المواطن', note: 'يرجى إرسال نسخة من الدفتر العائلي الأصلي للأب أو عقد الزواج الأصلي لتأكيد كتابة اللقب.' }
-    ],
-    internalNotes: [],
-    attachments: []
-  },
-  {
-    id: 'WD-2026-00145',
-    nin: '198239080066778899',
-    fullName: 'يوسف شوشان',
-    phone: '0551223344',
-    applicantDaira: 'الطالب العربي',
-    applicantMunicipality: 'بن قشة',
-    applicantNeighborhood: 'الحدود الشرقية / بن قشة المركز',
-    subject: 'تهيئة المسلك الرابط بين القرية والمركز الصحي الحدودي',
-    grievanceDaira: 'الطالب العربي',
-    grievanceMunicipality: 'بن قشة',
-    category: 'العمران',
-    sector: 'الأشغال العمومية والمنشآت',
-    details: 'المسلك الترابي المؤدي للمستوصف الريفي ببن قشة يتعرض لزحف الرمال خلال مواسم الرياح مما يمنع سيارات الإسعاف وسيارات المواطنين من العبور، نطالب بتعبيده وتثبيت حواف الطريق.',
-    createdAt: '2026-09-07T08:00:00.000Z',
-    updatedAt: '2026-09-07T11:00:00.000Z',
-    status: 'تم الإسناد',
-    priority: 'متوسط',
-    specialFlags: [],
-    assignedToId: 'usr-emp-2',
-    assignedToName: 'فاطمة الزهراء عثماني',
-    assignedDepartment: 'مصلحة العمران والبيئة والتهيئة',
-    assignedAt: '2026-09-07T11:00:00.000Z',
-    dueDate: '2026-09-14T18:00:00.000Z',
-    isOverdue: false,
-    timeline: [
-      { id: 't-20', date: '2026-09-07', time: '08:00', author: 'يوسف شوشان', authorRole: 'مواطن', action: 'تسجيل الانشغال' },
-      { id: 't-21', date: '2026-09-07', time: '11:00', author: 'عمر بن سالم', authorRole: 'مسؤول الخلية', action: 'تم الإسناد لفاطمة الزهراء عثماني' }
-    ],
-    internalNotes: [],
-    attachments: []
-  },
-  {
-    id: 'WD-2026-00148',
-    fullName: 'رابح دبابش',
-    phone: '0664998877',
-    applicantDaira: 'الرباح',
-    applicantMunicipality: 'النخلة',
-    applicantNeighborhood: 'الطرفاية',
-    subject: 'تراكم النفايات المنزلية وغياب حاويات الجمع',
-    grievanceDaira: 'الرباح',
-    grievanceMunicipality: 'النخلة',
-    category: 'البيئة',
-    sector: 'النظافة والبيئة',
-    details: 'نلفت عناية مصالحكم إلى تراكم أكوام القمامة عند مدخل حي الطرفاية بسبب نقص شاحنات الرفع التابعة لبلدية النخلة، نرجو تدعيم الحي بحاويات حديدية تفادياً لانتشار الحشرات والروائح.',
-    createdAt: '2026-09-08T09:00:00.000Z',
-    updatedAt: '2026-09-08T09:00:00.000Z',
-    status: 'جديد',
-    priority: 'عادي',
-    specialFlags: [],
-    dueDate: '2026-09-15T18:00:00.000Z',
-    isOverdue: false,
-    timeline: [
-      { id: 't-22', date: '2026-09-08', time: '09:00', author: 'رابح دبابش', authorRole: 'مواطن', action: 'تسجيل الانشغال' }
-    ],
-    internalNotes: [],
-    attachments: []
-  }
-];
+export const SEED_GRIEVANCES: EnhancedGrievance[] = [];
 
 // =========================================================================
 // INITIAL SEED AUDIT LOGS
 // =========================================================================
-export const SEED_AUDIT_LOGS: AuditLogEntry[] = [
-  {
-    id: 'log-1',
-    timestamp: '2026-09-08T09:10:00.000Z',
-    userId: 'usr-supervisor',
-    userName: 'عمر بن سالم',
-    userRole: 'مسؤول الخلية',
-    action: 'توجيه وإسناد انشغال',
-    targetId: 'WD-2026-00145',
-    targetType: 'انشغال',
-    previousValue: 'غير مسند (جديد)',
-    newValue: 'مسند للموظفة: فاطمة الزهراء عثماني',
-    details: 'قام مسؤول الخلية بإسناد الانشغال WD-2026-00145 إلى الموظفة فاطمة الزهراء عثماني للمتابعة مع مديرية الأشغال العمومية.'
-  },
-  {
-    id: 'log-2',
-    timestamp: '2026-09-07T14:15:00.000Z',
-    userId: 'usr-emp-1',
-    userName: 'أحمد بن عمار',
-    userRole: 'موظف معالجة',
-    action: 'إضافة ملاحظة داخلية',
-    targetId: 'WD-2026-00125',
-    targetType: 'انشغال',
-    details: 'أضاف الموظف أحمد بن عمار ملاحظة داخلية تفيد بتأكيد سونلغاز تقدم أشغال الربط بمحيط حاسي خليفة.'
-  },
-  {
-    id: 'log-3',
-    timestamp: '2026-09-06T15:45:00.000Z',
-    userId: 'usr-emp-1',
-    userName: 'أحمد بن عمار',
-    userRole: 'موظف معالجة',
-    action: 'إعداد رد رسمي وإحالته للمراجعة',
-    targetId: 'WD-2026-00128',
-    targetType: 'انشغال',
-    previousValue: 'قيد المعالجة',
-    newValue: 'بانتظار المراجعة',
-    details: 'أتم الموظف أحمد بن عمار صياغة الرد على شكوى حي الرمال بالبياضة بعد استلام تقرير الجزائرية للمياه وأحاله لاعتماد المسؤول.'
-  },
-  {
-    id: 'log-4',
-    timestamp: '2026-09-05T11:00:00.000Z',
-    userId: 'usr-supervisor',
-    userName: 'عمر بن سالم',
-    userRole: 'مسؤول الخلية',
-    action: 'اعتماد الرد وغلق الانشغال',
-    targetId: 'WD-2026-00130',
-    targetType: 'انشغال',
-    previousValue: 'بانتظار المراجعة',
-    newValue: 'مغلق ومسوى',
-    details: 'اعتمد مسؤول الخلية الرد الرسمي تحت رقم 2026/خ.إ/849 وأغلق ملف النقل المدرسي ببلدية قمار بعد التكفل التام.'
-  }
-];
+export const SEED_AUDIT_LOGS: AuditLogEntry[] = [];
 
 // =========================================================================
 // INITIAL SEED NOTIFICATIONS
 // =========================================================================
-export const SEED_NOTIFICATIONS: NotificationItem[] = [
-  {
-    id: 'notif-1',
-    title: 'انشغال جديد بانتظار التوزيع والإسناد',
-    message: 'تم تسجيل الانشغال WD-2026-00140 بشأن أسلاك الإنارة المكشوفة ببلدية الدبيلة بحاجة لإسناد فوري.',
-    targetRole: 'supervisor',
-    grievanceId: 'WD-2026-00140',
-    read: false,
-    createdAt: '2026-09-08T07:20:00.000Z',
-    type: 'urgent'
-  },
-  {
-    id: 'notif-2',
-    title: 'رد رسمي جاهز للاعتماد والمراجعة',
-    message: 'أعد الموظف أحمد بن عمار مسودة رد على ملف التزويد بالماء WD-2026-00128 وينتظر مراجعتكم.',
-    targetRole: 'supervisor',
-    grievanceId: 'WD-2026-00128',
-    read: false,
-    createdAt: '2026-09-06T15:50:00.000Z',
-    type: 'review'
-  },
-  {
-    id: 'notif-3',
-    title: 'ملف مسند إليكم حديثاً',
-    message: 'قام مسؤول الخلية بإسناد الانشغال WD-2026-00145 (تهيئة مسلك بن قشة) لمتابعتكم.',
-    targetUserId: 'usr-emp-2',
-    grievanceId: 'WD-2026-00145',
-    read: false,
-    createdAt: '2026-09-07T11:05:00.000Z',
-    type: 'assignment'
-  },
-  {
-    id: 'notif-4',
-    title: 'تنبيه تأخر: تجاوز المهلة المحددة',
-    message: 'الملف WD-2026-00135 (شهادة مطابقة البناء - الرقيبة) تجاوز مهلة 7 أيام المحددة في ميثاق الخدمة.',
-    targetRole: 'supervisor',
-    grievanceId: 'WD-2026-00135',
-    read: false,
-    createdAt: '2026-09-03T08:00:00.000Z',
-    type: 'overdue'
-  }
-];
+export const SEED_NOTIFICATIONS: NotificationItem[] = [];
 
 // =========================================================================
 // ADMIN SERVICE IMPLEMENTATION
@@ -697,7 +143,7 @@ export const AdminService = {
     }
   },
 
-  getCurrentUser: (): SystemUser => {
+  getCurrentUser: (): SystemUser | null => {
     try {
       const stored = localStorage.getItem(CURRENT_USER_KEY);
       if (stored) {
@@ -709,11 +155,9 @@ export const AdminService = {
         }
       }
       // Default to Wali for first load
-      const defaultUser = SEED_USERS[0];
-      localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(defaultUser));
-      return defaultUser;
+      return null;
     } catch {
-      return SEED_USERS[0];
+      return null;
     }
   },
 
@@ -721,9 +165,10 @@ export const AdminService = {
     localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
   },
 
-  switchUserById: (userId: string): SystemUser => {
+  switchUserById: (userId: string): SystemUser | null => {
     const users = AdminService.getUsers();
-    const user = users.find(u => u.id === userId) || users[0];
+    const user = users.find(u => u.id === userId) || null;
+    if (!user) return null;
     AdminService.setCurrentUser(user);
     return user;
   },
@@ -973,7 +418,7 @@ export const AdminService = {
 
       return grievances;
     } catch {
-      return SEED_GRIEVANCES;
+      return [];
     }
   },
 
@@ -1787,14 +1232,7 @@ export const AdminService = {
       }))
       .sort((a, b) => b.count - a.count);
 
-    const weeklyTrend = [
-      { day: 'السبت', received: 12, resolved: 9 },
-      { day: 'الأحد', received: 19, resolved: 14 },
-      { day: 'الإثنين', received: 15, resolved: 17 },
-      { day: 'الثلاثاء', received: 22, resolved: 18 },
-      { day: 'الأربعاء', received: 16, resolved: 13 },
-      { day: 'الخميس', received: 8, resolved: 11 },
-    ];
+    const weeklyTrend: Array<{ day: string; received: number; resolved: number }> = [];
 
     return {
       total,
@@ -1807,7 +1245,7 @@ export const AdminService = {
       overdue,
       urgent,
       resolutionRate,
-      averageResolutionDays: 3.4,
+      averageResolutionDays: 0,
       byMunicipality,
       byCategory,
       bySector,
@@ -1837,7 +1275,7 @@ export const AdminService = {
       resolvedOrClosed,
       overdue,
       completionRate,
-      avgResponseDays: 2.8
+      avgResponseDays: 0
     };
   },
 
@@ -1849,7 +1287,7 @@ export const AdminService = {
       localStorage.setItem(AUDIT_LOGS_STORAGE_KEY, JSON.stringify(SEED_AUDIT_LOGS));
       return SEED_AUDIT_LOGS.slice(0, limit);
     } catch {
-      return SEED_AUDIT_LOGS;
+      return [];
     }
   },
 

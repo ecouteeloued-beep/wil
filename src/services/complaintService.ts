@@ -455,57 +455,24 @@ export class ComplaintService {
     });
   }
 
-  /**
-   * Return simulated executive statistics as specifically outlined by user:
-   * Total: 128 | New: 24 | In Progress: 41 | Waiting Citizen: 8 | Resolved: 32 | Closed: 23
-   */
+  /** Return an empty compatibility shape; production dashboards use live repository metrics. */
   static getStatistics(): DemoStatistics {
     return {
-      isSimulated: true,
-      total: 128,
-      newCount: 24,
-      inProgress: 41,
-      waitingCitizen: 8,
-      waitingReview: 14,
-      resolved: 32,
-      closed: 23,
-      urgent: 9,
-      overdue: 4
+      isSimulated: false,
+      total: 0,
+      newCount: 0,
+      inProgress: 0,
+      waitingCitizen: 0,
+      waitingReview: 0,
+      resolved: 0,
+      closed: 0,
+      urgent: 0,
+      overdue: 0
     };
   }
 
-  /**
-   * Return mock notifications for citizen and staff
-   */
+  /** Notifications are populated only by real status changes. */
   static getMockNotifications(): MockNotification[] {
-    return [
-      {
-        id: 'notif-1',
-        title: 'تم تحديث حالة انشغالك',
-        message: 'تم تحديث حالة العريضة رقم WIL-2026-X7K4P92 إلى: قيد المعالجة والمتابعة الميدانية.',
-        trackingNumber: 'WIL-2026-X7K4P92',
-        type: 'status',
-        timestamp: 'منذ 15 دقيقة',
-        read: false
-      },
-      {
-        id: 'notif-2',
-        title: 'تمت إضافة رد رسمي جديد',
-        message: 'صدر الرد الإداري الرسمي المعتمد برقم 2026/خ.إ/849 بخصوص عريضتكم WIL-2026-B6K3M19.',
-        trackingNumber: 'WIL-2026-B6K3M19',
-        type: 'response',
-        timestamp: 'منذ ساعتين',
-        read: false
-      },
-      {
-        id: 'notif-3',
-        title: 'مطلوب تقديم وثيقة لاستكمال الملف',
-        message: 'يرجى تقديم نسخة من الوثيقة المطلوبة لاستكمال دراسة الانشغال WIL-2026-P5R8T36.',
-        trackingNumber: 'WIL-2026-P5R8T36',
-        type: 'document',
-        timestamp: 'أمس',
-        read: true
-      }
-    ];
+    return [];
   }
 }

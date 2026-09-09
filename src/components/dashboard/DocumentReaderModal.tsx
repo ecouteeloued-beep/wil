@@ -110,10 +110,10 @@ export const DocumentReaderModal: React.FC<DocumentReaderModalProps> = ({
   // Simulated OCR / Extracted Text for the document
   const getExtractedText = () => {
     const name = attachment.name;
-    const citizenName = grievance?.fullName || 'عبد الرحمن مسعودي';
+    const citizenName = grievance?.fullName || 'غير متوفر';
     const nin = grievance?.nin || '198839010045230012';
     const municipality = grievance?.grievanceMunicipality || grievance?.applicantMunicipality || 'الوادي';
-    const trackingId = grievance?.id || 'WIL-2026-X7K4P92';
+    const trackingId = grievance?.id || 'غير متوفر';
     const subject = grievance?.subject || 'انشغال مواطن رسمي';
     const details = grievance?.details || '';
 
@@ -489,7 +489,7 @@ ${details || 'وثيقة إدارية ثبوتية مؤيدة للعريضة ا�
                     <h3 className="font-cairo font-bold text-sm text-gray-700">وزارة الداخلية والجماعات المحلية والتهيئة العمرانية</h3>
                     <div className="flex items-center justify-between text-xs font-bold text-gray-600 pt-2 px-2">
                       <span>ولاية الوادي</span>
-                      <span className="font-mono text-[#006233]">الرقم التعريفي: {grievance?.id || 'WIL-2026-X7K4P92'}</span>
+                      <span className="font-mono text-[#006233]">الرقم التعريفي: {grievance?.id || 'غير متوفر'}</span>
                       <span>دائرة: {grievance?.grievanceDaira || 'الوادي'}</span>
                     </div>
                   </div>
@@ -516,7 +516,7 @@ ${details || 'وثيقة إدارية ثبوتية مؤيدة للعريضة ا�
                       <div className="grid grid-cols-2 gap-4 text-xs bg-gray-50/80 p-4 rounded-xl border border-gray-200">
                         <div>
                           <span className="text-gray-500 block mb-0.5">صاحب الملف:</span>
-                          <span className="font-bold text-sm text-gray-900">{grievance?.fullName || 'عبد الرحمن مسعودي'}</span>
+                          <span className="font-bold text-sm text-gray-900">{grievance?.fullName || 'غير متوفر'}</span>
                         </div>
                         <div>
                           <span className="text-gray-500 block mb-0.5">رقم التعريف الوطني (NIN):</span>
@@ -560,7 +560,7 @@ ${details || 'وثيقة إدارية ثبوتية مؤيدة للعريضة ا�
                         <div className="text-center space-y-2">
                           <div className="text-xs text-gray-500">توقيع ومصادقة صاحب العريضة:</div>
                           <div className="h-14 flex items-center justify-center font-amiri italic text-2xl text-blue-900 border-b border-gray-300">
-                            {grievance?.fullName || 'ع. مسعودي'}
+                            {grievance?.fullName || 'غير متوفر'}
                           </div>
                           <div className="text-[10px] text-gray-400 font-mono">بصمة إلكترونية موثقة</div>
                         </div>
@@ -576,7 +576,7 @@ ${details || 'وثيقة إدارية ثبوتية مؤيدة للعريضة ا�
                           ملحق رقم (02) — محضر التدقيق والمعاينة الأولية للمرفق
                         </h4>
                         <div className="text-[11px] text-gray-500 mt-0.5">
-                          رقم القيد المركزي: {grievance?.id || 'WIL-2026-X7K4P92'}
+                          رقم القيد المركزي: {grievance?.id || 'غير متوفر'}
                         </div>
                       </div>
 
@@ -722,11 +722,11 @@ ${details || 'وثيقة إدارية ثبوتية مؤيدة للعريضة ا�
                 </div>
                 <div className="flex justify-between py-2 border-b border-slate-800">
                   <span className="text-slate-400">رقم الانشغال التابع له:</span>
-                  <span className="font-mono font-bold text-[#006233]">{grievance?.id || 'WIL-2026-X7K4P92'}</span>
+                  <span className="font-mono font-bold text-[#006233]">{grievance?.id || 'غير متوفر'}</span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-slate-800">
                   <span className="text-slate-400">صاحب الانشغال:</span>
-                  <span className="font-bold text-white">{grievance?.fullName || 'عبد الرحمن مسعودي'}</span>
+                  <span className="font-bold text-white">{grievance?.fullName || 'غير متوفر'}</span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-slate-800">
                   <span className="text-slate-400">البصمة الرقمية (SHA-256):</span>
