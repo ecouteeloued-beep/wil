@@ -101,58 +101,55 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onCancel }) => 
   };
 
   return (
-    <div className="min-h-screen bg-[#eef2f5] text-[#17212b] flex flex-col font-tajawal" dir="rtl">
-      <div className="h-1.5 bg-gradient-to-l from-[#D21034] via-white to-[#006233]" />
-      <header className="bg-white border-b border-[#d7e0e7] shadow-sm px-4 sm:px-8 py-4">
-        <div className="max-w-6xl w-full mx-auto flex items-center justify-between gap-4">
+    <div className="min-h-screen bg-gradient-to-br from-[#06180e] via-[#0b2819] to-[#041209] text-white flex flex-col justify-between p-4 sm:p-6 lg:p-8 font-tajawal" dir="rtl">
+      <header className="max-w-6xl w-full mx-auto flex items-center justify-between gap-4 border-b border-white/10 pb-5">
         <div className="flex items-center gap-3.5">
-          <div className="w-14 h-14 rounded-full bg-white p-1 border border-[#d7e0e7] shadow-sm flex items-center justify-center">
+          <div className="w-12 h-12 rounded-xl bg-white/10 p-1.5 border border-white/20 flex items-center justify-center">
             <img src="/assets/algeria-emblem.png" alt="شعار الجمهورية الجزائرية" className="w-full h-full object-contain" />
           </div>
           <div>
-            <h2 className="font-changa font-black text-sm sm:text-base text-[#006233]">الجمهورية الجزائرية الديمقراطية الشعبية</h2>
-            <p className="text-xs text-[#526273] mt-1">وزارة الداخلية والجماعات المحلية — ولاية الوادي</p>
+            <h2 className="font-changa font-black text-sm sm:text-base text-amber-300">الجمهورية الجزائرية الديمقراطية الشعبية</h2>
+            <p className="text-xs text-emerald-200/80">وزارة الداخلية والجماعات المحلية — ولاية الوادي</p>
           </div>
         </div>
-        <button onClick={onCancel} className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#f3f6f8] border border-[#d7e0e7] text-xs font-bold text-[#526273] hover:text-[#006233]">
+        <button onClick={onCancel} className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs font-bold text-gray-300 hover:text-white">
           العودة للموقع العام <ArrowRight className="w-3.5 h-3.5" />
         </button>
-        </div>
       </header>
 
-      <main className="max-w-xl w-full mx-auto my-auto px-4 py-12">
-        <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="bg-white border border-[#d7e0e7] rounded-2xl p-6 sm:p-10 shadow-[0_18px_50px_rgba(23,33,43,0.12)]">
+      <main className="max-w-xl w-full mx-auto my-auto py-12">
+        <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="bg-[#0d2215]/90 border border-emerald-500/30 rounded-3xl p-6 sm:p-10 shadow-2xl">
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 rounded-2xl bg-[#006233]/10 border border-[#006233]/20 text-[#006233] flex items-center justify-center"><ShieldCheck className="w-6 h-6" /></div>
+            <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 flex items-center justify-center"><ShieldCheck className="w-6 h-6" /></div>
             <div>
-              <h1 className="font-changa font-bold text-2xl text-[#17212b]">فضاء الموظفين والإطارات</h1>
-              <p className="text-sm text-[#526273] mt-1">الدخول إلى المنصة الإدارية لولاية الوادي</p>
+              <h1 className="font-changa font-bold text-2xl">الدخول الآمن للموظفين</h1>
+              <p className="text-sm text-gray-400 mt-1">تتم المصادقة عبر Supabase Auth ولا توجد رموز دخول تجريبية.</p>
             </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-xs font-bold text-[#344454] mb-1.5">اسم المستخدم أو البريد المهني</label>
+              <label className="block text-xs font-bold text-gray-300 mb-1.5">البريد الإلكتروني المهني</label>
               <div className="relative"><UserIcon className="w-4 h-4 text-gray-400 absolute right-3.5 top-1/2 -translate-y-1/2" />
-                <input type="text" required autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-[#f8fafc] border border-[#cbd7e3] focus:border-[#006233] rounded-xl pr-10 pl-4 py-3 text-sm text-[#17212b] font-mono outline-none" placeholder="wali أو name@example.gov.dz" />
+                <input type="text" required autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-black/40 border border-white/10 focus:border-emerald-500 rounded-xl pr-10 pl-4 py-3 text-sm text-white font-mono outline-none" placeholder="اسم المستخدم أو name@example.gov.dz" />
               </div>
             </div>
             <div>
-              <label className="block text-xs font-bold text-[#344454] mb-1.5">كلمة المرور</label>
+              <label className="block text-xs font-bold text-gray-300 mb-1.5">كلمة المرور</label>
               <div className="relative"><Lock className="w-4 h-4 text-gray-400 absolute right-3.5 top-1/2 -translate-y-1/2" />
-                <input type={showPassword ? 'text' : 'password'} required autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-[#f8fafc] border border-[#cbd7e3] focus:border-[#006233] rounded-xl pr-10 pl-10 py-3 text-sm text-[#17212b] font-mono outline-none" placeholder="••••••••" />
+                <input type={showPassword ? 'text' : 'password'} required autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-black/40 border border-white/10 focus:border-emerald-500 rounded-xl pr-10 pl-10 py-3 text-sm text-white font-mono outline-none" placeholder="••••••••" />
                 <button type="button" aria-label={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'} onClick={() => setShowPassword(!showPassword)} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white">{showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}</button>
               </div>
             </div>
             {error && <p role="alert" className="text-red-300 text-xs font-bold flex items-center gap-1.5"><AlertCircle className="w-4 h-4 shrink-0" />{error}</p>}
-            <button type="submit" disabled={isVerifying} className="w-full py-3.5 bg-[#006233] hover:bg-[#004d28] rounded-xl font-changa font-bold text-sm text-white shadow-lg flex items-center justify-center gap-2 disabled:opacity-50">
+            <button type="submit" disabled={isVerifying} className="w-full py-3.5 bg-gradient-to-r from-[#006233] to-emerald-700 hover:from-[#005029] hover:to-emerald-800 rounded-xl font-changa font-bold text-sm shadow-xl flex items-center justify-center gap-2 disabled:opacity-50">
               {isVerifying ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><KeyRound className="w-4 h-4 text-amber-300" />مصادقة الدخول</>}
             </button>
           </form>
         </motion.section>
       </main>
 
-      <footer className="max-w-6xl w-full mx-auto text-center py-5 px-4 text-xs text-[#6b7b8a]">الدخول محمي بالمصادقة المركزية والتحقق من الصلاحيات في قاعدة البيانات — جميع الحقوق محفوظة لولاية الوادي</footer>
+      <footer className="max-w-6xl w-full mx-auto text-center py-2 text-xs text-gray-500">الدخول محمي بالمصادقة المركزية وتحقق الصلاحيات من قاعدة البيانات.</footer>
     </div>
   );
 };
