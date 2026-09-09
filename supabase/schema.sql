@@ -137,11 +137,24 @@ drop policy if exists "Allow public read on municipalities" on public.municipali
 create policy "Allow public read on municipalities" on public.municipalities
   for select using (true);
 
+-- الموظف الموثق يقرأ ملفه فقط لإتمام تسجيل الدخول وتحديد الصلاحيات.
+drop policy if exists "Allow staff to read own profile" on public.users;
+create policy "Allow staff to read own profile" on public.users
+  for select to authenticated
+  using (id = auth.uid() and is_active = true);
+
 -- 2. إرسال العرائض: الإدراج العام فقط، دون قراءة أو تعديل مباشر.
 drop policy if exists "Allow citizens to submit new complaints" on public.complaints;
 create policy "Allow citizens to submit new complaints" on public.complaints
   for insert to anon, authenticated
   with check (tracking_id is not null and citizen_name is not null and phone_encrypted is not null and subject is not null and category is not null);
+
+-- حذف أسماء السياسات القديمة المتساهلة عند إعادة تطبيق المخطط.
+drop policy if exists "Allow viewing complaints for tracking and dashboard" on public.complaints;
+drop policy if exists "Allow updating complaints" on public.complaints;
+drop policy if exists "Allow staff read/write internal notes" on public.internal_notes;
+drop policy if exists "Allow insert audit logs" on public.audit_logs;
+drop policy if exists "Allow read audit logs" on public.audit_logs;
 
 -- الموظفون الموثقون فقط يمكنهم قراءة وتعديل الشكاوى.
 drop policy if exists "Allow staff to read complaints" on public.complaints;
