@@ -12,7 +12,7 @@ create table if not exists public.users (
   id uuid references auth.users on delete cascade primary key,
   name text not null,
   email text unique not null,
-  role text not null default 'agent' check (role in ('super_admin', 'admin', 'supervisor', 'department_head', 'agent', 'wali', 'employee')),
+  role text not null default 'agent' check (role in ('wali', 'chef_cabinet', 'head_department', 'supervisor', 'employee', 'super_admin')),
   department text,
   municipality text,
   phone text,
