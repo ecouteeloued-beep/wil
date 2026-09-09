@@ -401,17 +401,30 @@ export const DashboardLayout: React.FC<{ user: SystemUser; onLogout: () => void 
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
                 >
-                  {currentView === 'overview' && <OverviewStats />}
-                  {currentView === 'inbox' && <InboxView />}
-                  {currentView === 'citizens' && <CitizensView />}
+                  {currentView === 'overview' && (
+                    <OverviewStats 
+                      user={user} 
+                      addToast={addToast} 
+                      onNavigateTab={(tab) => setCurrentView(tab)} 
+                      onOpenExecutiveReport={() => setShowExecutiveReportModal(true)} 
+                    />
+                  )}
+                  {currentView === 'inbox' && <InboxView user={user} addToast={addToast} />}
+                  {currentView === 'citizens' && <CitizensView user={user} addToast={addToast} />}
                   {currentView === 'map' && <MapView />}
-                  {currentView === 'reports' && <ReportsView />}
-                  {currentView === 'users' && <UsersView />}
-                  {currentView === 'permissions' && <PermissionsView />}
-                  {currentView === 'departments' && <DepartmentsView />}
-                  {currentView === 'municipalities' && <MunicipalitiesView />}
-                  {currentView === 'audit_log' && <AuditLogView />}
-                  {currentView === 'settings' && <SettingsView />}
+                  {currentView === 'reports' && (
+                    <ReportsView 
+                      user={user} 
+                      addToast={addToast} 
+                      onOpenExecutiveReport={() => setShowExecutiveReportModal(true)} 
+                    />
+                  )}
+                  {currentView === 'users' && <UsersView currentUser={user} addToast={addToast} />}
+                  {currentView === 'permissions' && <PermissionsView user={user} addToast={addToast} />}
+                  {currentView === 'departments' && <DepartmentsView user={user} addToast={addToast} />}
+                  {currentView === 'municipalities' && <MunicipalitiesView user={user} addToast={addToast} />}
+                  {currentView === 'audit_log' && <AuditLogView user={user} addToast={addToast} />}
+                  {currentView === 'settings' && <SettingsView user={user} addToast={addToast} />}
                 </motion.div>
               </AnimatePresence>
             </div>

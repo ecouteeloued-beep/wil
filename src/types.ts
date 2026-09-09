@@ -223,6 +223,11 @@ export interface AttachmentFile {
   type: string;
   uploadedAt: string;
   url?: string;
+  dataUrl?: string;
+  previewUrl?: string;
+  documentType?: 'id_card' | 'petition_letter' | 'field_photo' | 'receipt' | 'technical_report' | 'other';
+  extractedText?: string;
+  pageCount?: number;
 }
 
 export interface CitizenActionRequired {
@@ -287,7 +292,10 @@ export interface EnhancedGrievance {
   citizenActionRequired?: CitizenActionRequired;
   citizenRating?: CitizenRating;
   publicMessages?: PublicMessage[];
+  isSaved?: boolean;
 }
+
+export type AuditTargetType = 'انشغال' | 'موظف' | 'إعدادات' | 'نظام' | 'هيكل إداري' | 'صلاحيات' | 'أمن' | 'مستخدم';
 
 export interface AuditLogEntry {
   id: string;
@@ -297,7 +305,7 @@ export interface AuditLogEntry {
   userRole: string;
   action: string;
   targetId: string;
-  targetType: 'انشغال' | 'موظف' | 'إعدادات' | 'نظام';
+  targetType: AuditTargetType;
   previousValue?: string;
   newValue?: string;
   details: string;
@@ -344,3 +352,44 @@ export interface EmployeeStats {
   completionRate: number;
   avgResponseDays: number;
 }
+
+export interface SystemSettings {
+  // General & Dashboard
+  platformName: string;
+  officialEmail: string;
+  hotlinePhone: string;
+  legalDeadlineDays: string;
+  maintenanceMode: boolean;
+  maintenanceNotice?: string;
+  defaultSortOrder?: 'newest' | 'priority' | 'oldest';
+  autoRefreshInterval?: 'off' | '30' | '60' | '300';
+  allowCitizenAttachments?: boolean;
+  maxAttachmentSizeMB?: string;
+  enableDirectDocumentReader?: boolean;
+
+  // Security
+  sessionTimeoutMins: string;
+  pinLockoutAttempts: string;
+  requirePinForSensitiveActions?: boolean;
+  auditLogRetentionMonths?: string;
+
+  // Notifications & SMS
+  senderIdSms: string;
+  autoSmsEnabled: boolean;
+  smsOnRegister?: boolean;
+  smsOnTransfer?: boolean;
+  smsOnReply?: boolean;
+  dashboardSoundAlerts?: boolean;
+  urgentAlertEmail?: boolean;
+
+  // Templates
+  templateRegister?: string;
+  templateTransfer?: string;
+  templateReply?: string;
+  templateDirective?: string;
+
+  // Metadata
+  updatedAt?: string;
+  updatedBy?: string;
+}
+

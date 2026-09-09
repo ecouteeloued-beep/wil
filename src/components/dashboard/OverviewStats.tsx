@@ -48,8 +48,49 @@ const municipalityPerformance = [
   { name: 'حاسي خليفة', total: 75, resolved: 42, rate: '56%' }
 ];
 
-export const OverviewStats: React.FC = () => {
+import { SystemUser } from '../../types';
+
+interface OverviewStatsProps {
+  user?: SystemUser;
+  onNavigateTab?: (tab: string) => void;
+  onOpenExecutiveReport?: () => void;
+  addToast?: (toast: { type: 'success' | 'info' | 'warning' | 'error'; title: string; message: string }) => void;
+}
+
+export const OverviewStats: React.FC<OverviewStatsProps> = ({
+  user,
+  onNavigateTab,
+  onOpenExecutiveReport,
+  addToast
+}) => {
   const [selectedPeriod, setSelectedPeriod] = useState('month');
+
+  const handleExportKpi = () => {
+    const csvContent = '\uFEFF' + [
+      'المؤشر الولائي,القيمة,الحالة / التطور',
+      'إجمالي الانشغالات المسجلة,1245,+12% هذا الشهر',
+      'انشغالات جديدة (اليوم),34,+5 وارد جديد',
+      'قيد المعالجة والتحقيق,312,25% من الإجمالي',
+      'تجاوزت المهلة (عاجلة),18,بحاجة لتدخل الوالي',
+      'تمت التسوية والإغلاق,881,نسبة الإنجاز 71%',
+      'متوسط سرعة المعالجة,3.4 أيام,ضمن المعيار القانوني'
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `مؤشرات_لوحة_القيادة_ولاية_الوادي_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    addToast?.({
+      type: 'success',
+      title: 'تم تصدير المؤشرات الرسمية',
+      message: 'تم تحميل ملف مؤشرات لوحة القيادة الولائية بصيغة CSV بنجاح.'
+    });
+  };
 
   return (
     <div className="space-y-6 font-tajawal">
@@ -71,15 +112,19 @@ export const OverviewStats: React.FC = () => {
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
-            <div className="bg-white/10 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/10 text-center">
-              <span className="block text-2xl font-black font-mono text-amber-300">71%</span>
-              <span className="text-[11px] text-gray-300 font-bold">نسبة التسوية الشاملة</span>
-            </div>
-            <div className="bg-white/10 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/10 text-center">
-              <span className="block text-2xl font-black font-mono text-emerald-300">22 / 22</span>
-              <span className="text-[11px] text-gray-300 font-bold">بلديات متفاعلة</span>
-            </div>
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
+            <button 
+              onClick={handleExportKpi}
+              className="bg-white/10 hover:bg-white/20 backdrop-blur-md px-3.5 py-2.5 rounded-2xl border border-white/10 text-xs font-bold text-white transition-colors"
+            >
+              تصدير المؤشرات
+            </button>
+            <button 
+              onClick={onOpenExecutiveReport}
+              className="bg-[#006233] hover:bg-[#004d28] border border-emerald-400/40 px-4 py-2.5 rounded-2xl text-xs font-bold text-amber-300 shadow-md transition-colors"
+            >
+              تقرير السيد الوالي (PDF)
+            </button>
           </div>
         </div>
       </div>
@@ -95,9 +140,12 @@ export const OverviewStats: React.FC = () => {
             <p className="text-xs text-gray-700">هذه الملفات تجاوزت أجل 15 يوماً المحدد في تعليمة السيد الوالي وتتطلب تدخلاً مباشراً من المصالح المعنية.</p>
           </div>
         </div>
-        <span className="text-xs font-bold text-[#D21034] bg-red-100 px-3 py-1.5 rounded-xl shrink-0 border border-red-200">
-          توجيه فوري للهيئة التنفيذية
-        </span>
+        <button 
+          onClick={() => onNavigateTab?.('inbox')}
+          className="text-xs font-bold text-[#D21034] bg-red-100 hover:bg-red-200 transition-colors px-3 py-1.5 rounded-xl shrink-0 border border-red-200 cursor-pointer"
+        >
+          الانتقال للملفات المستعجلة ({stats[3].value})
+        </button>
       </div>
 
       {/* KPI Cards Grid */}
