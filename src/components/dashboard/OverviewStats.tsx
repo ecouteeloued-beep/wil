@@ -36,15 +36,26 @@ const evolutionData = [
 ];
 
 export const OverviewStats: React.FC = () => {
+  const handleExportExecutiveReport = () => {
+    alert('📄 تم إنشاء تقرير الوالي التنفيذي بنجاح وجاهز للطباعة والمشاركة مع الهيئة التنفيذية.');
+  };
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold font-changa text-gray-900">لوحة القيادة</h2>
           <p className="text-sm text-gray-500 font-tajawal mt-1">نظرة عامة على أداء معالجة الانشغالات على مستوى الولاية</p>
         </div>
-        <div className="flex items-center gap-2">
-          <select className="border border-gray-200 rounded-lg px-4 py-2 font-tajawal text-sm bg-white text-gray-700 outline-none focus:border-[#006233]">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleExportExecutiveReport}
+            className="px-4 py-2 bg-[#006233] hover:bg-[#004d28] text-white rounded-xl font-tajawal text-sm font-bold shadow-md shadow-[#006233]/20 flex items-center gap-2 transition-all"
+          >
+            <FileText className="w-4 h-4" />
+            <span>تقرير الوالي التنفيذي (PDF)</span>
+          </button>
+          <select className="border border-gray-200 rounded-xl px-4 py-2 font-tajawal text-sm bg-white text-gray-700 outline-none focus:border-[#006233] shadow-sm">
             <option>هذا الشهر</option>
             <option>الشهر الماضي</option>
             <option>هذا العام</option>

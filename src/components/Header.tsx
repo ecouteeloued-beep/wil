@@ -311,15 +311,8 @@ export const Header: React.FC<HeaderProps> = ({ onNavigateToForm, onOpenWelcome,
               </button>
             </div>
 
-            {/* Left side: External Ministry portal link & Admin */}
+            {/* Left side: External Ministry portal link */}
             <div className="hidden lg:flex items-center gap-2 py-1">
-              <button 
-                onClick={() => { if (onAdminClick) onAdminClick(); }}
-                className="text-xs text-white bg-[#0b9a39] hover:bg-[#098330] flex items-center gap-1.5 px-3 py-1.5 rounded transition-colors font-bold shadow-sm"
-              >
-                <Building2 className="w-3.5 h-3.5" />
-                <span>الفضاء الإداري</span>
-              </button>
               <a 
                 href="https://www.interieur.gov.dz/" 
                 target="_blank" 
@@ -390,13 +383,6 @@ export const Header: React.FC<HeaderProps> = ({ onNavigateToForm, onOpenWelcome,
               >
                 <Sparkles className="w-4 h-4 text-amber-400" />
                 <span>رؤية المشروع</span>
-              </button>
-              <button 
-                onClick={() => { setMobileMenuOpen(false); if (onAdminClick) onAdminClick(); }}
-                className="w-full text-right py-2 px-3 bg-[#0b9a39]/20 hover:bg-[#0b9a39]/30 text-white rounded font-bold flex items-center gap-2 border border-[#0b9a39]/50"
-              >
-                <Building2 className="w-4 h-4 text-[#4ade80]" />
-                <span>الفضاء الإداري</span>
               </button>
               <button 
                 onClick={() => { setMobileMenuOpen(false); setShowMunicipalitiesModal(true); }}
