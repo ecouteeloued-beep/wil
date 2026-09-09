@@ -131,11 +131,24 @@ export const UsersView: React.FC<UsersViewProps> = ({ user, addToast }) => {
     });
   };
 
-  const handleSaveUser = (e: React.FormEvent) => {
+  const handleSaveUser = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.email) return;
 
     if (editingUser) {
+      const remoteResult = await SupabaseService.updateStaffAccount({
+        id: editingUser.id,
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        department: formData.department,
+        role: formData.role,
+        isActive: editingUser.status === 'نشط',
+      });
+      if (!remoteResult.success) {
+        addToast?.({ type: 'error', title: 'تعذر حفظ التعديل', message: remoteResult.error || 'فشل تحديث الحساب في Supabase.' });
+        return;
+      }
       // Update existing
       AdminService.updateUser(editingUser.id, {
         name: formData.name,
@@ -235,9 +248,15 @@ export const UsersView: React.FC<UsersViewProps> = ({ user, addToast }) => {
     void loadUsers();
   };
 
-  const handleResetPin = (e: React.FormEvent) => {
+  const handleResetPin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!pinResetUser || !newPin || newPin.length < 4) return;
+    if (!pinResetUser || !newPin || newPin.length < 8) return;
+
+    const remoteResult = await SupabaseService.resetStaffPassword(pinResetUser.id, newPin);
+    if (!remoteResult.success) {
+      addToast?.({ type: 'error', title: 'تعذر إعادة كلمة المرور', message: remoteResult.error || 'فشل تحديث كلمة المرور.' });
+      return;
+    }
 
     AdminService.setUserPin(pinResetUser.id, pinResetUser.role, newPin);
 
@@ -623,14 +642,14 @@ export const UsersView: React.FC<UsersViewProps> = ({ user, addToast }) => {
                 </p>
 
                 <div>
-                  <label className="block font-bold text-gray-700 mb-1">الرمز السري الجديد (4 أرقام)</label>
+                  <label className="block font-bold text-gray-700 mb-1">كلمة المرور المؤقتة الجديدة (8 أحرف على الأقل)</label>
                   <input
                     type="password"
-                    maxLength={4}
+                    minLength={8}
                     required
                     value={newPin}
                     onChange={(e) => setNewPin(e.target.value)}
-                    placeholder="••••"
+                    placeholder="8 أحرف على الأقل"
                     className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-center font-mono font-bold text-lg tracking-widest focus:border-[#006233] outline-none"
                   />
                 </div>
@@ -645,7 +664,7 @@ export const UsersView: React.FC<UsersViewProps> = ({ user, addToast }) => {
                   </button>
                   <button
                     type="submit"
-                    disabled={newPin.length < 4}
+                    disabled={newPin.length < 8}
                     className="px-5 py-2 bg-[#006233] hover:bg-[#004d28] text-white font-bold rounded-xl shadow-sm disabled:opacity-50"
                   >
                     حفظ الرمز السري
