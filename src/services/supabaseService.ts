@@ -1,5 +1,5 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
-import { EnhancedGrievance, ComplaintStatusCode, GrievanceStatus } from '../types';
+import { EnhancedGrievance, ComplaintStatusCode, GrievanceStatus, SystemUser, UserRole } from '../types';
 
 export interface SupabaseComplaintRow {
   id?: string;
@@ -23,6 +23,31 @@ export interface SupabaseComplaintRow {
 export const SupabaseService = {
   isConfigured: (): boolean => {
     return isSupabaseConfigured && Boolean(supabase);
+  },
+
+  /** Load active staff profiles for the administrative users directory. */
+  fetchStaffUsers: async (): Promise<SystemUser[]> => {
+    if (!isSupabaseConfigured || !supabase) return [];
+    const { data, error } = await supabase
+      .from('users')
+      .select('id,name,email,role,department,phone,is_active,created_at')
+      .order('created_at', { ascending: true });
+    if (error || !Array.isArray(data)) return [];
+    return data.filter(row => row.is_active).map(row => ({
+      id: row.id,
+      name: row.name,
+      role: row.role as UserRole,
+      roleTitle: row.role,
+      email: row.email,
+      phone: row.phone || '',
+      department: row.department || '',
+      status: 'نشط',
+      assignedCount: 0,
+      resolvedCount: 0,
+      overdueCount: 0,
+      lastActive: row.created_at || '',
+      permissions: [],
+    }));
   },
 
   /**
