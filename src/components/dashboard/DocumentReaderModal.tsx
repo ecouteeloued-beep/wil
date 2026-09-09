@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { AttachmentFile, EnhancedGrievance } from '../../types';
+import { sanitizeDocumentUrl } from '../../utils/security';
 
 interface DocumentReaderModalProps {
   isOpen: boolean;
@@ -435,22 +436,42 @@ ${details || 'وثيقة إدارية ثبوتية مؤيدة للعريضة ا�
               }}
             >
               {/* CASE A: Real DataURL / Image Source */}
-              {attachment.dataUrl || attachment.url ? (
-                <div className="max-w-3xl w-full bg-white text-slate-900 rounded-2xl shadow-2xl p-4 sm:p-8 overflow-hidden">
-                  {isPdf ? (
-                    <iframe 
-                      src={attachment.dataUrl || attachment.url} 
-                      className="w-full h-[650px] rounded-xl border border-slate-200"
-                      title={attachment.name}
-                    />
-                  ) : (
-                    <img 
-                      src={attachment.dataUrl || attachment.url} 
-                      alt={attachment.name}
-                      className="max-h-[700px] w-auto mx-auto object-contain rounded-xl shadow-md"
-                    />
-                  )}
-                </div>
+              {(attachment.dataUrl || attachment.url) ? (
+                (() => {
+                  const rawUrl = attachment.dataUrl || attachment.url;
+                  const safeUrl = sanitizeDocumentUrl(rawUrl);
+
+                  if (!safeUrl) {
+                    return (
+                      <div className="max-w-md w-full bg-white text-slate-800 rounded-2xl shadow-xl p-6 text-center border border-red-200">
+                        <AlertCircle className="w-10 h-10 text-red-500 mx-auto mb-3" />
+                        <h4 className="font-changa font-bold text-base text-gray-900 mb-1">تعذر عرض الملف</h4>
+                        <p className="text-xs text-gray-600">تم حظر مصدر المستند لأسباب أمنية (بروتوكول غير مصرح به أو مسار غير آمن).</p>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div className="max-w-3xl w-full bg-white text-slate-900 rounded-2xl shadow-2xl p-4 sm:p-8 overflow-hidden">
+                      {isPdf ? (
+                        <iframe 
+                          src={safeUrl} 
+                          className="w-full h-[650px] rounded-xl border border-slate-200"
+                          title={attachment.name}
+                          sandbox="allow-scripts allow-same-origin allow-forms"
+                          referrerPolicy="no-referrer"
+                        />
+                      ) : (
+                        <img 
+                          src={safeUrl} 
+                          alt={attachment.name}
+                          className="max-h-[700px] w-auto mx-auto object-contain rounded-xl shadow-md"
+                          referrerPolicy="no-referrer"
+                        />
+                      )}
+                    </div>
+                  );
+                })()
               ) : isPdf ? (
                 /* CASE B: Official Vector-rendered Algerian Scanned Document */
                 <div className="w-[680px] min-h-[900px] bg-[#FFFDF9] text-gray-900 shadow-2xl rounded-sm p-8 sm:p-12 relative border border-amber-900/10 font-tajawal select-text">

@@ -5,6 +5,7 @@ import { GrievanceService } from '../services/grievanceService';
 import { complaintRepository } from '../services/complaintRepository';
 import { ComplaintService } from '../services/complaintService';
 import { AdminService } from '../services/adminService';
+import { sanitizeInput, validateUploadedFile, SecurityRateLimiter } from '../utils/security';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Send, Search, CheckCircle, Copy, Check, FileText, 
@@ -118,8 +119,26 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      const newFiles = Array.from(e.target.files);
-      setFiles(prev => [...prev, ...newFiles]);
+      const incomingFiles = Array.from(e.target.files) as File[];
+      setFormError(null);
+
+      // Enforce max 3 files limit
+      if (files.length + incomingFiles.length > 3) {
+        setFormError('الحد الأقصى للمرفقات هو 3 ملفات فقط.');
+        return;
+      }
+
+      const validFiles: File[] = [];
+      for (const file of incomingFiles) {
+        const check = validateUploadedFile(file);
+        if (!check.valid) {
+          setFormError(check.error || 'أحد الملفات المرفقة غير صالح.');
+          return;
+        }
+        validFiles.push(file);
+      }
+
+      setFiles(prev => [...prev, ...validFiles]);
     }
   };
 
@@ -131,14 +150,23 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
     e.preventDefault();
     setFormError(null);
 
+    // Sanitized Inputs
+    const cleanNin = sanitizeInput(nin, 18);
+    const cleanFullName = sanitizeInput(fullName, 100);
+    const cleanPhone = sanitizeInput(phone, 10);
+    const cleanEmail = email.trim() ? sanitizeInput(email, 100) : undefined;
+    const cleanNeighborhood = sanitizeInput(applicantNeighborhood, 150);
+    const cleanSubject = sanitizeInput(subject, 200);
+    const cleanDetails = sanitizeInput(details, 3000);
+
     // Strict Validations
-    if (!nin.trim() || !/^\d{18}$/.test(nin.trim())) {
+    if (!cleanNin || !/^\d{18}$/.test(cleanNin)) {
       return setFormError('رقم التعريف الوطني غير صالح (يجب أن يتكون من 18 رقماً)');
     }
-    if (!fullName.trim()) {
+    if (!cleanFullName) {
       return setFormError('يرجى إدخال الاسم واللقب بالكامل');
     }
-    if (!phone.trim() || !/^(05|06|07)\d{8}$/.test(phone.trim())) {
+    if (!cleanPhone || !/^(05|06|07)\d{8}$/.test(cleanPhone)) {
       return setFormError('رقم الهاتف غير صالح (يجب أن يبدأ بـ 05، 06، أو 07 ويتكون من 10 أرقام)');
     }
     if (!applicantDaira) {
@@ -147,10 +175,10 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
     if (!applicantMunicipality) {
       return setFormError('يرجى اختيار بلدية الإقامة');
     }
-    if (!applicantNeighborhood.trim()) {
+    if (!cleanNeighborhood) {
       return setFormError('يرجى إدخال الحي أو العنوان');
     }
-    if (!subject.trim()) {
+    if (!cleanSubject) {
       return setFormError('يرجى كتابة موضوع العريضة');
     }
     if (!grievanceDaira) {
@@ -159,13 +187,13 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
     if (!grievanceMunicipality) {
       return setFormError('يرجى اختيار البلدية المعنية بالعريضة');
     }
-    if (!details.trim()) {
+    if (!cleanDetails) {
       return setFormError('يرجى كتابة تفاصيل العريضة المراد تبليغها');
     }
     
     // Rate Limiting Check
     if (!GrievanceService.canSubmit()) {
-      return setFormError('يرجى الانتظار بضع دقائق قبل إرسال عريضة أخرى');
+      return setFormError('يرجى الانتظار بضع دقائق قبل إرسال عريضة أخرى منعاً للتكرار العشوائي.');
     }
 
     setIsSubmitting(true);
@@ -173,18 +201,18 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
     setTimeout(() => {
       try {
         const newSubmission = GrievanceService.save({
-          nin: nin.trim(),
-          fullName: fullName.trim(),
-          phone: phone.trim(),
-          email: email.trim() || undefined,
+          nin: cleanNin,
+          fullName: cleanFullName,
+          phone: cleanPhone,
+          email: cleanEmail,
           applicantDaira,
           applicantMunicipality,
-          applicantNeighborhood: applicantNeighborhood.trim(),
-          subject: subject.trim(),
+          applicantNeighborhood: cleanNeighborhood,
+          subject: cleanSubject,
           grievanceDaira,
           grievanceMunicipality,
           category,
-          details: details.trim(),
+          details: cleanDetails,
         });
         
         setSubmittedTicket(newSubmission);
@@ -222,8 +250,8 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
   };
 
   const executeTrackSearch = async (codeToSearch: string, phoneToSearch: string) => {
-    const cleaned = codeToSearch.trim().toUpperCase();
-    const cleanedPhone = phoneToSearch.trim();
+    const cleaned = sanitizeInput(codeToSearch.trim().toUpperCase(), 50);
+    const cleanedPhone = sanitizeInput(phoneToSearch.trim(), 20);
     if (!cleaned) {
       setTrackError('يرجى إدخال رقم التتبع');
       return;
@@ -232,6 +260,14 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
       setTrackError('يرجى إدخال رقم الهاتف');
       return;
     }
+
+    // Rate Limiter Check to prevent IDOR enumeration
+    const rateLimit = SecurityRateLimiter.checkLimit('citizen_track', cleaned);
+    if (rateLimit.isLocked) {
+      setTrackError(rateLimit.message || 'تم حظر محاولات الاستعلام مؤقتاً لتكرار المحاولات غير الصحيحة.');
+      return;
+    }
+
     setTrackError(null);
     setTrackQuery(cleaned);
     setTrackPhone(cleanedPhone);
@@ -289,16 +325,26 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
         }
       }
 
-      if (match) {
-        if (match.phone !== cleanedPhone) {
-          setTrackError('رقم الهاتف غير صحيح. يرجى التأكد من المعلومات.');
-          setActiveTrackingResult(null);
-          setHasSearched(false);
-          setIsSearching(false);
-          return;
-        }
+      if (!match) {
+        const fail = SecurityRateLimiter.registerFailure('citizen_track', cleaned);
+        setTrackError(fail.isLocked ? fail.message! : 'لم يتم العثور على عريضة مسجلة برقم التتبع المدخل.');
+        setActiveTrackingResult(null);
+        setHasSearched(true);
+        setIsSearching(false);
+        return;
       }
 
+      if (match.phone !== cleanedPhone) {
+        const fail = SecurityRateLimiter.registerFailure('citizen_track', cleaned);
+        setTrackError(fail.isLocked ? fail.message! : `رقم الهاتف غير مطابق لبيانات الملف المسجل. يتبقى لديك (${fail.remainingAttempts}) محاولات.`);
+        setActiveTrackingResult(null);
+        setHasSearched(false);
+        setIsSearching(false);
+        return;
+      }
+
+      // Reset limiter on valid authenticated citizen lookup
+      SecurityRateLimiter.reset('citizen_track', cleaned);
       setActiveTrackingResult(match);
       setHasSearched(true);
       setIsSearching(false);

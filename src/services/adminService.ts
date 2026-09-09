@@ -14,6 +14,7 @@ import {
   SystemSettings
 } from '../types';
 import { MOCK_COMPLAINTS_SEED } from './complaintRepository';
+import { SecurityRateLimiter, sanitizeInput } from '../utils/security';
 
 const USERS_STORAGE_KEY = 'wilaya_eloued_admin_users';
 const GRIEVANCES_STORAGE_KEY = 'wilaya_eloued_admin_grievances';
@@ -21,7 +22,9 @@ const AUDIT_LOGS_STORAGE_KEY = 'wilaya_eloued_admin_audit_logs';
 const NOTIFICATIONS_STORAGE_KEY = 'wilaya_eloued_admin_notifications';
 const CURRENT_USER_KEY = 'wilaya_eloued_current_session_user';
 const ADMIN_AUTH_KEY = 'wilaya_eloued_admin_authenticated';
+const ADMIN_AUTH_TIMESTAMP_KEY = 'wilaya_eloued_admin_auth_timestamp';
 export const SYSTEM_SETTINGS_KEY = 'wilaya_eloued_system_settings';
+
 
 export const DEFAULT_SYSTEM_SETTINGS: SystemSettings = {
   platformName: 'منظومة وساطة المواطن والإصغاء — ولاية الوادي',
@@ -748,13 +751,34 @@ export const AdminService = {
 
   loginWithPinAndRole: (role: UserRole, pin: string): { success: boolean; user?: SystemUser; error?: string } => {
     const trimmed = pin.trim();
-    const expected = ROLE_PINS[role] || '2026';
-    if (trimmed !== expected && trimmed !== '2026' && trimmed !== '1234') {
-      return { 
-        success: false, 
-        error: `الرمز السري غير صحيح. يرجى إدخال الرمز المعتمد للمنصب.` 
+
+    // 1. Check Rate Limiter (Brute-Force Attack Prevention)
+    const limitStatus = SecurityRateLimiter.checkLimit('admin_auth', role);
+    if (limitStatus.isLocked) {
+      return {
+        success: false,
+        error: limitStatus.message || 'تم حظر محاولات تسجيل الدخول مؤقتاً لتكرار إدخال الرمز غير الصحيح.'
       };
     }
+
+    // 2. Validate Against Authorized Role PIN
+    const expected = ROLE_PINS[role] || '2026';
+    if (trimmed !== expected) {
+      const failStatus = SecurityRateLimiter.registerFailure('admin_auth', role);
+      if (failStatus.isLocked) {
+        return {
+          success: false,
+          error: failStatus.message
+        };
+      }
+      return { 
+        success: false, 
+        error: `الرمز السري غير صحيح. يتبقى لديك (${failStatus.remainingAttempts}) محاولات قبل القفل المؤقت.` 
+      };
+    }
+
+    // 3. Reset rate limit counter on success
+    SecurityRateLimiter.reset('admin_auth', role);
 
     const users = AdminService.getUsers();
     let targetUser: SystemUser | undefined;
@@ -795,7 +819,24 @@ export const AdminService = {
 
   isAdminLoggedIn: (): boolean => {
     try {
-      return localStorage.getItem(ADMIN_AUTH_KEY) === 'true';
+      const isAuth = localStorage.getItem(ADMIN_AUTH_KEY) === 'true';
+      if (!isAuth) return false;
+
+      // Check Session Expiration based on system settings
+      const authTimestamp = localStorage.getItem(ADMIN_AUTH_TIMESTAMP_KEY);
+      if (authTimestamp) {
+        const loginTime = parseInt(authTimestamp, 10);
+        const settings = AdminService.getSystemSettings();
+        const timeoutMins = parseInt(settings.sessionTimeoutMins || '30', 10) || 30;
+        const timeoutMs = timeoutMins * 60 * 1000;
+        
+        if (Date.now() - loginTime > timeoutMs) {
+          // Session has timed out - trigger secure logout
+          AdminService.logoutAdmin();
+          return false;
+        }
+      }
+      return true;
     } catch {
       return false;
     }
@@ -805,8 +846,10 @@ export const AdminService = {
     try {
       if (status) {
         localStorage.setItem(ADMIN_AUTH_KEY, 'true');
+        localStorage.setItem(ADMIN_AUTH_TIMESTAMP_KEY, Date.now().toString());
       } else {
         localStorage.removeItem(ADMIN_AUTH_KEY);
+        localStorage.removeItem(ADMIN_AUTH_TIMESTAMP_KEY);
       }
     } catch {}
   },
@@ -814,6 +857,8 @@ export const AdminService = {
   logoutAdmin: (): void => {
     try {
       localStorage.removeItem(ADMIN_AUTH_KEY);
+      localStorage.removeItem(ADMIN_AUTH_TIMESTAMP_KEY);
+      localStorage.removeItem(CURRENT_USER_KEY);
     } catch {}
   },
 
