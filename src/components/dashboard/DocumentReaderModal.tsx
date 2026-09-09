@@ -102,10 +102,22 @@ export const DocumentReaderModal: React.FC<DocumentReaderModalProps> = ({
   };
 
   const handleDownload = () => {
+    const rawUrl = attachment.dataUrl || attachment.url;
+    const safeUrl = sanitizeDocumentUrl(rawUrl);
+    if (safeUrl) {
+      const link = document.createElement('a');
+      link.href = safeUrl;
+      link.download = attachment.name;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    }
     addToast?.({
       type: 'success',
-      title: 'تحميل نسخة مؤرشفة',
-      message: `تم تنزيل نسخة رقمية من ${attachment.name}`
+      title: safeUrl ? 'تم فتح نسخة الملف' : 'لا توجد نسخة أصلية',
+      message: safeUrl ? `تم فتح أو تنزيل ${attachment.name}` : 'هذا الملف لا يحتوي على رابط أو محتوى مرفوع قابل للعرض.'
     });
   };
 
