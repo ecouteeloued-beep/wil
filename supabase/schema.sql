@@ -45,6 +45,8 @@ create table if not exists public.complaints (
   citizen_name text not null,
   national_id_encrypted text, -- رقم التعريف الوطني (NIN)
   phone_encrypted text,       -- رقم هاتف المواطن
+  citizen_nin text,            -- رقم التعريف للعرض داخل لوحة الموظفين المصرح لهم
+  citizen_phone text,          -- الهاتف للعرض داخل لوحة الموظفين المصرح لهم
   category text not null,     -- قطاع الانشغال (سكن، مياه، طرقات...)
   municipality text not null, -- بلدية الانشغال
   daira text default 'الوادي', -- دائرة الانشغال

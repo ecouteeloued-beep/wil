@@ -7,6 +7,8 @@ export interface SupabaseComplaintRow {
   citizen_name: string;
   national_id_encrypted?: string;
   phone_encrypted?: string;
+  citizen_nin?: string;
+  citizen_phone?: string;
   category: string;
   municipality: string;
   subject: string;
@@ -119,6 +121,8 @@ export const SupabaseService = {
         citizen_name: complaint.fullName || 'مواطن',
         national_id_encrypted: complaint.nin || '',
         phone_encrypted: complaint.phone || '',
+        citizen_nin: complaint.nin || '',
+        citizen_phone: complaint.phone || '',
         category: complaint.category || 'أخرى',
         municipality: complaint.grievanceMunicipality || complaint.applicantMunicipality || 'الوادي',
         subject: complaint.subject || 'انشغال إداري',
@@ -187,9 +191,9 @@ export const SupabaseService = {
           trackingNumber: trackingId,
           secretPin: undefined,
           statusCode,
-          nin: row.national_id_encrypted || undefined,
+          nin: row.citizen_nin || undefined,
           fullName: row.citizen_name || 'مواطن',
-          phone: row.phone_encrypted || '',
+          phone: row.citizen_phone || '',
           email: '',
           applicantDaira: row.municipality || 'الوادي',
           applicantMunicipality: row.municipality || 'الوادي',
@@ -312,9 +316,9 @@ export const SupabaseService = {
                 trackingNumber: trackingId,
                 secretPin: row.pin_hash || '',
                 statusCode: 'NEW',
-                nin: row.national_id_encrypted || '',
+                nin: row.citizen_nin || '',
                 fullName: row.citizen_name || 'مواطن',
-                phone: row.phone_encrypted || '',
+                phone: row.citizen_phone || '',
                 applicantDaira: row.municipality || 'الوادي',
                 applicantMunicipality: row.municipality || 'الوادي',
                 applicantNeighborhood: 'حي سكني',
