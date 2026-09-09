@@ -125,7 +125,7 @@ export const DashboardLayout: React.FC<{ user: SystemUser; onLogout: () => void 
   };
 
   return (
-    <div className={`dashboard-theme ${dashboardTheme === 'dark' ? 'dashboard-dark' : ''} min-h-screen bg-[#F4F6F8] flex flex-col font-tajawal text-gray-900 selection:bg-[#006233] selection:text-white`} dir="rtl">
+    <div className={`dashboard-theme ${dashboardTheme === 'dark' ? 'dashboard-dark' : 'dashboard-light'} min-h-screen bg-[#F4F6F8] flex flex-col font-tajawal text-gray-900 selection:bg-[#006233] selection:text-white`} dir="rtl">
       
       {/* Top Sovereign Republic Header Ribbon */}
       <div className="bg-[#04190c] text-white px-4 sm:px-6 py-2 border-b border-emerald-900/60 flex flex-wrap items-center justify-between gap-3 text-xs shrink-0 z-40">

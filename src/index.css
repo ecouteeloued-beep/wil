@@ -105,26 +105,81 @@ body {
 }
 
 .dashboard-dark {
-  background: #101923 !important;
-  color: #e5edf5 !important;
+  background: #0c1422 !important;
+  color: #e8eef7 !important;
+}
+
+/* Calm light dashboard palette: neutral surfaces instead of harsh white. */
+.dashboard-light {
+  background: #eef2f6 !important;
+  color: #17212b !important;
+}
+
+.dashboard-light .bg-white,
+.dashboard-light .bg-white\/95 {
+  background-color: #f8fafc !important;
+  color: #17212b;
+}
+
+.dashboard-light .bg-gray-50,
+.dashboard-light .bg-gray-50\/60,
+.dashboard-light .bg-gray-100 {
+  background-color: #eaf0f5 !important;
+}
+
+.dashboard-light .text-gray-900,
+.dashboard-light .text-gray-800,
+.dashboard-light .text-gray-700 {
+  color: #17212b !important;
+}
+
+.dashboard-light .text-gray-600,
+.dashboard-light .text-gray-500,
+.dashboard-light .text-gray-400 {
+  color: #526273 !important;
+}
+
+.dashboard-light .border-gray-100,
+.dashboard-light .border-gray-200,
+.dashboard-light .border-gray-200\/80,
+.dashboard-light .border-gray-300 {
+  border-color: #d5dee8 !important;
+}
+
+.dashboard-light input,
+.dashboard-light textarea,
+.dashboard-light select {
+  background-color: #fbfdff !important;
+  color: #17212b !important;
+  border-color: #cbd7e3 !important;
+}
+
+.dashboard-light input::placeholder,
+.dashboard-light textarea::placeholder {
+  color: #7a8998 !important;
+}
+
+.dashboard-light .hover\:bg-gray-50:hover,
+.dashboard-light .hover\:bg-gray-100:hover {
+  background-color: #e1e9f0 !important;
 }
 
 .dashboard-dark .bg-white,
 .dashboard-dark .bg-white\/95 {
-  background-color: #182431 !important;
-  color: #e5edf5;
+  background-color: #172335 !important;
+  color: #e8eef7;
 }
 
 .dashboard-dark .bg-gray-50,
 .dashboard-dark .bg-gray-50\/60,
 .dashboard-dark .bg-gray-100 {
-  background-color: #202e3c !important;
+  background-color: #1d2b3e !important;
 }
 
 .dashboard-dark .text-gray-900,
 .dashboard-dark .text-gray-800,
 .dashboard-dark .text-gray-700 {
-  color: #e5edf5 !important;
+  color: #e8eef7 !important;
 }
 
 .dashboard-dark .text-gray-600,
@@ -143,9 +198,9 @@ body {
 .dashboard-dark input,
 .dashboard-dark textarea,
 .dashboard-dark select {
-  background-color: #182431 !important;
-  color: #e5edf5 !important;
-  border-color: #405466 !important;
+  background-color: #142033 !important;
+  color: #e8eef7 !important;
+  border-color: #435a72 !important;
 }
 
 .dashboard-dark input::placeholder,
