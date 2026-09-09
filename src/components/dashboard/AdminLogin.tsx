@@ -64,6 +64,9 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onCancel }) => 
               <div className="text-center mb-8">
                 <h2 className="text-2xl font-bold font-changa text-gray-900">تسجيل الدخول للنظام</h2>
                 <p className="text-sm text-gray-500 font-tajawal mt-2">اختر حسابك التجريبي للمتابعة</p>
+                <div className="mt-3 inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-[#006233] px-3 py-1 rounded-full text-xs font-bold font-tajawal">
+                  <span>✨ نظام آمن مصدق برؤية ولاية الوادي</span>
+                </div>
               </div>
 
               <div className="space-y-3">

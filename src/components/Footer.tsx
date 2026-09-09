@@ -4,19 +4,26 @@ import { motion } from 'motion/react';
 
 interface FooterProps {
   onPrivacyClick?: () => void;
+  onSecretAdminTrigger?: () => void;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onPrivacyClick }) => {
+export const Footer: React.FC<FooterProps> = ({ onPrivacyClick, onSecretAdminTrigger }) => {
   return (
     <footer className="bg-[#111827] text-white mt-16 pt-12 pb-6 border-t-4 border-[#D21034]">
       <div className="max-w-xl md:max-w-5xl mx-auto px-4">
         {/* Main Footer Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-10 border-b border-white/10">
-          
+              
           {/* Brand/Identity Column */}
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 shrink-0 bg-white rounded-full flex items-center justify-center p-0.5 shadow-sm overflow-hidden border border-gray-200">
+              <div 
+                onClick={() => {
+                  if (onSecretAdminTrigger) onSecretAdminTrigger();
+                }}
+                className="w-12 h-12 shrink-0 bg-white rounded-full flex items-center justify-center p-0.5 shadow-sm overflow-hidden border border-gray-200 cursor-pointer"
+                title="بوابة ولاية الوادي الرسمية"
+              >
                 <img 
                   src="/assets/official-ministry-logo.jpg" 
                   alt="شعار وزارة الداخلية والجماعات المحلية" 
@@ -37,12 +44,12 @@ export const Footer: React.FC<FooterProps> = ({ onPrivacyClick }) => {
           {/* Contact Info */}
           <div className="flex flex-col gap-4 text-sm font-tajawal">
             <h5 className="font-changa font-bold text-lg text-white mb-2">معلومات التواصل</h5>
-            
+                
             <div className="flex items-start gap-3">
               <MapPin className="w-4 h-4 text-[#D21034] shrink-0 mt-0.5" />
               <span className="text-gray-300">مقر الولاية، حي الشهداء، بلدية الوادي، ولاية الوادي 39000</span>
             </div>
-            
+                
             <div className="flex items-start gap-3">
               <PhoneCall className="w-4 h-4 text-[#006233] shrink-0 mt-0.5" />
               <div>
@@ -55,7 +62,7 @@ export const Footer: React.FC<FooterProps> = ({ onPrivacyClick }) => {
           {/* Working Hours */}
           <div className="flex flex-col gap-4 text-sm font-tajawal">
             <h5 className="font-changa font-bold text-lg text-white mb-2">مواقيت العمل</h5>
-            
+                
             <div className="flex items-start gap-3">
               <Clock className="w-4 h-4 text-[#E5E7EB] shrink-0 mt-0.5" />
               <div className="text-gray-300 space-y-1">
@@ -76,7 +83,11 @@ export const Footer: React.FC<FooterProps> = ({ onPrivacyClick }) => {
             <ShieldCheck className="w-4 h-4 text-[#006233]" />
             <span className="underline underline-offset-4 decoration-gray-600">سياسة الخصوصية وحماية المعطيات الشخصية</span>
           </button>
-          <p>
+          <p 
+            onDoubleClick={() => { if (onSecretAdminTrigger) onSecretAdminTrigger(); }}
+            title="انقر مرتين للوصول الإداري الآمن"
+            className="cursor-default select-none"
+          >
             جميع الحقوق محفوظة © ولاية الوادي 2026
           </p>
         </div>

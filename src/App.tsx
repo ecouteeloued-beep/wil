@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
 import { Domains } from './components/Domains';
@@ -20,6 +20,25 @@ export default function App() {
   const [adminUser, setAdminUser] = useState<SystemUser | null>(null);
   const [formActiveTab, setFormActiveTab] = useState<'new' | 'track'>('new');
   const [selectedCategory, setSelectedCategory] = useState<GrievanceCategory>('الحالة المدنية');
+
+  useEffect(() => {
+    // Check URL parameters for secure hidden admin access e.g. ?portal=admin
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('portal') === 'admin' || params.get('admin') === 'true') {
+      setCurrentView('admin_dashboard');
+    }
+
+    // Secret keyboard shortcut: Ctrl + Shift + A (or Cmd + Shift + A)
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'a') {
+        e.preventDefault();
+        setCurrentView('admin_dashboard');
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const handleSelectTab = (tab: 'new' | 'track') => {
     setCurrentView('home');
@@ -94,14 +113,14 @@ export default function App() {
               <Hero onSelectTab={handleSelectTab} onVisionClick={() => setCurrentView('vision')} />
               
               <Domains 
-                onDomainClick={handleDomainClick} 
+                onDomainClick={handleDomainClick}
               />
               
               <div className="w-full space-y-10 sm:space-y-12">
                 <HowItWorks />
                 
                 <GrievanceForm 
-                  activeTab={formActiveTab} 
+                  activeTab={formActiveTab}
                   onTabChange={setFormActiveTab}
                   initialCategory={selectedCategory}
                 />
@@ -114,10 +133,13 @@ export default function App() {
           )}
         </main>
 
-        <Footer onPrivacyClick={() => {
-          setCurrentView('privacy');
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }} />
+        <Footer 
+          onPrivacyClick={() => {
+            setCurrentView('privacy');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }} 
+          onSecretAdminTrigger={() => setCurrentView('admin_dashboard')}
+        />
       </div>
     </>
   );
