@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { CATEGORIES, DAIRAS, DAIRAS_MUNICIPALITIES } from '../data';
-import { Municipality, GrievanceCategory, GrievanceSubmission, EnhancedGrievance } from '../types';
+import { Municipality, GrievanceCategory, GrievanceSubmission, EnhancedGrievance, AttachmentFile } from '../types';
 import { GrievanceService } from '../services/grievanceService';
 import { complaintRepository } from '../services/complaintRepository';
 import { ComplaintService } from '../services/complaintService';
@@ -146,7 +146,7 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
     setFiles(prev => prev.filter((_, index) => index !== indexToRemove));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
 
@@ -198,30 +198,57 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
 
     setIsSubmitting(true);
 
-    setTimeout(() => {
-      try {
-        const newSubmission = GrievanceService.save({
-          nin: cleanNin,
-          fullName: cleanFullName,
-          phone: cleanPhone,
-          email: cleanEmail,
-          applicantDaira,
-          applicantMunicipality,
-          applicantNeighborhood: cleanNeighborhood,
-          subject: cleanSubject,
-          grievanceDaira,
-          grievanceMunicipality,
-          category,
-          details: cleanDetails,
-        });
-        
-        setSubmittedTicket(newSubmission);
-      } catch (err) {
-        setFormError('حدث خطأ أثناء حفظ العريضة، يرجى المحاولة لاحقاً');
-      } finally {
-        setIsSubmitting(false);
+    try {
+      // Process any uploaded attachments to Data URLs for instant preview/reading
+      const processedAttachments: AttachmentFile[] = [];
+      if (files && files.length > 0) {
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          try {
+            const base64 = await new Promise<string>((resolve) => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve((reader.result as string) || '');
+              reader.onerror = () => resolve('');
+              reader.readAsDataURL(file);
+            });
+            processedAttachments.push({
+              id: `att-${Date.now()}-${i}`,
+              name: file.name,
+              size: `${(file.size / (1024 * 1024)).toFixed(2)} MB`,
+              type: file.type || 'application/octet-stream',
+              uploadedAt: new Date().toISOString().split('T')[0],
+              dataUrl: base64,
+              url: base64
+            });
+          } catch {
+            // fallback
+          }
+        }
       }
-    }, 700);
+
+      const newSubmission = GrievanceService.save({
+        nin: cleanNin,
+        fullName: cleanFullName,
+        phone: cleanPhone,
+        email: cleanEmail,
+        applicantDaira,
+        applicantMunicipality,
+        applicantNeighborhood: cleanNeighborhood,
+        subject: cleanSubject,
+        grievanceDaira,
+        grievanceMunicipality,
+        category,
+        details: cleanDetails,
+        attachments: processedAttachments
+      });
+      
+      setSubmittedTicket(newSubmission);
+    } catch (err) {
+      console.error('Submission error:', err);
+      setFormError('حدث خطأ أثناء حفظ العريضة، يرجى المحاولة لاحقاً');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleCopy = (text: string) => {
@@ -290,7 +317,7 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
 
       // 3. Fallback to GrievanceService
       if (!match) {
-        const legacyMatch = GrievanceService.findByTrackingId(cleaned);
+        const legacyMatch = await GrievanceService.findByTrackingId(cleaned, cleanedPhone);
         if (legacyMatch) {
           match = {
             id: legacyMatch.id,
