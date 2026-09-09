@@ -78,6 +78,20 @@ drop policy if exists "Allow staff read/write internal notes" on public.internal
 drop policy if exists "Allow staff to insert audit logs" on public.audit_logs;
 drop policy if exists "Allow staff to read audit logs" on public.audit_logs;
 
+-- حذف سياسات هذا الملف أيضاً لجعل التنفيذ متكرراً وآمناً.
+drop policy if exists "Staff read own profile" on public.users;
+drop policy if exists "Executives read all users" on public.users;
+drop policy if exists "Wali manages users" on public.users;
+drop policy if exists "Super admin manages technical user fields" on public.users;
+drop policy if exists "Public submits complaints" on public.complaints;
+drop policy if exists "Role scoped complaint read" on public.complaints;
+drop policy if exists "Role scoped complaint update" on public.complaints;
+drop policy if exists "Scoped internal notes read" on public.internal_notes;
+drop policy if exists "Scoped internal notes insert" on public.internal_notes;
+drop policy if exists "Scoped internal notes update" on public.internal_notes;
+drop policy if exists "Staff insert own audit logs" on public.audit_logs;
+drop policy if exists "Authorized audit log read" on public.audit_logs;
+
 -- ملفات المستخدمين: كل موظف يرى ملفه؛ الوالي وsuper_admin يديران المستخدمين.
 create policy "Staff read own profile" on public.users
   for select to authenticated
