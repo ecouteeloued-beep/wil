@@ -62,15 +62,6 @@ export const DEFAULT_SYSTEM_SETTINGS: SystemSettings = {
 // =========================================================================
 // INITIAL SEED USERS WITH DISTINCT SOVEREIGN ROLES & PERMISSIONS
 // =========================================================================
-export const ROLE_PINS: Record<UserRole, string> = {
-  super_admin: '1234',
-  wali: '2026',
-  chef_cabinet: '2026',
-  head_department: '2026',
-  supervisor: '0000',
-  employee: '1111'
-};
-
 export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
   wali: ['view_all', 'executive_directive', 'export_reports', 'view_audit_logs'],
   chef_cabinet: ['view_all', 'assign_grievance', 'export_reports', 'view_audit_logs'],
@@ -119,7 +110,6 @@ export const SEED_USERS: SystemUser[] = [
     resolvedCount: 840,
     overdueCount: 0,
     lastActive: 'نشط الآن',
-    pinCode: '2026',
     permissions: ['sovereign_oversight', 'executive_directives', 'view_all', 'reports', 'map_oversight', 'audit_log']
   },
   {
@@ -135,7 +125,6 @@ export const SEED_USERS: SystemUser[] = [
     resolvedCount: 520,
     overdueCount: 0,
     lastActive: 'منذ 10 دقائق',
-    pinCode: '2026',
     permissions: ['admin_coordination', 'view_all', 'assign_departments', 'reports', 'map_oversight', 'audit_log', 'municipalities_manage']
   },
   {
@@ -151,7 +140,6 @@ export const SEED_USERS: SystemUser[] = [
     resolvedCount: 185,
     overdueCount: 1,
     lastActive: 'نشط الآن',
-    pinCode: '2026',
     permissions: ['daira_oversight', 'view_daira_only', 'transfer_commune', 'process_local']
   },
   {
@@ -167,7 +155,6 @@ export const SEED_USERS: SystemUser[] = [
     resolvedCount: 142,
     overdueCount: 0,
     lastActive: 'منذ 5 دقائق',
-    pinCode: '0000',
     permissions: ['triage', 'assign_agents', 'approve_replies', 'view_all', 'citizens_manage', 'reports']
   },
   {
@@ -183,7 +170,6 @@ export const SEED_USERS: SystemUser[] = [
     resolvedCount: 49,
     overdueCount: 1,
     lastActive: 'نشط الآن',
-    pinCode: '1111',
     permissions: ['view_assigned', 'process', 'draft_response', 'add_notes', 'request_info']
   },
   {
@@ -199,7 +185,6 @@ export const SEED_USERS: SystemUser[] = [
     resolvedCount: 38,
     overdueCount: 0,
     lastActive: 'منذ 20 دقيقة',
-    pinCode: '1111',
     permissions: ['view_assigned', 'process', 'draft_response', 'add_notes', 'request_info']
   },
   {
@@ -215,7 +200,6 @@ export const SEED_USERS: SystemUser[] = [
     resolvedCount: 0,
     overdueCount: 0,
     lastActive: 'نشط الآن',
-    pinCode: '1234',
     permissions: ['all', 'manage_users', 'manage_rbac', 'system_settings', 'audit_log', 'database_backup']
   }
 ];
@@ -745,78 +729,9 @@ export const AdminService = {
   },
 
   // Official PIN Authentication for /admin
-  verifyPin: (role: UserRole, pin: string): boolean => {
-    const expected = ROLE_PINS[role] || '2026';
-    return expected === pin.trim();
-  },
+  verifyPin: (_role: UserRole, _pin: string): boolean => false,
 
-  loginWithPinAndRole: (role: UserRole, pin: string): { success: boolean; user?: SystemUser; error?: string } => {
-    const trimmed = pin.trim();
-
-    // 1. Check Rate Limiter (Brute-Force Attack Prevention)
-    const limitStatus = SecurityRateLimiter.checkLimit('admin_auth', role);
-    if (limitStatus.isLocked) {
-      return {
-        success: false,
-        error: limitStatus.message || 'تم حظر محاولات تسجيل الدخول مؤقتاً لتكرار إدخال الرمز غير الصحيح.'
-      };
-    }
-
-    // 2. Validate Against Authorized Role PIN
-    const expected = ROLE_PINS[role] || '2026';
-    if (trimmed !== expected) {
-      const failStatus = SecurityRateLimiter.registerFailure('admin_auth', role);
-      if (failStatus.isLocked) {
-        return {
-          success: false,
-          error: failStatus.message
-        };
-      }
-      return { 
-        success: false, 
-        error: `الرمز السري غير صحيح. يتبقى لديك (${failStatus.remainingAttempts}) محاولات قبل القفل المؤقت.` 
-      };
-    }
-
-    // 3. Reset rate limit counter on success
-    SecurityRateLimiter.reset('admin_auth', role);
-
-    const users = AdminService.getUsers();
-    let targetUser: SystemUser | undefined;
-    if (role === 'wali') {
-      targetUser = users.find(u => u.role === 'wali') || users.find(u => u.id === 'usr-wali');
-    } else if (role === 'chef_cabinet') {
-      targetUser = users.find(u => u.role === 'chef_cabinet') || users.find(u => u.id === 'usr-sg');
-    } else if (role === 'head_department') {
-      targetUser = users.find(u => u.role === 'head_department') || users.find(u => u.id === 'usr-daira-eloued');
-    } else if (role === 'supervisor') {
-      targetUser = users.find(u => u.role === 'supervisor') || users.find(u => u.id === 'usr-supervisor');
-    } else if (role === 'super_admin') {
-      targetUser = users.find(u => u.role === 'super_admin') || users.find(u => u.id === 'usr-admin');
-    } else {
-      targetUser = users.find(u => u.role === 'employee') || users.find(u => u.id === 'usr-emp-1');
-    }
-
-    if (!targetUser) {
-      targetUser = SEED_USERS.find(u => u.role === role) || SEED_USERS[0];
-    }
-
-    AdminService.setCurrentUser(targetUser);
-    AdminService.setAdminLoggedIn(true);
-
-    AdminService.logAudit({
-      userId: targetUser.id,
-      userName: targetUser.name,
-      userRole: targetUser.roleTitle,
-      action: 'تسجيل دخول إداري /admin',
-      targetId: targetUser.id,
-      targetType: 'موظف',
-      newValue: 'متصل بالنظام الإداري',
-      details: `تم التحقق بنجاح من الرمز السري الرسمي وتسجيل الدخول بحساب (${targetUser.name} - ${targetUser.roleTitle}).`
-    });
-
-    return { success: true, user: targetUser };
-  },
+  loginWithPinAndRole: (_role: UserRole, _pin: string) => ({ success: false, error: 'استخدم مصادقة Supabase Auth.' }),
 
   isAdminLoggedIn: (): boolean => {
     try {
@@ -863,22 +778,7 @@ export const AdminService = {
     } catch {}
   },
 
-  loginWithPinUniversal: (pin: string): { success: boolean; user?: SystemUser; error?: string } => {
-    const trimmed = pin.trim();
-    if (trimmed === '0000') {
-      return AdminService.loginWithPinAndRole('supervisor', '0000');
-    }
-    if (trimmed === '1111') {
-      return AdminService.loginWithPinAndRole('employee', '1111');
-    }
-    if (trimmed === '1234') {
-      return AdminService.loginWithPinAndRole('super_admin', '1234');
-    }
-    return {
-      success: false,
-      error: 'رمز PIN غير صالح. الرموز المعتمدة: مسؤل خلية (0000)، موظف معالج (1111)، Super admin (1234)'
-    };
-  },
+  loginWithPinUniversal: (_pin: string) => ({ success: false, error: 'استخدم مصادقة Supabase Auth.' }),
 
   addUser: (userData: Omit<SystemUser, 'id' | 'assignedCount' | 'resolvedCount' | 'overdueCount' | 'lastActive'>, actor: SystemUser): SystemUser => {
     const users = AdminService.getUsers();
@@ -894,7 +794,6 @@ export const AdminService = {
         : userData.role === 'supervisor'
         ? ['view_all', 'assign', 'approve', 'manage_staff', 'reports', 'audit_log', 'settings']
         : ['all', 'super_admin_map', 'view_all', 'reports', 'audit_log', 'manage_staff', 'settings'],
-      pinCode: userData.role === 'supervisor' ? '0000' : userData.role === 'employee' ? '1111' : '1234'
     };
     users.push(newUser);
     localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));

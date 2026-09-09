@@ -45,7 +45,7 @@ export const UsersView: React.FC<UsersViewProps> = ({ user, addToast }) => {
     department: 'ديوان والي ولاية الوادي',
     role: 'employee' as SystemUser['role'],
     status: 'active' as SystemUser['status'],
-    pin: '1234',
+    pin: '',
     permissions: [] as string[]
   });
 
@@ -89,7 +89,7 @@ export const UsersView: React.FC<UsersViewProps> = ({ user, addToast }) => {
       department: 'ديوان والي ولاية الوادي',
       role: 'employee',
       status: 'active',
-      pin: '1234',
+      pin: '',
       permissions: DEFAULT_ROLE_PERMISSIONS['employee'] || []
     });
     setShowAddModal(true);
@@ -175,7 +175,7 @@ export const UsersView: React.FC<UsersViewProps> = ({ user, addToast }) => {
         role: formData.role,
         status: formData.status,
         permissions: formData.permissions
-      }, formData.pin || '1234');
+      }, user);
 
       AdminService.logAudit({
         userId: user?.id || 'admin',
@@ -191,7 +191,7 @@ export const UsersView: React.FC<UsersViewProps> = ({ user, addToast }) => {
       addToast?.({
         type: 'success',
         title: 'تمت إضافة المستخدم',
-        message: `تم إنشاء حساب (${newUser.name}) برمز PIN: ${formData.pin || '1234'}`
+        message: `تم إنشاء حساب (${newUser.name}). يجب دعوة المستخدم وتعيين كلمة مروره عبر Supabase Auth.`
       });
       setShowAddModal(false);
     }

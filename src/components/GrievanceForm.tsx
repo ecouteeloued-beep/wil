@@ -322,7 +322,7 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
           match = {
             id: legacyMatch.id,
             trackingNumber: legacyMatch.id,
-            secretPin: (legacyMatch as any).secretPin || '2026',
+            secretPin: (legacyMatch as any).secretPin || '',
             statusCode: 'IN_PROGRESS',
             status: legacyMatch.status || 'قيد المعالجة',
             priority: legacyMatch.priority || 'عادي',
@@ -499,14 +499,14 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
                             </span>
                             <div className="flex items-center justify-center gap-3">
                               <span className="font-mono text-xl font-bold text-[#111827] tracking-[0.3em]">
-                                {submittedTicket.secretPin || '2026'}
+                                {submittedTicket.secretPin || ''}
                               </span>
                             </div>
                           </div>
 
                           <button
                             type="button"
-                            onClick={() => handleCopy(`الرقم المرجعي: ${submittedTicket.id}\nالرمز السري: ${submittedTicket.secretPin || '2026'}`)}
+                            onClick={() => handleCopy(`الرقم المرجعي: ${submittedTicket.id}\nالرمز السري: ${submittedTicket.secretPin || ''}`)}
                             className={`mt-4 w-full py-2.5 rounded-lg border text-xs font-tajawal font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm print-hidden ${
                               copiedCode ? 'bg-[#006233] border-[#006233] text-white' : 'bg-gray-50 border-gray-200 text-[#111827] hover:bg-gray-100'
                             }`}
@@ -532,7 +532,7 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
                           type="button"
                           onClick={() => { 
                             onTabChange('track');
-                            executeTrackSearch(submittedTicket.id, submittedTicket.secretPin || '2026');
+                            executeTrackSearch(submittedTicket.id, submittedTicket.secretPin || '');
                           }}
                           className="py-2.5 px-6 bg-[#006233] hover:bg-[#004d28] text-white font-tajawal font-bold text-sm rounded-lg transition-colors flex items-center justify-center gap-2 shadow-xs cursor-pointer"
                         >
