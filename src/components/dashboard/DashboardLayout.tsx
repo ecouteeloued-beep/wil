@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  LayoutDashboard, Inbox, MapIcon, BarChart3, Settings, 
+  LayoutDashboard, Inbox, MapIcon, BarChart3, Settings,
   User, LogOut, Menu, X, Bell, Search, ShieldAlert,
   FileClock, MapPin, Building2, UsersRound, AlertTriangle, CheckCircle2, Info,
-  Printer, Download, Shield, Sparkles, ExternalLink, Calendar, Clock, Award, FileText
+  Printer, Download, Shield, Sparkles, ExternalLink, Calendar, Clock, Award, FileText,
+  Moon, Sun
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { OverviewStats } from './OverviewStats';
@@ -35,6 +36,14 @@ export const DashboardLayout: React.FC<{ user: SystemUser; onLogout: () => void 
   const [showExecutiveReportModal, setShowExecutiveReportModal] = useState(false);
   const [currentTime, setCurrentTime] = useState<string>('');
   const [showNotificationsMenu, setShowNotificationsMenu] = useState(false);
+  const [dashboardTheme, setDashboardTheme] = useState<'light' | 'dark'>(() => {
+    if (typeof window === 'undefined') return 'dark';
+    return window.localStorage.getItem('dashboard_theme') === 'light' ? 'light' : 'dark';
+  });
+
+  useEffect(() => {
+    window.localStorage.setItem('dashboard_theme', dashboardTheme);
+  }, [dashboardTheme]);
 
   // Live Algerian clock
   useEffect(() => {
@@ -60,24 +69,8 @@ export const DashboardLayout: React.FC<{ user: SystemUser; onLogout: () => void 
     setToasts(prev => prev.filter(t => t.id !== id));
   };
 
-  // Simulate incoming notifications on mount
+  // Listen for real submissions from the portal; no demo notifications are generated.
   useEffect(() => {
-    const timer1 = setTimeout(() => {
-      addToast({
-        type: 'info',
-        title: 'انشغال وارد جديد من بلدية قمار',
-        message: 'تم إيداع عريضة جديدة للمواطن (س. مسعود) بخصوص تهيئة شبكة المياه الصالحة للشرب.'
-      });
-    }, 2500);
-
-    const timer2 = setTimeout(() => {
-      addToast({
-        type: 'warning',
-        title: 'تنبيه الأجل القانوني (Deadline Alert)',
-        message: 'الملف رقم WL-2026-000125 بدائرة حاسي خليفة اقترب من انقضاء مهلة الرد (بقي 24 ساعة).'
-      });
-    }, 6500);
-
     const handleComplaintsUpdated = (e: any) => {
       if (e?.detail?.complaint) {
         addToast({
@@ -91,8 +84,6 @@ export const DashboardLayout: React.FC<{ user: SystemUser; onLogout: () => void 
     window.addEventListener('complaints_updated', handleComplaintsUpdated);
 
     return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
       window.removeEventListener('complaints_updated', handleComplaintsUpdated);
     };
   }, []);
@@ -112,7 +103,7 @@ export const DashboardLayout: React.FC<{ user: SystemUser; onLogout: () => void 
     {
       category: 'إدارة ومعالجة العرائض',
       items: [
-        { id: 'inbox', icon: Inbox, label: 'صندوق الانشغالات المركزي', badge: '1,245', badgeColor: 'bg-[#006233]' },
+        { id: 'inbox', icon: Inbox, label: 'صندوق الانشغالات المركزي' },
         { id: 'citizens', icon: UsersRound, label: 'سجل المواطنين والمتابعة' },
         { id: 'departments', icon: Building2, label: 'المصالح والهيكل الإداري', roles: ['super_admin', 'admin'] },
         { id: 'municipalities', icon: MapPin, label: 'دليل الدوائر والبلديات', roles: ['super_admin', 'admin'] },
@@ -134,7 +125,7 @@ export const DashboardLayout: React.FC<{ user: SystemUser; onLogout: () => void 
   };
 
   return (
-    <div className="min-h-screen bg-[#F4F6F8] flex flex-col font-tajawal text-gray-900 selection:bg-[#006233] selection:text-white" dir="rtl">
+    <div className={`dashboard-theme ${dashboardTheme === 'dark' ? 'dashboard-dark' : ''} min-h-screen bg-[#F4F6F8] flex flex-col font-tajawal text-gray-900 selection:bg-[#006233] selection:text-white`} dir="rtl">
       
       {/* Top Sovereign Republic Header Ribbon */}
       <div className="bg-[#04190c] text-white px-4 sm:px-6 py-2 border-b border-emerald-900/60 flex flex-wrap items-center justify-between gap-3 text-xs shrink-0 z-40">
@@ -370,6 +361,17 @@ export const DashboardLayout: React.FC<{ user: SystemUser; onLogout: () => void 
                 />
               </div>
 
+              {/* Light / dark mode toggle */}
+              <button
+                type="button"
+                onClick={() => setDashboardTheme(theme => theme === 'dark' ? 'light' : 'dark')}
+                className="p-2 text-gray-600 hover:text-[#006233] bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors border border-gray-200"
+                title={dashboardTheme === 'dark' ? 'تفعيل الوضع النهاري' : 'تفعيل الوضع الليلي'}
+                aria-label={dashboardTheme === 'dark' ? 'تفعيل الوضع النهاري' : 'تفعيل الوضع الليلي'}
+              >
+                {dashboardTheme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              </button>
+
               {/* Notifications Dropdown Toggle */}
               <div className="relative">
                 <button
@@ -385,17 +387,10 @@ export const DashboardLayout: React.FC<{ user: SystemUser; onLogout: () => void 
                   <div className="absolute left-0 mt-2 w-80 bg-white border border-gray-200 rounded-2xl shadow-xl p-3 z-50 animate-in fade-in">
                     <div className="flex items-center justify-between pb-2 border-b border-gray-100">
                       <span className="font-changa font-bold text-xs text-gray-900">تنبيهات المنظومة</span>
-                      <span className="text-[10px] bg-[#D21034]/10 text-[#D21034] px-2 py-0.5 rounded-full font-bold">2 غير مقروءة</span>
+                      <span className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-bold">لا توجد بيانات وهمية</span>
                     </div>
                     <div className="py-2 space-y-2 text-xs">
-                      <div className="p-2 bg-amber-50 rounded-lg border border-amber-100">
-                        <p className="font-bold text-amber-900">تنبيه مهلة قانونية (24 ساعة)</p>
-                        <p className="text-amber-700 text-[11px]">الملف رقم WL-2026-000125 بحاجة لرد رسمي.</p>
-                      </div>
-                      <div className="p-2 bg-emerald-50 rounded-lg border border-emerald-100">
-                        <p className="font-bold text-emerald-900">انشغال وارد جديد</p>
-                        <p className="text-emerald-700 text-[11px]">انشغال جديد من بلدية قمار بخصوص شبكة المياه.</p>
-                      </div>
+                      <p className="p-3 bg-gray-50 rounded-lg text-gray-500">ستظهر التنبيهات هنا عند تسجيل أو تحديث عريضة حقيقية.</p>
                     </div>
                   </div>
                 )}
@@ -504,19 +499,19 @@ export const DashboardLayout: React.FC<{ user: SystemUser; onLogout: () => void 
               {/* Stats Matrix */}
               <div className="grid grid-cols-4 gap-3 text-center">
                 <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200">
-                  <span className="block text-2xl font-black font-mono text-[#006233]">1,245</span>
-                  <span className="text-xs text-gray-700 font-bold">إجمالي العرائض</span>
+                  <span className="block text-2xl font-black font-mono text-[#006233]">0</span>
+                  <span className="text-xs text-gray-700 font-bold">إجمالي العرائض المسجلة</span>
                 </div>
                 <div className="p-3 bg-blue-50 rounded-xl border border-blue-200">
-                  <span className="block text-2xl font-black font-mono text-blue-800">881</span>
-                  <span className="text-xs text-gray-700 font-bold">تمت تسويتها (71%)</span>
+                  <span className="block text-2xl font-black font-mono text-blue-800">0</span>
+                  <span className="text-xs text-gray-700 font-bold">تمت تسويتها (0%)</span>
                 </div>
                 <div className="p-3 bg-amber-50 rounded-xl border border-amber-200">
-                  <span className="block text-2xl font-black font-mono text-amber-800">312</span>
+                  <span className="block text-2xl font-black font-mono text-amber-800">0</span>
                   <span className="text-xs text-gray-700 font-bold">قيد المعالجة</span>
                 </div>
                 <div className="p-3 bg-red-50 rounded-xl border border-red-200">
-                  <span className="block text-2xl font-black font-mono text-[#D21034]">18</span>
+                  <span className="block text-2xl font-black font-mono text-[#D21034]">0</span>
                   <span className="text-xs text-gray-700 font-bold">ملفات متأخرة</span>
                 </div>
               </div>
@@ -525,10 +520,10 @@ export const DashboardLayout: React.FC<{ user: SystemUser; onLogout: () => void 
               <div className="text-sm leading-relaxed space-y-2 text-gray-800">
                 <h5 className="font-changa font-bold text-gray-900 text-sm border-r-4 border-[#006233] pr-2">خلاصة المتابعة الميدانية:</h5>
                 <p>
-                  بناءً على تعليمات السيد والي ولاية الوادي المتعلقة بوجوب الرد على كافة الانشغالات في آجال أقصاها 15 يوماً، سجلت المنصة الرقمية تفاعلاً إيجابياً من 22 بلدية، مع انخفاض متوسط مدة الرد إلى 3.4 أيام.
+                  لا توجد عرائض فعلية مسجلة حالياً في قاعدة البيانات. ستُحتسب المؤشرات تلقائياً بعد استقبال أول عريضة حقيقية.
                 </p>
                 <p className="text-xs text-[#D21034] font-bold">
-                  توجيه: يتعين على رؤساء دوائر حاسي خليفة والدبيلة تسريع دراسة الملفات ذات الطابع العقاري والسكن الريفي العالقة.
+                  توجيه: تُعرض التوصيات التشغيلية بعد توفر بيانات فعلية كافية للتحليل.
                 </p>
               </div>
 

@@ -168,16 +168,50 @@ create policy "Allow staff to update complaints" on public.complaints
   using (exists (select 1 from public.users u where u.id = auth.uid() and u.is_active = true))
   with check (exists (select 1 from public.users u where u.id = auth.uid() and u.is_active = true));
 
--- تتبع المواطن يتم عبر دالة محدودة تعيد السجل المطابق للرقم والهاتف فقط.
-create or replace function public.track_complaint(p_tracking_id text, p_phone text)
-returns setof public.complaints
-language sql
+-- حماية الحقول الحساسة: تخزين بصمات SHA-256 للهاتف وNIN وbcrypt للرمز السري.
+create or replace function public.hash_complaint_sensitive_fields()
+returns trigger
+language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
-  select c.* from public.complaints c
+begin
+  if new.phone_encrypted is not null and new.phone_encrypted !~ '^[0-9a-f]{64}$' then
+    new.phone_encrypted := encode(digest(trim(new.phone_encrypted), 'sha256'), 'hex');
+  end if;
+  if new.national_id_encrypted is not null and new.national_id_encrypted !~ '^[0-9a-f]{64}$' then
+    new.national_id_encrypted := encode(digest(trim(new.national_id_encrypted), 'sha256'), 'hex');
+  end if;
+  if new.pin_hash is not null and new.pin_hash !~ '^\$2[aby]\$' then
+    new.pin_hash := crypt(trim(new.pin_hash), gen_salt('bf'));
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists hash_complaint_sensitive_fields on public.complaints;
+create trigger hash_complaint_sensitive_fields
+  before insert or update on public.complaints
+  for each row execute function public.hash_complaint_sensitive_fields();
+
+-- تتبع المواطن يعيد الحد الأدنى اللازم فقط، ولا يعيد الهاتف أو NIN أو PIN.
+drop function if exists public.track_complaint(text, text);
+create or replace function public.track_complaint(p_tracking_id text, p_phone text)
+returns table(
+  tracking_id text, citizen_name text, category text, municipality text, daira text,
+  neighborhood text, subject text, description text, status text, priority text,
+  assigned_department text, deadline timestamptz, official_response jsonb,
+  timeline jsonb, created_at timestamptz, updated_at timestamptz
+)
+language sql security definer set search_path = public, extensions
+as $$
+  select c.tracking_id, c.citizen_name, c.category, c.municipality, c.daira,
+    c.neighborhood, c.subject, c.description, c.status, c.priority,
+    c.assigned_department, c.deadline, c.official_response, c.timeline,
+    c.created_at, c.updated_at
+  from public.complaints c
   where upper(c.tracking_id) = upper(trim(p_tracking_id))
-    and c.phone_encrypted = trim(p_phone)
+    and c.phone_encrypted = encode(digest(trim(p_phone), 'sha256'), 'hex')
   limit 1;
 $$;
 revoke all on function public.track_complaint(text, text) from public;
