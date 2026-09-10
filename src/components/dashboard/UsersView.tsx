@@ -15,7 +15,7 @@ interface UsersViewProps {
 
 const AVAILABLE_PERMISSIONS = [
   { id: 'view_all', label: 'الاطلاع الشامل على كافة العرائض والبلديات الـ 22' },
-  { id: 'view_department', label: 'الاطلاع على عرائض المصلحة / الدائرة فقط' },
+  { id: 'view_department', label: 'الاطلاع على عرائض المصلحة / الديوان فقط' },
   { id: 'assign_grievance', label: 'إسناد وتوجيه الملفات للموظفين والمديريات' },
   { id: 'executive_directive', label: 'إصدار تعليمات ولائية استعجالية ملزمة' },
   { id: 'approve_reply', label: 'المصادقة على الردود الرسمية الموجهة للمواطن' },
@@ -351,7 +351,7 @@ export const UsersView: React.FC<UsersViewProps> = ({ user, addToast }) => {
               <option value="">كافة الرتب والمسؤوليات</option>
               <option value="wali">السيد والي الولاية</option>
               <option value="chef_cabinet">السيد الأمين العام للولاية</option>
-              <option value="head_department">السادة رؤساء الدوائر</option>
+              <option value="head_department">رئيس الديوان — تابع لديوان الوالي</option>
               <option value="supervisor">مسؤولو خلية الإصغاء</option>
               <option value="employee">الموظفون المكلفون بالمعالجة</option>
               <option value="super_admin">المشرف العام وأمن المنظومة</option>
@@ -551,7 +551,7 @@ export const UsersView: React.FC<UsersViewProps> = ({ user, addToast }) => {
                     >
                       <option value="wali">السيد والي الولاية (صلاحيات سيادية كاملة)</option>
                       <option value="chef_cabinet">السيد الأمين العام للولاية (إشراف ومتابعة)</option>
-                      <option value="head_department">رئيس دائرة (نطاق إقليمي)</option>
+                      <option value="head_department">رئيس الديوان — تابع لديوان الوالي</option>
                       <option value="supervisor">مسؤول خلية الإصغاء والتكفل</option>
                       <option value="employee">موظف معالج وميداني</option>
                       <option value="super_admin">المشرف العام والرقمنة</option>
@@ -559,7 +559,7 @@ export const UsersView: React.FC<UsersViewProps> = ({ user, addToast }) => {
                   </div>
 
                   <div>
-                    <label className="block font-bold text-gray-700 mb-1">المصلحة أو الدائرة التابع لها</label>
+                    <label className="block font-bold text-gray-700 mb-1">الديوان أو المصلحة التابع لها</label>
                     <input
                       type="text"
                       value={formData.department}

@@ -1458,6 +1458,11 @@ export const InboxView: React.FC<InboxViewProps> = ({
                   <h3 className="font-changa font-bold text-lg text-gray-900 mb-2">
                     {selectedTicket.subject}
                   </h3>
+                  {selectedTicket.meetingRequest && (
+                    <div className="mb-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-900">
+                      طلب لقاء موجه إلى: {selectedTicket.meetingRequest}
+                    </div>
+                  )}
                   <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 text-gray-800 text-sm leading-relaxed whitespace-pre-wrap">
                     {selectedTicket.details}
                   </div>

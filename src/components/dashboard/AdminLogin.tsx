@@ -1,33 +1,22 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { AlertCircle, ArrowRight, Eye, EyeOff, KeyRound, Lock, ShieldCheck, User as UserIcon } from 'lucide-react';
+import { AlertCircle, ArrowRight, Eye, EyeOff, KeyRound, Lock, ShieldCheck, User as UserIcon, Crown, Landmark, Users } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { SupabaseService } from '../../services/supabaseService';
 import { SecurityRateLimiter } from '../../utils/security';
-import { SystemUser, UserRole } from '../../types';
+import { SystemUser } from '../../types';
+import { getAuthenticatedStaff } from '../../services/authService';
 
 interface AdminLoginProps {
   onLogin: (user: SystemUser) => void;
   onCancel: () => void;
 }
 
-const ROLE_TITLES: Record<string, string> = {
-  super_admin: 'المشرف التقني العام',
-  wali: 'والي الولاية',
-  chef_cabinet: 'الأمين العام للولاية',
-  head_department: 'رئيس الديوان',
-  supervisor: 'رئيس خلية الإصغاء والتكفل',
-  employee: 'الموظف المكلف',
-};
-
-const ROLE_PERMISSIONS: Record<string, string[]> = {
-  wali: ['view_all', 'assign_grievance', 'draft_reply', 'approve_reply', 'manage_users', 'view_audit_logs', 'manage_settings'],
-  chef_cabinet: ['view_all', 'assign_grievance', 'draft_reply', 'approve_reply', 'view_audit_logs'],
-  super_admin: ['manage_users', 'view_audit_logs', 'manage_settings'],
-  supervisor: ['view_department', 'assign_grievance', 'draft_reply', 'approve_reply', 'view_audit_logs'],
-  head_department: ['view_department', 'assign_grievance', 'draft_reply', 'view_audit_logs'],
-  employee: ['view_assigned', 'draft_reply'],
-};
+const ENTRY_ROLES = [
+  { title: 'والي ولاية الوادي', subtitle: 'المسؤول الأول للولاية', icon: Crown, tone: 'amber' },
+  { title: 'الأمين العام للولاية', subtitle: 'التنسيق والمتابعة الإدارية', icon: Landmark, tone: 'emerald' },
+  { title: 'رئيس الديوان', subtitle: 'تابع لديوان الوالي', icon: Users, tone: 'blue' },
+];
 
 export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onCancel }) => {
   const [email, setEmail] = useState('');
@@ -39,12 +28,10 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onCancel }) => 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setError('');
-
     if (!isSupabaseConfigured || !supabase) {
       setError('بوابة الإدارة غير مفعلة: يجب إعداد Supabase Auth قبل السماح بالدخول.');
       return;
     }
-
     const identifier = email.trim().toLowerCase();
     const loginEmail = await SupabaseService.resolveLoginIdentifier(identifier);
     const limit = SecurityRateLimiter.checkLimit('admin-login', identifier || 'anonymous');
@@ -52,59 +39,29 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onCancel }) => 
       setError(limit.message || 'تم إيقاف المحاولات مؤقتاً لأسباب أمنية.');
       return;
     }
-
     setIsVerifying(true);
-    const { data, error: authError } = await supabase.auth.signInWithPassword({
-      email: loginEmail || identifier,
-      password,
-    });
-
+    const { data, error: authError } = await supabase.auth.signInWithPassword({ email: loginEmail || identifier, password });
     if (authError || !data.user) {
       SecurityRateLimiter.registerFailure('admin-login', identifier || 'anonymous');
       setIsVerifying(false);
       setError('اسم المستخدم أو البريد المهني أو كلمة المرور غير صحيحة.');
       return;
     }
-
-    const { data: profile, error: profileError } = await supabase
-      .from('users')
-      .select('id,username,name,email,role,department,phone,is_active')
-      .eq('id', data.user.id)
-      .maybeSingle();
-
-    if (profileError || !profile || !profile.is_active) {
+    const authenticatedUser = await getAuthenticatedStaff();
+    if (!authenticatedUser) {
       await supabase.auth.signOut();
       SecurityRateLimiter.registerFailure('admin-login', identifier || 'anonymous');
       setIsVerifying(false);
       setError('الحساب موثق لكنه لا يملك ملف موظف نشطاً في النظام.');
       return;
     }
-
     SecurityRateLimiter.reset('admin-login', identifier || 'anonymous');
-    const role = (profile.role || 'employee') as UserRole;
-    const authenticatedUser: SystemUser = {
-      id: profile.id,
-      username: profile.username,
-      name: profile.name,
-      role,
-      roleTitle: ROLE_TITLES[role] || 'موظف النظام',
-      email: profile.email,
-      phone: profile.phone || '',
-      department: profile.department || '',
-      status: 'نشط',
-      assignedCount: 0,
-      resolvedCount: 0,
-      overdueCount: 0,
-      lastActive: new Date().toISOString(),
-      permissions: ROLE_PERMISSIONS[role] || [],
-    };
-    localStorage.setItem('wilaya_eloued_current_session_user', JSON.stringify(authenticatedUser));
     onLogin(authenticatedUser);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#06180e] via-[#0b2819] to-[#041209] text-white flex flex-col justify-between p-4 sm:p-6 lg:p-8 font-tajawal" dir="rtl">
-      <header className="max-w-6xl w-full mx-auto flex items-center justify-between gap-4 border-b border-white/10 pb-5">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_right,#124b2c_0%,#061b11_45%,#030c08_100%)] text-white p-4 sm:p-6 lg:p-8 font-tajawal" dir="rtl">
+      <header className="max-w-6xl mx-auto flex items-center justify-between gap-4 border-b border-white/10 pb-5">
         <div className="flex items-center gap-3.5">
           <div className="w-12 h-12 rounded-xl bg-white/10 p-1.5 border border-white/20 flex items-center justify-center">
             <img src="/assets/algeria-emblem.png" alt="شعار الجمهورية الجزائرية" className="w-full h-full object-contain" />
@@ -114,44 +71,49 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onCancel }) => 
             <p className="text-xs text-emerald-200/80">وزارة الداخلية والجماعات المحلية — ولاية الوادي</p>
           </div>
         </div>
-        <button onClick={onCancel} className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs font-bold text-gray-300 hover:text-white">
+        <button onClick={onCancel} className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-white/5 border border-white/10 text-xs font-bold text-gray-300 hover:text-white">
           العودة للموقع العام <ArrowRight className="w-3.5 h-3.5" />
         </button>
       </header>
 
-      <main className="max-w-xl w-full mx-auto my-auto py-12">
-        <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="bg-[#0d2215]/90 border border-emerald-500/30 rounded-3xl p-6 sm:p-10 shadow-2xl">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 flex items-center justify-center"><ShieldCheck className="w-6 h-6" /></div>
-            <div>
-              <h1 className="font-changa font-bold text-2xl">الدخول الآمن للموظفين</h1>
-              <p className="text-sm text-gray-400 mt-1">تتم المصادقة عبر Supabase Auth ولا توجد رموز دخول تجريبية.</p>
+      <main className="max-w-5xl mx-auto py-8 sm:py-12">
+        <motion.section initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} className="rounded-3xl border border-emerald-400/25 bg-[#082819]/85 p-6 sm:p-10 shadow-2xl relative overflow-hidden">
+          <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-l from-[#D21034] via-amber-400 to-[#006233]" />
+          <div className="max-w-3xl">
+            <span className="inline-flex items-center gap-2 rounded-lg bg-emerald-700/50 border border-emerald-400/25 px-3 py-1.5 text-xs font-bold">ديوان والي ولاية الوادي <ShieldCheck className="w-4 h-4 text-emerald-300" /></span>
+            <h1 className="font-changa font-black text-3xl sm:text-5xl leading-tight mt-5">منظومة القيادة<br /><span className="text-amber-300">وإصغاء المواطن المركزي</span></h1>
+            <p className="text-sm text-emerald-100/70 mt-4 leading-7">الفضاء الإداري الموحد لمتابعة انشغالات المواطنين وتنسيق عمل المصالح التنفيذية الولائية.</p>
+            <div className="grid sm:grid-cols-3 gap-3 mt-7 text-xs text-emerald-100/80">
+              <span className="rounded-xl bg-black/20 border border-white/5 p-3">ربط مؤسسي موحد وآمن</span>
+              <span className="rounded-xl bg-black/20 border border-white/5 p-3">صلاحيات حسب الرتبة والدور</span>
+              <span className="rounded-xl bg-black/20 border border-white/5 p-3">سجل تدقيق للعمليات الحساسة</span>
             </div>
           </div>
-
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label className="block text-xs font-bold text-gray-300 mb-1.5">البريد الإلكتروني المهني</label>
-              <div className="relative"><UserIcon className="w-4 h-4 text-gray-400 absolute right-3.5 top-1/2 -translate-y-1/2" />
-                <input type="text" required autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-black/40 border border-white/10 focus:border-emerald-500 rounded-xl pr-10 pl-4 py-3 text-sm text-white font-mono outline-none" placeholder="اسم المستخدم أو name@example.gov.dz" />
-              </div>
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-gray-300 mb-1.5">كلمة المرور</label>
-              <div className="relative"><Lock className="w-4 h-4 text-gray-400 absolute right-3.5 top-1/2 -translate-y-1/2" />
-                <input type={showPassword ? 'text' : 'password'} required autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-black/40 border border-white/10 focus:border-emerald-500 rounded-xl pr-10 pl-10 py-3 text-sm text-white font-mono outline-none" placeholder="••••••••" />
-                <button type="button" aria-label={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'} onClick={() => setShowPassword(!showPassword)} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white">{showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}</button>
-              </div>
-            </div>
-            {error && <p role="alert" className="text-red-300 text-xs font-bold flex items-center gap-1.5"><AlertCircle className="w-4 h-4 shrink-0" />{error}</p>}
-            <button type="submit" disabled={isVerifying} className="w-full py-3.5 bg-gradient-to-r from-[#006233] to-emerald-700 hover:from-[#005029] hover:to-emerald-800 rounded-xl font-changa font-bold text-sm shadow-xl flex items-center justify-center gap-2 disabled:opacity-50">
-              {isVerifying ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><KeyRound className="w-4 h-4 text-amber-300" />مصادقة الدخول</>}
-            </button>
-          </form>
         </motion.section>
-      </main>
 
-      <footer className="max-w-6xl w-full mx-auto text-center py-2 text-xs text-gray-500">الدخول محمي بالمصادقة المركزية وتحقق الصلاحيات من قاعدة البيانات.</footer>
+        <section className="mt-6 rounded-3xl border border-emerald-400/25 bg-[#061b11]/85 p-5 sm:p-8">
+          <div className="flex items-center gap-2 rounded-xl bg-emerald-700/70 border border-emerald-300/20 px-4 py-3 text-sm font-bold mb-5"><ShieldCheck className="w-4 h-4 text-amber-300" /> الهيئة التنفيذية — الدخول الآمن</div>
+          <div className="grid sm:grid-cols-3 gap-3 mb-7">
+            {ENTRY_ROLES.map(({ title, subtitle, icon: Icon, tone }) => (
+              <div key={title} className="rounded-2xl bg-white/[0.06] border border-white/10 p-4 flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${tone === 'amber' ? 'bg-amber-500/20 text-amber-300' : tone === 'blue' ? 'bg-sky-500/20 text-sky-300' : 'bg-emerald-500/20 text-emerald-300'}`}><Icon className="w-5 h-5" /></div>
+                <div><p className="font-bold text-sm">{title}</p><p className="text-[11px] text-gray-400 mt-1">{subtitle}</p></div>
+              </div>
+            ))}
+          </div>
+
+          <div className="max-w-2xl mx-auto rounded-2xl bg-[#0b2b19] border border-white/10 p-5 sm:p-7">
+            <div className="flex items-center gap-3 mb-6"><div className="w-11 h-11 rounded-xl bg-emerald-500/15 border border-emerald-400/25 flex items-center justify-center"><Lock className="w-5 h-5 text-emerald-300" /></div><div><h2 className="font-changa font-bold text-xl">بيانات الاعتماد الرسمية</h2><p className="text-xs text-gray-400 mt-1">المصادقة المركزية عبر Supabase Auth</p></div></div>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div><label className="block text-xs font-bold text-gray-300 mb-1.5">اسم المستخدم أو البريد المهني</label><div className="relative"><UserIcon className="w-4 h-4 text-gray-400 absolute right-3.5 top-1/2 -translate-y-1/2" /><input type="text" required autoComplete="username" value={email} onChange={e => setEmail(e.target.value)} className="w-full bg-black/30 border border-white/10 focus:border-emerald-500 rounded-xl pr-10 pl-4 py-3 text-sm text-white font-mono outline-none" placeholder="name@example.gov.dz" /></div></div>
+              <div><label className="block text-xs font-bold text-gray-300 mb-1.5">كلمة المرور</label><div className="relative"><Lock className="w-4 h-4 text-gray-400 absolute right-3.5 top-1/2 -translate-y-1/2" /><input type={showPassword ? 'text' : 'password'} required autoComplete="current-password" value={password} onChange={e => setPassword(e.target.value)} className="w-full bg-black/30 border border-white/10 focus:border-emerald-500 rounded-xl pr-10 pl-10 py-3 text-sm text-white font-mono outline-none" placeholder="••••••••" /><button type="button" aria-label={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'} onClick={() => setShowPassword(!showPassword)} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white">{showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}</button></div></div>
+              {error && <p role="alert" className="text-red-300 text-xs font-bold flex items-center gap-1.5"><AlertCircle className="w-4 h-4 shrink-0" />{error}</p>}
+              <button type="submit" disabled={isVerifying} className="w-full py-3.5 bg-gradient-to-l from-[#006233] to-emerald-700 hover:from-[#005029] hover:to-emerald-800 rounded-xl font-changa font-bold text-sm shadow-xl flex items-center justify-center gap-2 disabled:opacity-50">{isVerifying ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><KeyRound className="w-4 h-4 text-amber-300" />دخول آمن إلى لوحة التحكم</>}</button>
+            </form>
+          </div>
+        </section>
+      </main>
+      <footer className="max-w-6xl mx-auto text-center py-2 text-xs text-gray-500">حماية مؤسسية متعددة المستويات — لا توجد رموز دخول تجريبية</footer>
     </div>
   );
 };

@@ -1,10 +1,6 @@
 import { GrievanceSubmission, EnhancedGrievance, AttachmentFile } from '../types';
-import { AdminService, SEED_GRIEVANCES } from './adminService';
 import { ComplaintService } from './complaintService';
-import { complaintRepository } from './complaintRepository';
 import { SupabaseService } from './supabaseService';
-
-const STORAGE_KEY = 'wilaya_eloued_grievances';
 
 export const GrievanceService = {
   save: async (data: {
@@ -16,51 +12,41 @@ export const GrievanceService = {
     applicantMunicipality: string;
     applicantNeighborhood: string;
     subject: string;
+    meetingRequest?: 'والي الولاية' | 'رئيس الديوان' | 'الأمين العام للولاية';
     grievanceDaira: string;
     grievanceMunicipality: string;
     category: any;
     details: string;
     attachments?: AttachmentFile[];
   }): Promise<GrievanceSubmission> => {
-    const existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    // Generate unified official tracking code and confidential PIN
-    const trackingId = ComplaintService.generateTrackingNumber();
-    const secretPin = ComplaintService.generateSecretPin();
+    if (!SupabaseService.isConfigured()) {
+      throw new Error('بوابة الإيداع غير متاحة حالياً. يرجى المحاولة لاحقاً.');
+    }
+
+    const clientDisplayId = ComplaintService.generateTrackingNumber();
     const now = new Date();
     const nowIso = now.toISOString();
     const dateFormatted = now.toLocaleDateString('ar-DZ', { year: 'numeric', month: 'long', day: 'numeric' });
     const timeFormatted = now.toLocaleTimeString('ar-DZ', { hour: '2-digit', minute: '2-digit' });
-
-    const newGrievance: GrievanceSubmission = {
-      ...data,
-      id: trackingId,
-      secretPin,
-      status: 'قيد المعالجة', // default status for citizen view
-      createdAt: nowIso
-    };
-    
-    existing.unshift(newGrievance);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
-    
-    // SLA Deadline (+15 days)
     const dueDate = new Date(now.getTime() + 15 * 24 * 60 * 60 * 1000).toISOString();
 
-    // 1. Build complete EnhancedGrievance for Admin Dashboard
     const enhancedGrievance: EnhancedGrievance = {
-      id: trackingId,
-      trackingNumber: trackingId,
-      secretPin,
+      id: clientDisplayId,
+      trackingNumber: clientDisplayId,
       statusCode: 'NEW',
       status: 'جديد',
       priority: 'عادي',
       fullName: data.fullName,
-      nin: data.nin || '',
+      // NIN is intentionally not sent to the public submission RPC until a reviewed
+      // server-side retention/encryption path exists.
+      nin: undefined,
       phone: data.phone,
       email: data.email || '',
       applicantDaira: data.applicantDaira,
       applicantMunicipality: data.applicantMunicipality,
       applicantNeighborhood: data.applicantNeighborhood,
       subject: data.subject,
+      meetingRequest: data.meetingRequest,
       grievanceDaira: data.grievanceDaira,
       grievanceMunicipality: data.grievanceMunicipality,
       category: data.category,
@@ -71,6 +57,8 @@ export const GrievanceService = {
       dueDate,
       isOverdue: false,
       specialFlags: [],
+      // Attachments remain in memory for the confirmation view only. Persistent
+      // document storage is intentionally blocked until private Storage policies exist.
       attachments: data.attachments || [],
       timeline: [
         {
@@ -80,96 +68,42 @@ export const GrievanceService = {
           author: data.fullName || 'مواطن',
           authorRole: 'منصة المواطن',
           action: 'تم تسجيل العريضة بنجاح عبر البوابة الإلكترونية',
-          note: `تم إيداع الانشغال وإعطاء رقم التتبع الرسمي: ${trackingId}`
+          note: 'تم إيداع الانشغال وإنشاء رقم التتبع من قاعدة البيانات المركزية.'
         }
       ],
       internalNotes: []
     };
 
-    // 2. Direct instant save into Admin Service (wilaya_eloued_admin_grievances)
-    try {
-      AdminService.addGrievanceDirectly(enhancedGrievance);
-    } catch (err) {
-      console.warn('Could not add to AdminService directly:', err);
+    const cloudResult = await SupabaseService.insertComplaint(enhancedGrievance);
+    if (!cloudResult.success) {
+      throw new Error(cloudResult.error || 'تعذر حفظ الانشغال في قاعدة البيانات المركزية.');
     }
 
-    // 3. Direct save into Mock Complaint Repository
-    complaintRepository.create(enhancedGrievance).catch(err => {
-      console.warn('Failed to sync to local repository:', err);
-    });
-
-    // 4. Asynchronous Cloud Sync to Supabase (if configured)
-    if (SupabaseService.isConfigured()) {
-      const cloudResult = await SupabaseService.insertComplaint(enhancedGrievance);
-      if (!cloudResult.success) {
-        throw new Error(cloudResult.error || 'تعذر حفظ الانشغال في قاعدة البيانات السحابية.');
-      }
-    }
-
-    // Track the last submission time for rate limiting (anti-spam)
-    localStorage.setItem('last_submit_time', Date.now().toString());
-    
-    return newGrievance;
+    const serverTrackingId = cloudResult.data?.tracking_id || clientDisplayId;
+    window.localStorage.setItem('wilaya_eloued_last_submit_time', Date.now().toString());
+    return {
+      ...data,
+      id: serverTrackingId,
+      status: 'قيد المعالجة',
+      createdAt: cloudResult.data?.created_at || nowIso,
+    };
   },
 
   findByTrackingId: async (id: string, phone?: string): Promise<any> => {
     const cleanId = id.trim().toUpperCase();
-    if (!cleanId) return null;
-
-    // 1. First check admin repository (supports all active & seed grievances)
-    try {
-      const allAdmin = AdminService.getAllGrievances();
-      const adminFound = allAdmin.find(g => 
-        g.id.trim().toUpperCase() === cleanId || 
-        (g.trackingNumber && g.trackingNumber.trim().toUpperCase() === cleanId)
-      );
-      if (adminFound) {
-        return adminFound;
-      }
-    } catch (e) {
-      console.warn('Error querying admin service for tracking', e);
-    }
-
-    // 2. Check Supabase Remote Database (for cross-device citizen tracking)
-    if (SupabaseService.isConfigured()) {
-      try {
-        const cloudFound = await SupabaseService.trackComplaint(cleanId, phone);
-        if (cloudFound) {
-          return cloudFound;
-        }
-      } catch (e) {
-        console.warn('Error checking Supabase for complaint tracking:', e);
-      }
-    }
-
-    // 3. Direct fallback to SEED_GRIEVANCES if not initialized yet
-    const seedFound = SEED_GRIEVANCES.find(g => 
-      g.id.trim().toUpperCase() === cleanId || 
-      (g.trackingNumber && g.trackingNumber.trim().toUpperCase() === cleanId)
-    );
-    if (seedFound) {
-      return seedFound;
-    }
-
-    // 4. Check client submissions in local storage
-    const existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    const match = existing.find((g: GrievanceSubmission) => g.id.trim().toUpperCase() === cleanId);
-    return match || null;
+    if (!cleanId || !phone || !SupabaseService.isConfigured()) return null;
+    return SupabaseService.trackComplaint(cleanId, phone);
   },
 
-  getStats: () => {
-    const existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    return {
-      total: existing.length,
-      resolved: existing.filter((g: GrievanceSubmission) => g.status === 'تم الرد' || g.status === 'تمت المعالجة').length,
-    };
-  },
+  // Dashboard statistics must come from scoped server queries. Returning zero here
+  // avoids presenting browser-local counts as institutional facts until that query exists.
+  getStats: () => ({ total: 0, resolved: 0 }),
 
+  // Client throttling is only a UX measure; server-side rate limiting remains mandatory.
   canSubmit: (): boolean => {
-    const lastSubmit = localStorage.getItem('last_submit_time');
+    const key = 'wilaya_eloued_last_submit_time';
+    const lastSubmit = window.localStorage.getItem(key);
     if (!lastSubmit) return true;
-    // Prevent submitting more than once every 30 seconds during demo
-    const timeDiff = Date.now() - Number(lastSubmit);
-    return timeDiff > 30 * 1000;
+    return Date.now() - Number(lastSubmit) > 30 * 1000;
   }
 };
