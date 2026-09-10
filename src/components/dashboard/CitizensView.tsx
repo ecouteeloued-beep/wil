@@ -40,6 +40,7 @@ export const CitizensView: React.FC<CitizensViewProps> = ({ user, addToast }) =>
         if (current) {
           current.filesCount += 1;
           current.files.push(item);
+          current.history.push(item);
           if (new Date(item.createdAt) > new Date(current.lastActivity)) current.lastActivity = item.createdAt;
         } else {
           grouped.set(key, {
@@ -51,8 +52,10 @@ export const CitizensView: React.FC<CitizensViewProps> = ({ user, addToast }) =>
             neighborhood: item.applicantNeighborhood || 'غير محدد',
             filesCount: 1,
             files: [item],
+            history: [item],
             status: 'موثق',
             lastActivity: item.createdAt,
+            registrationDate: item.createdAt,
           });
         }
       });
@@ -438,7 +441,7 @@ export const CitizensView: React.FC<CitizensViewProps> = ({ user, addToast }) =>
                         <div className="flex items-center gap-2">
                           <span className="font-mono font-bold text-[#006233]">{h.id}</span>
                           <span className="text-gray-400">•</span>
-                          <span className="text-gray-500 font-mono">{h.date}</span>
+                          <span className="text-gray-500 font-mono">{h.createdAt?.split('T')[0] || 'غير متوفر'}</span>
                         </div>
                         <span className={`px-2.5 py-0.5 rounded-full font-bold border ${getFileStatusColor(h.status)}`}>
                           {h.status}

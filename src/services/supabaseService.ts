@@ -120,6 +120,7 @@ export const SupabaseService = {
       const { data, error } = await supabase.rpc('submit_complaint', {
         p_payload: {
           full_name: complaint.fullName || 'مواطن',
+          nin: complaint.nin || null,
           phone: complaint.phone,
           email: complaint.email || null,
           category: complaint.category || 'أخرى',
@@ -157,7 +158,7 @@ export const SupabaseService = {
     try {
       const { data, error } = await supabase
         .from('complaints')
-        .select('id,tracking_id,citizen_name,category,municipality,daira,neighborhood,subject,description,meeting_request,status,priority,assigned_department,assigned_user_id,deadline,official_response,timeline,created_at,updated_at,attachments')
+        .select('id,tracking_id,citizen_name,citizen_phone,citizen_nin,category,municipality,daira,neighborhood,subject,description,meeting_request,status,priority,assigned_department,assigned_user_id,deadline,official_response,timeline,created_at,updated_at,attachments')
         .order('created_at', { ascending: false });
 
       if (error) {
