@@ -108,8 +108,8 @@ export const DocumentReaderModal: React.FC<DocumentReaderModalProps> = ({
       const link = document.createElement('a');
       link.href = safeUrl;
       link.download = attachment.name;
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
+      // Opening a data/blob URL in a new tab can be blocked by Chrome.
+      // Trigger the download in the current document instead.
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -479,7 +479,7 @@ ${details || 'وثيقة إدارية ثبوتية مؤيدة للعريضة ا�
                           src={safeUrl} 
                           className="w-full h-[650px] rounded-xl border border-slate-200"
                           title={attachment.name}
-                          sandbox="allow-scripts allow-same-origin allow-forms"
+                          sandbox="allow-scripts allow-same-origin allow-forms allow-downloads"
                           referrerPolicy="no-referrer"
                         />
                       ) : (
