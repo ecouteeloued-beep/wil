@@ -4,7 +4,7 @@ import {
   User, LogOut, Menu, X, Bell, Search, ShieldAlert,
   FileClock, MapPin, Building2, UsersRound, AlertTriangle, CheckCircle2, Info,
   Printer, Download, Shield, Sparkles, ExternalLink, Calendar, Clock, Award, FileText,
-  Moon, Sun, Sprout, TrendingUp
+  Moon, Sun, Sprout, TrendingUp, Mail
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { OverviewStats } from './OverviewStats';
@@ -19,9 +19,10 @@ import { PermissionsView } from './PermissionsView';
 import { DepartmentsView } from './DepartmentsView';
 import { MunicipalitiesView } from './MunicipalitiesView';
 import { SectorDetailsView } from './SectorDetailsView';
+import { InternalMessagesView } from './InternalMessagesView';
 import { SystemUser } from '../../types';
 
-type DashboardView = 'overview' | 'inbox' | 'map' | 'reports' | 'users' | 'citizens' | 'permissions' | 'departments' | 'municipalities' | 'audit_log' | 'settings' | 'agriculture' | 'investment';
+type DashboardView = 'overview' | 'inbox' | 'map' | 'reports' | 'users' | 'citizens' | 'permissions' | 'departments' | 'municipalities' | 'audit_log' | 'settings' | 'agriculture' | 'investment' | 'messages';
 
 type Toast = {
   id: string;
@@ -91,21 +92,21 @@ export const DashboardLayout: React.FC<{ user: SystemUser; onLogout: () => void 
 
   const menuSections: {
     category: string;
-    items: { id: DashboardView; icon: any; label: string; badge?: string; badgeColor?: string; roles?: string[] }[];
+    items: { id: DashboardView; icon: any; label: string; badge?: string; badgeColor?: string; roles?: string[]; permissions?: string[] }[];
   }[] = [
     {
       category: 'المراقبة والاستشراف الولائي',
       items: [
-        { id: 'overview', icon: LayoutDashboard, label: 'لوحة القيادة المركزية' },
-        { id: 'map', icon: MapIcon, label: 'الخريطة التفاعلية للبلديات (22)', badge: 'مباشر', badgeColor: 'bg-emerald-500' },
-        { id: 'reports', icon: BarChart3, label: 'التقارير التحليلية والمؤشرات' },
+        { id: 'overview', icon: LayoutDashboard, label: 'لوحة القيادة المركزية', permissions: ['view_all', 'view_department'] },
+        { id: 'map', icon: MapIcon, label: 'الخريطة التفاعلية للبلديات (22)', badge: 'مباشر', badgeColor: 'bg-emerald-500', permissions: ['view_all'] },
+        { id: 'reports', icon: BarChart3, label: 'التقارير التحليلية والمؤشرات', permissions: ['export_reports'] },
       ]
     },
     {
       category: 'إدارة ومعالجة العرائض',
       items: [
-        { id: 'inbox', icon: Inbox, label: 'صندوق الانشغالات المركزي' },
-        { id: 'citizens', icon: UsersRound, label: 'سجل المواطنين والمتابعة' },
+        { id: 'inbox', icon: Inbox, label: 'صندوق الانشغالات الموكلة', permissions: ['view_all', 'view_department'] },
+        { id: 'citizens', icon: UsersRound, label: 'سجل المواطنين والمتابعة', permissions: ['view_all', 'view_department'] },
         { id: 'departments', icon: Building2, label: 'المصالح والهيكل الإداري', roles: ['super_admin', 'admin'] },
         { id: 'municipalities', icon: MapPin, label: 'دليل الدوائر والبلديات', roles: ['super_admin', 'admin'] },
       ]
@@ -113,8 +114,8 @@ export const DashboardLayout: React.FC<{ user: SystemUser; onLogout: () => void 
     {
       category: 'القطاعات والبرامج الولائية',
       items: [
-        { id: 'agriculture', icon: Sprout, label: 'تفاصيل قطاع الفلاحة والتنمية الريفية' },
-        { id: 'investment', icon: TrendingUp, label: 'تفاصيل قطاع الاستثمار والمؤسسات' },
+        { id: 'agriculture', icon: Sprout, label: 'تفاصيل قطاع الفلاحة والتنمية الريفية', permissions: ['view_all', 'view_department'] },
+        { id: 'investment', icon: TrendingUp, label: 'تفاصيل قطاع الاستثمار والمؤسسات', permissions: ['view_all', 'view_department'] },
       ]
     },
     {
@@ -125,8 +126,20 @@ export const DashboardLayout: React.FC<{ user: SystemUser; onLogout: () => void 
         { id: 'permissions', icon: ShieldAlert, label: 'إدارة الصلاحيات (RBAC)', roles: ['super_admin'] },
         { id: 'settings', icon: Settings, label: 'إعدادات المنظومة والربط', roles: ['super_admin'] },
       ]
+    },
+    {
+      category: 'التواصل الإداري السري',
+      items: [{ id: 'messages', icon: Mail, label: 'الدردشة الداخلية السرية' }]
     }
   ];
+
+  const canAccess = (item: { roles?: string[]; permissions?: string[] }) => {
+    if (user.role === 'super_admin') return true;
+    if (item.roles && !item.roles.includes(user.role)) return false;
+    if (!item.permissions || item.permissions.length === 0) return true;
+    return item.permissions.some(permission => user.permissions?.includes(permission));
+  };
+  const visibleMenuSections = menuSections.map(section => ({ ...section, items: section.items.filter(canAccess) })).filter(section => section.items.length > 0);
 
   const handlePrintExecutiveReport = () => {
     window.print();
@@ -251,7 +264,7 @@ export const DashboardLayout: React.FC<{ user: SystemUser; onLogout: () => void 
 
           {/* Nav Categories */}
           <div className="px-3 py-5 flex flex-col gap-6 flex-1 overflow-y-auto custom-scrollbar">
-            {menuSections.map((section, sIdx) => {
+            {visibleMenuSections.map((section, sIdx) => {
               const visibleItems = section.items.filter(item => 
                 !item.roles || item.roles.includes(user.role) || user.role === 'wali'
               );
@@ -443,6 +456,7 @@ export const DashboardLayout: React.FC<{ user: SystemUser; onLogout: () => void 
                   {currentView === 'settings' && <SettingsView user={user} addToast={addToast} />}
                   {currentView === 'agriculture' && <SectorDetailsView sector="agriculture" onBack={() => setCurrentView('overview')} />}
                   {currentView === 'investment' && <SectorDetailsView sector="investment" onBack={() => setCurrentView('overview')} />}
+                  {currentView === 'messages' && <InternalMessagesView user={user} addToast={addToast} />}
                 </motion.div>
               </AnimatePresence>
             </div>

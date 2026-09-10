@@ -81,7 +81,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onCancel }) => 
   };
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_right,#124b2c_0%,#061b11_45%,#030c08_100%)] text-white p-4 sm:p-6 lg:p-8 font-tajawal" dir="rtl">
+    <div className="min-h-screen text-white p-4 sm:p-6 lg:p-8 font-tajawal bg-cover bg-center" style={{ backgroundImage: 'linear-gradient(90deg, rgba(0,98,51,.84), rgba(6,27,17,.82) 48%, rgba(210,16,52,.35)), url("/assets/wilaya-eloued-bg.webp")' }} dir="rtl">
       <header className="max-w-6xl mx-auto flex items-center justify-between gap-4 border-b border-white/10 pb-5">
         <div className="flex items-center gap-3.5">
           <div className="w-12 h-12 rounded-xl bg-white/10 p-1.5 border border-white/20 flex items-center justify-center">

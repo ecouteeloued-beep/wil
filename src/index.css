@@ -52,18 +52,19 @@ body {
   min-height: 100vh;
   transition: background-color 180ms ease, color 180ms ease;
   background-repeat: no-repeat;
+  background-size: cover;
   background-attachment: fixed;
 }
 .dashboard-dark {
   background-color: #14221f !important;
-  background-image: radial-gradient(ellipse at 12% 8%, rgba(196,139,55,.20) 0 13%, transparent 42%), radial-gradient(ellipse at 92% 18%, rgba(27,111,83,.22) 0 12%, transparent 40%), linear-gradient(135deg,#10201d 0%,#172a28 48%,#0d171b 100%) !important;
+  background-image: linear-gradient(90deg, rgba(0,98,51,.78), rgba(7,28,20,.72) 48%, rgba(210,16,52,.30)), url('/assets/wilaya-eloued-bg.webp') !important;
   color: #f4ead9 !important;
 }
 .dashboard-dark .dashboard-content-stage { background: rgba(8,24,19,.28); }
 .dashboard-dark .dashboard-commandbar { background: rgba(18,43,37,.97) !important; color: #f4ead9; border-color: #3d6257 !important; }
 .dashboard-light {
   background-color: #f3ede2 !important;
-  background-image: radial-gradient(ellipse at 8% 4%, rgba(214,161,74,.28) 0 12%, transparent 42%), radial-gradient(ellipse at 95% 16%, rgba(54,125,91,.16) 0 11%, transparent 40%), linear-gradient(135deg,#f7f1e7 0%,#eee3d1 52%,#e7d7bf 100%) !important;
+  background-image: linear-gradient(90deg, rgba(0,98,51,.16), rgba(255,255,255,.78) 48%, rgba(210,16,52,.14)), url('/assets/wilaya-eloued-bg.webp') !important;
   color: #26352f !important;
 }
 .dashboard-light .dashboard-content-stage { background: rgba(247,241,231,.72); }
