@@ -74,6 +74,10 @@ begin
 end;
 $$;
 
+-- PostgreSQL does not allow CREATE OR REPLACE to change OUT parameters.
+-- The old function returns the previous row shape, so replace it explicitly.
+drop function if exists public.track_complaint(text, text);
+
 create or replace function public.track_complaint(p_tracking_id text, p_phone text)
 returns table (
   tracking_id text, citizen_name text, category text, municipality text, daira text,
