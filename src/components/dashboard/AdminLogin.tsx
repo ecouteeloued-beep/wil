@@ -24,6 +24,8 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onCancel }) => 
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
+  const [isRecovery, setIsRecovery] = useState(false);
+  const [recoverySent, setRecoverySent] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -32,6 +34,25 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onCancel }) => 
       setError('بوابة الإدارة غير مفعلة: يجب إعداد Supabase Auth قبل السماح بالدخول.');
       return;
     }
+    if (isRecovery) {
+      const recoveryEmail = email.trim().toLowerCase();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recoveryEmail)) {
+        setError('أدخل البريد الإلكتروني المهني المرتبط بالحساب لاسترجاع كلمة المرور.');
+        return;
+      }
+      setIsVerifying(true);
+      const { error: recoveryError } = await supabase.auth.resetPasswordForEmail(recoveryEmail, {
+        redirectTo: `${window.location.origin}/admin/reset-password`,
+      });
+      setIsVerifying(false);
+      if (recoveryError) {
+        setError('تعذر إرسال رابط الاسترجاع. تحقق من البريد وحاول مرة أخرى.');
+        return;
+      }
+      setRecoverySent(true);
+      return;
+    }
+
     const identifier = email.trim().toLowerCase();
     const loginEmail = await SupabaseService.resolveLoginIdentifier(identifier);
     const limit = SecurityRateLimiter.checkLimit('admin-login', identifier || 'anonymous');
@@ -103,13 +124,14 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin, onCancel }) => 
           </div>
 
           <div className="max-w-2xl mx-auto rounded-2xl bg-[#0b2b19] border border-white/10 p-5 sm:p-7">
-            <div className="flex items-center gap-3 mb-6"><div className="w-11 h-11 rounded-xl bg-emerald-500/15 border border-emerald-400/25 flex items-center justify-center"><Lock className="w-5 h-5 text-emerald-300" /></div><div><h2 className="font-changa font-bold text-xl">بيانات الاعتماد الرسمية</h2><p className="text-xs text-gray-400 mt-1">المصادقة المركزية عبر Supabase Auth</p></div></div>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="flex items-center gap-3 mb-6"><div className="w-11 h-11 rounded-xl bg-emerald-500/15 border border-emerald-400/25 flex items-center justify-center"><Lock className="w-5 h-5 text-emerald-300" /></div><div><h2 className="font-changa font-bold text-xl">{isRecovery ? 'استرجاع كلمة المرور' : 'بيانات الاعتماد الرسمية'}</h2><p className="text-xs text-gray-400 mt-1">{isRecovery ? 'سيصلك رابط آمن على البريد المهني المسجل' : 'المصادقة المركزية عبر Supabase Auth'}</p></div></div>
+            {recoverySent ? <div className="rounded-xl border border-emerald-400/25 bg-emerald-900/30 p-4 text-sm leading-7 text-emerald-100">تم إرسال رابط استرجاع كلمة المرور إذا كان البريد مسجلاً. راجع البريد المهني ومجلد الرسائل غير المرغوب فيها.</div> : <form onSubmit={handleSubmit} className="space-y-4">
               <div><label className="block text-xs font-bold text-gray-300 mb-1.5">اسم المستخدم أو البريد المهني</label><div className="relative"><UserIcon className="w-4 h-4 text-gray-400 absolute right-3.5 top-1/2 -translate-y-1/2" /><input type="text" required autoComplete="username" value={email} onChange={e => setEmail(e.target.value)} className="w-full bg-black/30 border border-white/10 focus:border-emerald-500 rounded-xl pr-10 pl-4 py-3 text-sm text-white font-mono outline-none" placeholder="name@example.gov.dz" /></div></div>
-              <div><label className="block text-xs font-bold text-gray-300 mb-1.5">كلمة المرور</label><div className="relative"><Lock className="w-4 h-4 text-gray-400 absolute right-3.5 top-1/2 -translate-y-1/2" /><input type={showPassword ? 'text' : 'password'} required autoComplete="current-password" value={password} onChange={e => setPassword(e.target.value)} className="w-full bg-black/30 border border-white/10 focus:border-emerald-500 rounded-xl pr-10 pl-10 py-3 text-sm text-white font-mono outline-none" placeholder="••••••••" /><button type="button" aria-label={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'} onClick={() => setShowPassword(!showPassword)} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white">{showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}</button></div></div>
+              {!isRecovery && <div><label className="block text-xs font-bold text-gray-300 mb-1.5">كلمة المرور</label><div className="relative"><Lock className="w-4 h-4 text-gray-400 absolute right-3.5 top-1/2 -translate-y-1/2" /><input type={showPassword ? 'text' : 'password'} required autoComplete="current-password" value={password} onChange={e => setPassword(e.target.value)} className="w-full bg-black/30 border border-white/10 focus:border-emerald-500 rounded-xl pr-10 pl-10 py-3 text-sm text-white font-mono outline-none" placeholder="••••••••" /><button type="button" aria-label={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'} onClick={() => setShowPassword(!showPassword)} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white">{showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}</button></div></div>}
               {error && <p role="alert" className="text-red-300 text-xs font-bold flex items-center gap-1.5"><AlertCircle className="w-4 h-4 shrink-0" />{error}</p>}
-              <button type="submit" disabled={isVerifying} className="w-full py-3.5 bg-gradient-to-l from-[#006233] to-emerald-700 hover:from-[#005029] hover:to-emerald-800 rounded-xl font-changa font-bold text-sm shadow-xl flex items-center justify-center gap-2 disabled:opacity-50">{isVerifying ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><KeyRound className="w-4 h-4 text-amber-300" />دخول آمن إلى لوحة التحكم</>}</button>
-            </form>
+              <button type="submit" disabled={isVerifying} className="w-full py-3.5 bg-gradient-to-l from-[#006233] to-emerald-700 hover:from-[#005029] hover:to-emerald-800 rounded-xl font-changa font-bold text-sm shadow-xl flex items-center justify-center gap-2 disabled:opacity-50">{isVerifying ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><KeyRound className="w-4 h-4 text-amber-300" />{isRecovery ? 'إرسال رابط الاسترجاع' : 'دخول آمن إلى لوحة التحكم'}</>}</button>
+              <button type="button" onClick={() => { setIsRecovery(!isRecovery); setError(''); setRecoverySent(false); }} className="w-full text-xs text-emerald-300 hover:text-amber-300 underline">{isRecovery ? 'العودة إلى تسجيل الدخول' : 'نسيت كلمة المرور؟ استرجاع آمن عبر البريد'}</button>
+            </form>}
           </div>
         </section>
       </main>

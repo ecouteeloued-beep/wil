@@ -58,6 +58,22 @@ const DOMAINS: Array<{
     color: 'bg-[#1D3557]',
     lightColor: 'bg-blue-50',
     sampleBadge: 'دعم المشاريع التنموية المحلية'
+  },
+  {
+    title: 'الفلاحة',
+    description: 'الأراضي الفلاحية، السقي، الدعم الفلاحي، تربية المواشي وحماية الإنتاج المحلي',
+    icon: <Leaf className="w-8 h-8 text-white" />,
+    color: 'bg-[#2f6b3c]',
+    lightColor: 'bg-green-50',
+    sampleBadge: 'مرافقة الفلاحين والتنمية الريفية'
+  },
+  {
+    title: 'الاستثمار',
+    description: 'مرافقة المستثمرين، العقار الاقتصادي، تراخيص المشاريع ورفع العراقيل الإدارية',
+    icon: <Briefcase className="w-8 h-8 text-white" />,
+    color: 'bg-[#6b4f2a]',
+    lightColor: 'bg-amber-50',
+    sampleBadge: 'تسهيل الاستثمار وترقية المؤسسات'
   }
 ];
 
@@ -156,4 +172,3 @@ export const Domains: React.FC<DomainsProps> = ({
     </section>
   );
 };
-

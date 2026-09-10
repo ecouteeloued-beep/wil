@@ -90,6 +90,41 @@ export function maskNIN(nin: string | undefined | null): string {
   return `${clean.slice(0, 6)}${'*'.repeat(Math.max(0, clean.length - 8))}${clean.slice(-2)}`;
 }
 
+export type AlgerianNinParts = {
+  genderAndBirthPlaceType: string;
+  birthYear: string;
+  municipalityCode: string;
+  birthActNumber: string;
+  serialNumber: string;
+  controlKey: string;
+};
+
+/** Validates the public 18-digit Algerian NIN layout: 2 + 3 + 4 + 5 + 2 + 2. */
+export function parseAlgerianNIN(value: unknown): { valid: boolean; parts?: AlgerianNinParts; error?: string } {
+  const clean = typeof value === 'string' ? value.replace(/\s/g, '') : '';
+  if (!/^\d{18}$/.test(clean)) {
+    return { valid: false, error: 'يجب أن يتكون رقم التعريف الوطني من 18 رقماً.' };
+  }
+
+  const parts: AlgerianNinParts = {
+    genderAndBirthPlaceType: clean.slice(0, 2),
+    birthYear: clean.slice(2, 5),
+    municipalityCode: clean.slice(5, 9),
+    birthActNumber: clean.slice(9, 14),
+    serialNumber: clean.slice(14, 16),
+    controlKey: clean.slice(16, 18),
+  };
+
+  if (Number(parts.genderAndBirthPlaceType) === 0 || Number(parts.birthYear) === 0 || Number(parts.municipalityCode) === 0 || Number(parts.birthActNumber) === 0) {
+    return { valid: false, error: 'مكونات رقم التعريف الوطني لا يمكن أن تكون أصفاراً بالكامل.' };
+  }
+  if (Number(parts.controlKey) === 0) {
+    return { valid: false, error: 'مفتاح مراقبة رقم التعريف الوطني غير صالح.' };
+  }
+
+  return { valid: true, parts };
+}
+
 /**
  * Masks 10-digit Algerian Phone: 0661245890 -> 0661****90
  */
