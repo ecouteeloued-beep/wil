@@ -142,39 +142,7 @@ export const InboxView: React.FC<InboxViewProps> = ({
   const [isDocumentReaderOpen, setIsDocumentReaderOpen] = useState<boolean>(false);
 
   const getTicketAttachments = (ticket: EnhancedGrievance): AttachmentFile[] => {
-    if (ticket.attachments && ticket.attachments.length > 0) {
-      return ticket.attachments;
-    }
-    const isAgri = (ticket.category || '').includes('فلاح') || (ticket.subject || '').includes('فلاح');
-    return [
-      {
-        id: `att-id-${ticket.id}`,
-        name: 'بطاقة_التعريف_الوطنية_البيومترية.pdf',
-        size: '1.4 MB',
-        type: 'application/pdf',
-        uploadedAt: ticket.createdAt?.split('T')[0] || '2026-09-08',
-        documentType: 'id_card',
-        pageCount: 2
-      },
-      {
-        id: `att-doc-${ticket.id}`,
-        name: isAgri ? 'بطاقة_فلاح_ومهنية_معتمدة.pdf' : 'عريضة_الانشغال_الرسمية_الموقعة.pdf',
-        size: '2.1 MB',
-        type: 'application/pdf',
-        uploadedAt: ticket.createdAt?.split('T')[0] || '2026-09-08',
-        documentType: 'petition_letter',
-        pageCount: 2
-      },
-      {
-        id: `att-photo-${ticket.id}`,
-        name: 'معاينة_ميدانية_مصورة_للموقع.jpg',
-        size: '3.8 MB',
-        type: 'image/jpeg',
-        uploadedAt: ticket.createdAt?.split('T')[0] || '2026-09-08',
-        documentType: 'field_photo',
-        pageCount: 1
-      }
-    ];
+    return Array.isArray(ticket.attachments) ? ticket.attachments : [];
   };
 
   const handleOpenDocumentReader = (att: AttachmentFile, e?: React.MouseEvent) => {

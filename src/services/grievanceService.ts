@@ -37,9 +37,8 @@ export const GrievanceService = {
       status: 'جديد',
       priority: 'عادي',
       fullName: data.fullName,
-      // NIN is intentionally not sent to the public submission RPC until a reviewed
-      // server-side retention/encryption path exists.
-      nin: undefined,
+      // The server stores a hashed copy for protection and a staff-only display field.
+      nin: data.nin,
       phone: data.phone,
       email: data.email || '',
       applicantDaira: data.applicantDaira,
