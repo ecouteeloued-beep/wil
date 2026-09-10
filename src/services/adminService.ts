@@ -442,6 +442,9 @@ export const AdminService = {
 
       const remoteComplaints = await SupabaseService.fetchComplaints();
       if (!remoteComplaints || remoteComplaints.length === 0) {
+        // Supabase is authoritative in production: never resurrect deleted local records.
+        localStorage.setItem(GRIEVANCES_STORAGE_KEY, JSON.stringify([]));
+        localStorage.setItem('wilaya_eloued_grievances', JSON.stringify([]));
         return { total: 0, newAdded: 0 };
       }
 
