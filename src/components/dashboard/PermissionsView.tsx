@@ -12,7 +12,7 @@ interface PermissionsViewProps {
 const ROLES = [
   { id: 'wali', name: 'والي الولاية', color: 'bg-amber-100 text-amber-900 border-amber-300' },
   { id: 'chef_cabinet', name: 'الأمين العام', color: 'bg-emerald-100 text-emerald-900 border-emerald-300' },
-  { id: 'head_department', name: 'رئيس الدائرة', color: 'bg-blue-100 text-blue-900 border-blue-300' },
+  { id: 'head_department', name: 'رئيس الديوان — تابع لديوان الوالي', color: 'bg-blue-100 text-blue-900 border-blue-300' },
   { id: 'supervisor', name: 'مسؤول الخلية', color: 'bg-purple-100 text-purple-900 border-purple-300' },
   { id: 'employee', name: 'موظف معالج', color: 'bg-gray-100 text-gray-800 border-gray-300' },
   { id: 'super_admin', name: 'المشرف التقني', color: 'bg-red-100 text-red-900 border-red-300' },
@@ -20,7 +20,7 @@ const ROLES = [
 
 const PERMISSIONS = [
   { id: 'view_all', label: 'الاطلاع الشامل على كافة العرائض والبلديات (22)', desc: 'تمكين تصفح والاطلاع على كافة ملفات مواطني الولاية دون قيود', type: 'read' },
-  { id: 'view_department', label: 'الاطلاع الإقليمي / الخاص بالمصلحة فقط', desc: 'تقييد المشاهدة بملفات دائرة أو مصلحة المستخدم فقط', type: 'read' },
+  { id: 'view_department', label: 'الاطلاع الخاص بالديوان / المصلحة', desc: 'تقييد المشاهدة بملفات ديوان الوالي أو مصلحة المستخدم فقط', type: 'read' },
   { id: 'assign_grievance', label: 'إحالة وتوجيه الملفات للمديريات والموظفين', desc: 'صلاحية توجيه العرائض للمصالح التنفيذية وتعيين المكلفين بالدراسة', type: 'write' },
   { id: 'executive_directive', label: 'إصدار تعليمات ولائية استعجالية ملزمة', desc: 'صلاحية سيادية لإلزام المصالح بالتدخل الاستعجالي وتحديد المهل', type: 'admin' },
   { id: 'approve_reply', label: 'المصادقة على الرد الرسمي للمواطن وغلق الملف', desc: 'اعتماد الرد النهائي والتوقيع الإداري عليه في المنظومة', type: 'write' },

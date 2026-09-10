@@ -5,7 +5,7 @@ const ROLE_TITLES: Record<UserRole, string> = {
   super_admin: 'المشرف التقني العام',
   wali: 'والي الولاية',
   chef_cabinet: 'الأمين العام للولاية',
-  head_department: 'رئيس الديوان',
+  head_department: 'رئيس الديوان — تابع لديوان الوالي',
   supervisor: 'رئيس خلية الإصغاء والتكفل',
   employee: 'الموظف المكلف',
 };
