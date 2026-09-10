@@ -4,7 +4,7 @@ import {
   User, LogOut, Menu, X, Bell, Search, ShieldAlert,
   FileClock, MapPin, Building2, UsersRound, AlertTriangle, CheckCircle2, Info,
   Printer, Download, Shield, Sparkles, ExternalLink, Calendar, Clock, Award, FileText,
-  Moon, Sun
+  Moon, Sun, Sprout, TrendingUp
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { OverviewStats } from './OverviewStats';
@@ -18,9 +18,10 @@ import { CitizensView } from './CitizensView';
 import { PermissionsView } from './PermissionsView';
 import { DepartmentsView } from './DepartmentsView';
 import { MunicipalitiesView } from './MunicipalitiesView';
+import { SectorDetailsView } from './SectorDetailsView';
 import { SystemUser } from '../../types';
 
-type DashboardView = 'overview' | 'inbox' | 'map' | 'reports' | 'users' | 'citizens' | 'permissions' | 'departments' | 'municipalities' | 'audit_log' | 'settings';
+type DashboardView = 'overview' | 'inbox' | 'map' | 'reports' | 'users' | 'citizens' | 'permissions' | 'departments' | 'municipalities' | 'audit_log' | 'settings' | 'agriculture' | 'investment';
 
 type Toast = {
   id: string;
@@ -107,6 +108,13 @@ export const DashboardLayout: React.FC<{ user: SystemUser; onLogout: () => void 
         { id: 'citizens', icon: UsersRound, label: 'سجل المواطنين والمتابعة' },
         { id: 'departments', icon: Building2, label: 'المصالح والهيكل الإداري', roles: ['super_admin', 'admin'] },
         { id: 'municipalities', icon: MapPin, label: 'دليل الدوائر والبلديات', roles: ['super_admin', 'admin'] },
+      ]
+    },
+    {
+      category: 'القطاعات والبرامج الولائية',
+      items: [
+        { id: 'agriculture', icon: Sprout, label: 'تفاصيل قطاع الفلاحة والتنمية الريفية' },
+        { id: 'investment', icon: TrendingUp, label: 'تفاصيل قطاع الاستثمار والمؤسسات' },
       ]
     },
     {
@@ -433,6 +441,8 @@ export const DashboardLayout: React.FC<{ user: SystemUser; onLogout: () => void 
                   {currentView === 'municipalities' && <MunicipalitiesView user={user} addToast={addToast} />}
                   {currentView === 'audit_log' && <AuditLogView user={user} addToast={addToast} />}
                   {currentView === 'settings' && <SettingsView user={user} addToast={addToast} />}
+                  {currentView === 'agriculture' && <SectorDetailsView sector="agriculture" onBack={() => setCurrentView('overview')} />}
+                  {currentView === 'investment' && <SectorDetailsView sector="investment" onBack={() => setCurrentView('overview')} />}
                 </motion.div>
               </AnimatePresence>
             </div>

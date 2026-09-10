@@ -91,7 +91,8 @@ export function maskNIN(nin: string | undefined | null): string {
 }
 
 export type AlgerianNinParts = {
-  genderAndBirthPlaceType: string;
+  nationality: string;
+  sex: string;
   birthYear: string;
   municipalityCode: string;
   birthActNumber: string;
@@ -99,7 +100,23 @@ export type AlgerianNinParts = {
   controlKey: string;
 };
 
-/** Validates the public 18-digit Algerian NIN layout: 2 + 3 + 4 + 5 + 2 + 2. */
+function calculateAlgerianNINControlKey(base16: string): string {
+  let sum = 0;
+  let alternate = false;
+  for (let index = base16.length - 1; index >= 0; index -= 1) {
+    let digit = Number(base16[index]);
+    if (alternate) {
+      digit *= 2;
+      if (digit > 9) digit -= 9;
+    }
+    sum += digit;
+    alternate = !alternate;
+  }
+  const key = (10 - (sum % 10)) % 10;
+  return key.toString().padStart(2, '0');
+}
+
+/** Validates the Algerian NIN layout and its two-digit modified-Luhn control key. */
 export function parseAlgerianNIN(value: unknown): { valid: boolean; parts?: AlgerianNinParts; error?: string } {
   const clean = typeof value === 'string' ? value.replace(/\s/g, '') : '';
   if (!/^\d{18}$/.test(clean)) {
@@ -107,7 +124,8 @@ export function parseAlgerianNIN(value: unknown): { valid: boolean; parts?: Alge
   }
 
   const parts: AlgerianNinParts = {
-    genderAndBirthPlaceType: clean.slice(0, 2),
+    nationality: clean.slice(0, 1),
+    sex: clean.slice(1, 2),
     birthYear: clean.slice(2, 5),
     municipalityCode: clean.slice(5, 9),
     birthActNumber: clean.slice(9, 14),
@@ -115,11 +133,15 @@ export function parseAlgerianNIN(value: unknown): { valid: boolean; parts?: Alge
     controlKey: clean.slice(16, 18),
   };
 
-  if (Number(parts.genderAndBirthPlaceType) === 0 || Number(parts.birthYear) === 0 || Number(parts.municipalityCode) === 0 || Number(parts.birthActNumber) === 0) {
-    return { valid: false, error: 'مكونات رقم التعريف الوطني لا يمكن أن تكون أصفاراً بالكامل.' };
+  if (!['1', '2'].includes(parts.nationality)) {
+    return { valid: false, error: 'رمز الجنسية في رقم التعريف الوطني يجب أن يكون 1 أو 2.' };
   }
-  if (Number(parts.controlKey) === 0) {
-    return { valid: false, error: 'مفتاح مراقبة رقم التعريف الوطني غير صالح.' };
+  if (!['0', '1'].includes(parts.sex)) {
+    return { valid: false, error: 'رمز الجنس في رقم التعريف الوطني غير صالح.' };
+  }
+  const calculatedKey = calculateAlgerianNINControlKey(clean.slice(0, 16));
+  if (calculatedKey !== parts.controlKey) {
+    return { valid: false, error: `مفتاح المراقبة غير صحيح. المفتاح المتوقع هو ${calculatedKey}.` };
   }
 
   return { valid: true, parts };
