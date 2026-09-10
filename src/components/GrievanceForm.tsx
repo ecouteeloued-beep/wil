@@ -803,25 +803,27 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 20 }}
                   transition={{ duration: 0.2 }}
-                  className="max-w-2xl mx-auto space-y-6"
+                  className="max-w-5xl mx-auto space-y-6"
                 >
                   {/* Official Search Form */}
-                  <form onSubmit={handleSearchSubmit} className="p-6 bg-white border border-gray-200 rounded-xl shadow-xs">
-                    <div className="text-center max-w-md mx-auto mb-5">
-                      <div className="w-12 h-12 rounded-full bg-[#006233]/10 text-[#006233] flex items-center justify-center mx-auto mb-3">
+                  <form onSubmit={handleSearchSubmit} className="p-5 sm:p-7 lg:p-8 bg-white border border-[#D8C9AE] rounded-2xl shadow-[0_12px_35px_rgba(92,63,36,0.08)]">
+                    <div className="text-center max-w-xl mx-auto mb-7">
+                      <div className="w-14 h-14 rounded-2xl bg-[#006233]/10 text-[#006233] flex items-center justify-center mx-auto mb-3">
                         <Search className="w-6 h-6" />
                       </div>
-                      <h4 className="text-base font-bold text-gray-900 font-changa">
+                      <h4 className="text-lg sm:text-xl font-bold text-gray-900 font-changa">
                         الاستعلام ومتابعة العريضة
                       </h4>
-                      <p className="font-tajawal text-xs text-gray-500 mt-1">
+                      <p className="font-tajawal text-sm text-gray-500 mt-2 leading-6">
                         أدخل رقم التتبع ورقم الهاتف والرمز السري الموجود في وصل الإيداع للتحقق من هويتك
                       </p>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-[1.5fr_1fr_1fr_auto] gap-2.5 max-w-3xl mx-auto">
-                      <div className="relative flex-1">
+                    <div className="grid grid-cols-1 md:grid-cols-[1.4fr_1fr_1fr_auto] gap-4 items-end max-w-4xl mx-auto">
+                      <div className="relative min-w-0">
+                        <label htmlFor="tracking-number" className="block mb-2 text-xs font-bold text-gray-700">رقم التتبع</label>
                         <input
+                          id="tracking-number"
                           type="text"
                           required
                           value={trackQuery}
@@ -831,11 +833,13 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
                           }}
                           placeholder="رقم التتبع (مثال: WIL-2026-00130)"
                           dir="ltr"
-                          className={`${inputBaseClass} font-mono uppercase text-center sm:text-left text-sm`}
+                          className={`${inputBaseClass} w-full min-w-0 h-12 font-mono uppercase text-center sm:text-left text-sm px-4`}
                         />
                       </div>
-                      <div className="relative w-full sm:w-1/3">
+                      <div className="relative min-w-0">
+                        <label htmlFor="tracking-phone" className="block mb-2 text-xs font-bold text-gray-700">رقم الهاتف</label>
                         <input
+                          id="tracking-phone"
                           type="text"
                           required
                           maxLength={10}
@@ -846,11 +850,13 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
                           }}
                           placeholder="رقم الهاتف"
                           dir="ltr"
-                          className={`${inputBaseClass} font-mono text-center tracking-widest text-sm`}
+                          className={`${inputBaseClass} w-full min-w-0 h-12 font-mono text-center tracking-widest text-sm px-4`}
                         />
                       </div>
-                      <div className="relative w-full sm:w-1/3">
+                      <div className="relative min-w-0">
+                        <label htmlFor="tracking-pin" className="block mb-2 text-xs font-bold text-gray-700">الرمز السري</label>
                         <input
+                          id="tracking-pin"
                           type="password"
                           inputMode="numeric"
                           required
@@ -862,13 +868,13 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
                           }}
                           placeholder="الرمز السري (6 أرقام)"
                           dir="ltr"
-                          className={`${inputBaseClass} font-mono text-center tracking-widest text-sm`}
+                          className={`${inputBaseClass} w-full min-w-0 h-12 font-mono text-center tracking-widest text-sm px-4`}
                         />
                       </div>
                       <button
                         type="submit"
                         disabled={isSearching}
-                        className="py-3 px-6 bg-[#006233] hover:bg-[#005228] text-white font-tajawal font-bold text-sm rounded-lg transition-colors flex items-center justify-center gap-2 shrink-0 disabled:opacity-70 cursor-pointer shadow-xs"
+                        className="h-12 py-3 px-6 bg-[#006233] hover:bg-[#005228] text-white font-tajawal font-bold text-sm rounded-xl transition-colors flex items-center justify-center gap-2 shrink-0 disabled:opacity-70 cursor-pointer shadow-sm whitespace-nowrap"
                       >
                         {isSearching ? (
                           <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
