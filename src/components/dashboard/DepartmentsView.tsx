@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Building2, Search, Plus, MoreVertical, FolderOpen, Users, X, Check, Power } from 'lucide-react';
+import { Building2, Search, Plus, FolderOpen, Users, X, Power, Pencil } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { SystemUser } from '../../types';
 import { AdminService } from '../../services/adminService';
@@ -24,6 +24,7 @@ export const DepartmentsView: React.FC<DepartmentsViewProps> = ({ user, addToast
   const [departments, setDepartments] = useState(INITIAL_DEPTS);
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingDept, setEditingDept] = useState<(typeof INITIAL_DEPTS)[number] | null>(null);
   const [formData, setFormData] = useState({ name: '', head: '', users: '4' });
 
   const filtered = departments.filter(d => 
@@ -44,25 +45,24 @@ export const DepartmentsView: React.FC<DepartmentsViewProps> = ({ user, addToast
       status: 'نشط'
     };
 
-    setDepartments([...departments, newDept]);
+    if (editingDept) {
+      setDepartments(departments.map(dept => dept.id === editingDept.id ? { ...dept, name: newDept.name, head: newDept.head, users: newDept.users } : dept));
+      AdminService.logAudit({ userId: user?.id || 'admin', userName: user?.name || 'المسؤول', userRole: user?.roleTitle || 'مسؤول الهيكل', action: 'تعديل مصلحة / مديرية', targetId: editingDept.id, targetType: 'هيكل إداري', details: `تم تعديل (${newDept.name}) والمسؤول عنها (${newDept.head}).` });
+      addToast?.({ type: 'success', title: 'تم حفظ التعديلات', message: `تم تحديث بيانات (${newDept.name}).` });
+    } else {
+      setDepartments([...departments, newDept]);
+      AdminService.logAudit({ userId: user?.id || 'admin', userName: user?.name || 'المسؤول', userRole: user?.roleTitle || 'مسؤول الهيكل', action: 'إضافة مصلحة / مديرية جديدة', targetId: newDept.id, targetType: 'هيكل إداري', details: `تمت إضافة (${newDept.name}) برئاسة (${newDept.head}) إلى الهيكل التنظيمي للمنظومة.` });
+      addToast?.({ type: 'success', title: 'تمت إضافة المديرية', message: `تم إدراج (${newDept.name}) ضمن المصالح والمديريات المتفاعلة مع المنظومة.` });
+    }
     setShowAddModal(false);
+    setEditingDept(null);
     setFormData({ name: '', head: '', users: '4' });
+  };
 
-    AdminService.logAudit({
-      userId: user?.id || 'admin',
-      userName: user?.name || 'المسؤول',
-      userRole: user?.roleTitle || 'مسؤول الهيكل',
-      action: 'إضافة مصلحة / مديرية جديدة',
-      targetId: newDept.id,
-      targetType: 'هيكل إداري',
-      details: `تمت إضافة (${newDept.name}) برئاسة (${newDept.head}) إلى الهيكل التنظيمي للمنظومة.`
-    });
-
-    addToast?.({
-      type: 'success',
-      title: 'تمت إضافة المديرية',
-      message: `تم إدراج (${newDept.name}) ضمن المصالح والمديريات المتفاعلة مع المنظومة.`
-    });
+  const openEdit = (dept: (typeof INITIAL_DEPTS)[number]) => {
+    setEditingDept(dept);
+    setFormData({ name: dept.name, head: dept.head, users: String(dept.users) });
+    setShowAddModal(true);
   };
 
   const handleToggleStatus = (id: string, name: string) => {
@@ -96,7 +96,7 @@ export const DepartmentsView: React.FC<DepartmentsViewProps> = ({ user, addToast
         </div>
 
         <button 
-          onClick={() => setShowAddModal(true)}
+          onClick={() => { setEditingDept(null); setFormData({ name: '', head: '', users: '4' }); setShowAddModal(true); }}
           className="px-4 py-2 bg-[#006233] hover:bg-[#004d28] text-white rounded-xl text-xs sm:text-sm font-bold shadow-sm transition-colors flex items-center gap-2"
         >
           <Plus className="w-4 h-4 text-amber-300" />
@@ -133,13 +133,10 @@ export const DepartmentsView: React.FC<DepartmentsViewProps> = ({ user, addToast
                     <Building2 className="w-5 h-5" />
                   </div>
                   
-                  <button 
-                    onClick={() => handleToggleStatus(dept.id, dept.name)}
-                    className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                    title={dept.status === 'نشط' ? 'تعطيل الاستقبال' : 'تفعيل الاستقبال'}
-                  >
-                    <Power className={`w-4 h-4 ${dept.status === 'نشط' ? 'text-emerald-600' : 'text-gray-400'}`} />
-                  </button>
+                  <div className="flex items-center gap-1">
+                    <button onClick={() => openEdit(dept)} className="p-1.5 text-gray-400 hover:text-[#006233] hover:bg-gray-100 rounded-lg transition-colors" title="تعديل بيانات المصلحة"><Pencil className="w-4 h-4" /></button>
+                    <button onClick={() => handleToggleStatus(dept.id, dept.name)} className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors" title={dept.status === 'نشط' ? 'تعطيل الاستقبال' : 'تفعيل الاستقبال'}><Power className={`w-4 h-4 ${dept.status === 'نشط' ? 'text-emerald-600' : 'text-gray-400'}`} /></button>
+                  </div>
                 </div>
                 
                 <h3 className="font-bold text-gray-900 font-changa text-base mb-1">{dept.name}</h3>
@@ -181,9 +178,9 @@ export const DepartmentsView: React.FC<DepartmentsViewProps> = ({ user, addToast
               <div className="bg-[#006233] text-white p-4 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Building2 className="w-5 h-5 text-amber-300" />
-                  <h3 className="font-changa font-bold text-base">إضافة مصلحة / مديرية جديدة</h3>
+                  <h3 className="font-changa font-bold text-base">{editingDept ? 'تعديل بيانات المصلحة / المديرية' : 'إضافة مصلحة / مديرية جديدة'}</h3>
                 </div>
-                <button onClick={() => setShowAddModal(false)} className="text-white/70 hover:text-white">
+                <button onClick={() => { setShowAddModal(false); setEditingDept(null); }} className="text-white/70 hover:text-white">
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -227,7 +224,7 @@ export const DepartmentsView: React.FC<DepartmentsViewProps> = ({ user, addToast
                 <div className="flex items-center justify-end gap-2.5 pt-2">
                   <button
                     type="button"
-                    onClick={() => setShowAddModal(false)}
+                    onClick={() => { setShowAddModal(false); setEditingDept(null); }}
                     className="px-4 py-2 font-bold text-gray-600 hover:bg-gray-100 rounded-xl"
                   >
                     إلغاء
@@ -236,7 +233,7 @@ export const DepartmentsView: React.FC<DepartmentsViewProps> = ({ user, addToast
                     type="submit"
                     className="px-5 py-2 bg-[#006233] hover:bg-[#004d28] text-white font-bold rounded-xl shadow-sm"
                   >
-                    حفظ وإضافة المصلحة
+                    {editingDept ? 'حفظ التعديلات' : 'حفظ وإضافة المصلحة'}
                   </button>
                 </div>
               </form>
