@@ -1,0 +1,20 @@
+-- Remove legacy grants that may have been created by earlier migrations.
+begin;
+revoke execute on function public.admin_reset_staff_password(uuid, text) from anon, public;
+grant execute on function public.admin_reset_staff_password(uuid, text) to authenticated;
+revoke execute on function public.admin_update_staff_account(uuid, text, text, text, text, text, text, boolean) from anon, public;
+grant execute on function public.admin_update_staff_account(uuid, text, text, text, text, text, text, boolean) to authenticated;
+revoke execute on function public.admin_update_staff_permissions(uuid, jsonb) from anon, public;
+grant execute on function public.admin_update_staff_permissions(uuid, jsonb) to authenticated;
+revoke execute on function public.list_message_recipients() from anon, public;
+grant execute on function public.list_message_recipients() to authenticated;
+revoke execute on function public.mark_internal_message_read(uuid) from anon, public;
+grant execute on function public.mark_internal_message_read(uuid) to authenticated;
+revoke execute on function public.transition_complaint(text, text, jsonb) from anon, public;
+grant execute on function public.transition_complaint(text, text, jsonb) to authenticated;
+revoke execute on function public.can_access_complaint(uuid) from anon, authenticated, public;
+revoke execute on function public.current_staff_role() from anon, authenticated, public;
+revoke execute on function public.is_active_staff() from anon, authenticated, public;
+revoke execute on function public.hash_complaint_sensitive_fields() from anon, authenticated, public;
+revoke execute on function public.rls_auto_enable() from anon, authenticated, public;
+commit;
