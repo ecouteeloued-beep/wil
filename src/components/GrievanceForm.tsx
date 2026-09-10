@@ -2,9 +2,6 @@ import React, { useState } from 'react';
 import { CATEGORIES, DAIRAS, DAIRAS_MUNICIPALITIES } from '../data';
 import { Municipality, GrievanceCategory, GrievanceSubmission, EnhancedGrievance, AttachmentFile } from '../types';
 import { GrievanceService } from '../services/grievanceService';
-import { complaintRepository } from '../services/complaintRepository';
-import { ComplaintService } from '../services/complaintService';
-import { AdminService } from '../services/adminService';
 import { sanitizeInput, validateUploadedFile, SecurityRateLimiter } from '../utils/security';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -88,6 +85,7 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
   const [applicantNeighborhood, setApplicantNeighborhood] = useState('');
   
   const [subject, setSubject] = useState('');
+  const [meetingRequest, setMeetingRequest] = useState<'' | 'والي الولاية' | 'رئيس الديوان' | 'الأمين العام للولاية'>('');
   const [grievanceDaira, setGrievanceDaira] = useState('');
   const [grievanceMunicipality, setGrievanceMunicipality] = useState('');
   const [category, setCategory] = useState<GrievanceCategory>(initialCategory || 'الخدمات الإدارية');
@@ -235,6 +233,7 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
         applicantMunicipality,
         applicantNeighborhood: cleanNeighborhood,
         subject: cleanSubject,
+        meetingRequest: meetingRequest || undefined,
         grievanceDaira,
         grievanceMunicipality,
         category,
@@ -266,6 +265,7 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
     setApplicantMunicipality('');
     setApplicantNeighborhood('');
     setSubject('');
+    setMeetingRequest('');
     setGrievanceDaira('');
     setGrievanceMunicipality('');
     setCategory('الخدمات الإدارية');
@@ -303,54 +303,9 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
     setActiveTrackingResult(null);
 
     try {
-      // 1. Check direct complaintRepository
-      let match = await complaintRepository.getById(cleaned);
-      
-      // 2. Check AdminService all grievances if not found in first pass
-      if (!match) {
-        const allAdmin = AdminService.getAllGrievances();
-        match = allAdmin.find(g => 
-          g.id.trim().toUpperCase() === cleaned || 
-          (g.trackingNumber && g.trackingNumber.trim().toUpperCase() === cleaned)
-        ) || null;
-      }
-
-      // 3. Fallback to GrievanceService
-      if (!match) {
-        const legacyMatch = await GrievanceService.findByTrackingId(cleaned, cleanedPhone);
-        if (legacyMatch) {
-          match = {
-            id: legacyMatch.id,
-            trackingNumber: legacyMatch.id,
-            secretPin: (legacyMatch as any).secretPin || '',
-            statusCode: 'IN_PROGRESS',
-            status: legacyMatch.status || 'قيد المعالجة',
-            priority: legacyMatch.priority || 'عادي',
-            fullName: legacyMatch.fullName,
-            phone: legacyMatch.phone || '',
-            applicantDaira: legacyMatch.applicantDaira || 'الوادي',
-            applicantMunicipality: legacyMatch.applicantMunicipality || 'الوادي',
-            applicantNeighborhood: legacyMatch.applicantNeighborhood || '',
-            subject: legacyMatch.subject,
-            grievanceDaira: legacyMatch.grievanceDaira || legacyMatch.applicantDaira || 'الوادي',
-            grievanceMunicipality: legacyMatch.grievanceMunicipality || legacyMatch.applicantMunicipality || 'الوادي',
-            category: legacyMatch.category,
-            sector: legacyMatch.category || 'عام',
-            details: legacyMatch.details,
-            createdAt: legacyMatch.createdAt,
-            updatedAt: legacyMatch.createdAt,
-            dueDate: new Date(Date.now() + 15 * 86400000).toISOString(),
-            isOverdue: false,
-            specialFlags: [],
-            officialResponse: legacyMatch.officialResponse,
-            citizenActionRequired: legacyMatch.citizenActionRequired,
-            citizenRating: legacyMatch.citizenRating,
-            publicMessages: legacyMatch.publicMessages,
-            timeline: legacyMatch.timeline || [],
-            internalNotes: []
-          };
-        }
-      }
+      // Tracking is intentionally cloud-only and phone-bound. Browser-local
+      // repositories must never be used as an authority for citizen records.
+      const match = await GrievanceService.findByTrackingId(cleaned, cleanedPhone);
 
       if (!match) {
         const fail = SecurityRateLimiter.registerFailure('citizen_track', cleaned);
@@ -523,6 +478,7 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
                           <div><span className="text-gray-500 block text-[11px]">البلدية المعنية:</span><span className="font-bold">{submittedTicket.grievanceMunicipality}</span></div>
                           <div><span className="text-gray-500 block text-[11px]">تاريخ التسجيل:</span><span className="font-bold font-mono">{new Date(submittedTicket.createdAt).toLocaleDateString('ar-DZ')}</span></div>
                           <div className="col-span-2"><span className="text-gray-500 block text-[11px]">نوع العريضة:</span><span className="font-bold text-[#D21034]">{submittedTicket.category}</span></div>
+                          {submittedTicket.meetingRequest && <div className="col-span-2"><span className="text-gray-500 block text-[11px]">طلب اللقاء:</span><span className="font-bold text-[#006233]">{submittedTicket.meetingRequest}</span></div>}
                         </div>
 
                       </div>
@@ -697,6 +653,21 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
                               />
                             </div>
                             
+                            <div className="md:col-span-2">
+                              <label className={labelClass}>طلب لقاء (اختياري)</label>
+                              <select
+                                value={meetingRequest}
+                                onChange={e => setMeetingRequest(e.target.value as typeof meetingRequest)}
+                                className={`${inputBaseClass} appearance-none`}
+                              >
+                                <option value="">لا يوجد طلب لقاء</option>
+                                <option value="والي الولاية">طلب لقاء مع السيد والي الولاية</option>
+                                <option value="رئيس الديوان">طلب لقاء مع السيد رئيس الديوان — تابع لديوان الوالي</option>
+                                <option value="الأمين العام للولاية">طلب لقاء مع السيد الأمين العام للولاية</option>
+                              </select>
+                              <p className="text-[11px] text-gray-500 mt-1">سيظهر الطلب للجهة المختصة داخل لوحة التحكم لمراجعته وتحديد موعد مناسب.</p>
+                            </div>
+
                             <div>
                               <label className={labelClass}>الدائرة المعنية <span className="text-[#D21034]">*</span></label>
                               <div className="relative">

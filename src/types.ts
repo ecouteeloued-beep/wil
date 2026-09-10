@@ -46,6 +46,7 @@ export interface GrievanceSubmission {
   applicantMunicipality: string;
   applicantNeighborhood: string;
   subject: string;
+  meetingRequest?: 'والي الولاية' | 'رئيس الديوان' | 'الأمين العام للولاية';
   grievanceDaira: string;
   grievanceMunicipality: string;
   category: GrievanceCategory;
@@ -270,6 +271,7 @@ export interface EnhancedGrievance {
   applicantMunicipality: string;
   applicantNeighborhood: string;
   subject: string;
+  meetingRequest?: 'والي الولاية' | 'رئيس الديوان' | 'الأمين العام للولاية';
   grievanceDaira: string;
   grievanceMunicipality: string;
   category: GrievanceCategory;
