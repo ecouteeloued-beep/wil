@@ -545,7 +545,7 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
                                 dir="ltr"
                                 className={`${inputBaseClass} font-mono text-right placeholder:text-right placeholder:font-tajawal`}
                               />
-                              <p className="text-[10px] text-gray-500 mt-1 leading-5">18 رقماً: أول رقميْن للجنس ونوع مكان الميلاد، ثم سنة الميلاد (3)، رمز البلدية (4)، رقم عقد الميلاد (5)، الرقم التسلسلي (2)، ومفتاح المراقبة (2).</p>
+                              <p className="text-[10px] text-gray-500 mt-1 leading-5">18 رقماً: رمز الجنسية (1)، رمز الجنس (1)، سنة التسجيل في الولادات (3)، رمز البلدية أو البلد (4)، رقم عقد الميلاد (5)، الرقم التسلسلي (2)، ومفتاح المراقبة (2).</p>
                             </div>
 
                             <div>
