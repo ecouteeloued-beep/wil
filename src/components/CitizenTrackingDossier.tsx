@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Check, CheckCircle2, Clipboard, Clock3, FileText, MapPin, Phone, RotateCcw, ShieldCheck } from 'lucide-react';
+import { Check, CheckCircle2, Clipboard, Clock3, FileText, MapPin, Phone, RotateCcw, ShieldCheck, Download, Paperclip } from 'lucide-react';
 import { EnhancedGrievance } from '../types';
 
 interface CitizenTrackingDossierProps {
@@ -8,7 +8,7 @@ interface CitizenTrackingDossierProps {
   onNewSearch: () => void;
 }
 
-const stages = ['تم تسجيل العريضة', 'تم الاطلاع على الملف', 'تم توجيه الملف للمصلحة المختصة', 'جاري دراسة الملف', 'تم الرد أو الحل'];
+const stages = ['تم تسجيل العريضة', 'تم الاطلاع على الملف', 'تم توجيه الملف للمصلحة المختصة', 'جاري دراسة الملف', 'تم الرد والحل'];
 
 const normalizeStage = (complaint: EnhancedGrievance) => {
   const status = complaint.status || '';
@@ -27,7 +27,7 @@ export const CitizenTrackingDossier: React.FC<CitizenTrackingDossierProps> = ({ 
   const createdDate = complaint.createdAt ? new Date(complaint.createdAt).toLocaleDateString('ar-DZ') : 'غير متوفر';
 
   const statusText = useMemo(() => {
-    if (currentStage === 4) return 'تمت معالجة العريضة أو إصدار رد بشأنها';
+    if (currentStage === 4) return 'تم اعتماد الرد الرسمي وإغلاق الملف بالحل أو الإجراء المتخذ';
     if (currentStage === 3) return 'المصلحة المختصة تدرس العريضة حاليًا';
     if (currentStage === 2) return 'تم تحويل العريضة إلى المصلحة المختصة';
     if (currentStage === 1) return 'تم الاطلاع على العريضة وهي قيد التوجيه';
@@ -77,6 +77,35 @@ export const CitizenTrackingDossier: React.FC<CitizenTrackingDossierProps> = ({ 
           <div className="rounded-xl border border-gray-200 bg-gray-50 p-4"><div className="flex items-center gap-2 text-xs text-gray-500"><Clock3 className="w-4 h-4" />تاريخ الإيداع</div><p className="font-bold text-sm text-gray-800 mt-2">{createdDate}</p></div>
           <div className="rounded-xl border border-gray-200 bg-gray-50 p-4"><div className="flex items-center gap-2 text-xs text-gray-500"><Phone className="w-4 h-4" />المصلحة المعنية</div><p className="font-bold text-sm text-gray-800 mt-2">{complaint.assignedDepartment || 'سيتم تحديدها عند التوجيه'}</p></div>
         </div>
+
+        {complaint.officialResponse?.approved && complaint.officialResponse.text && (
+          <div className="rounded-2xl border-2 border-emerald-300 bg-emerald-50 p-5 space-y-4">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[#006233] text-white flex items-center justify-center shrink-0"><CheckCircle2 className="w-5 h-5" /></div>
+              <div>
+                <h3 className="font-changa font-bold text-base text-emerald-950">الرد الرسمي والحل</h3>
+                <p className="text-xs text-emerald-800 mt-1">هذا الرد معتمد رسمياً من مصالح الولاية ومتاح لصاحب العريضة بعد التحقق.</p>
+              </div>
+            </div>
+            <div className="rounded-xl bg-white border border-emerald-200 p-4 text-sm leading-7 text-gray-800 whitespace-pre-wrap">{complaint.officialResponse.text}</div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-emerald-900">
+              {complaint.officialResponse.letterNumber && <div><span className="text-emerald-700">رقم المراسلة:</span> <strong dir="ltr">{complaint.officialResponse.letterNumber}</strong></div>}
+              {complaint.officialResponse.reviewedAt && <div><span className="text-emerald-700">تاريخ الاعتماد:</span> <strong>{new Date(complaint.officialResponse.reviewedAt).toLocaleDateString('ar-DZ')}</strong></div>}
+            </div>
+            {Array.isArray(complaint.officialResponse.attachments) && complaint.officialResponse.attachments.length > 0 && (
+              <div className="pt-3 border-t border-emerald-200">
+                <div className="flex items-center gap-2 text-sm font-bold text-emerald-950 mb-2"><Paperclip className="w-4 h-4" />ملفات مرفقة بالرد الرسمي</div>
+                <div className="space-y-2">
+                  {complaint.officialResponse.attachments.map(file => (
+                    <a key={file.id} href={file.url || file.dataUrl || '#'} download={file.name} target="_blank" rel="noreferrer" className="flex items-center justify-between gap-3 rounded-lg bg-white border border-emerald-200 px-3 py-2 text-xs text-gray-700 hover:bg-emerald-100">
+                      <span className="truncate">{file.name}</span><Download className="w-4 h-4 text-[#006233] shrink-0" />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 text-xs leading-6 text-blue-900"><strong>ماذا تفعل الآن؟</strong><br />احتفظ برقم التتبع والرمز السري. يمكنك العودة إلى صفحة التتبع في أي وقت لمعرفة آخر وضعية لعريضتك.</div>
         <button type="button" onClick={onNewSearch} className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border border-[#006233] text-[#006233] hover:bg-emerald-50 px-5 py-3 text-sm font-bold"><RotateCcw className="w-4 h-4" />تتبع عريضة أخرى</button>

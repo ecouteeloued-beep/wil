@@ -133,6 +133,7 @@ export const InboxView: React.FC<InboxViewProps> = ({
   // Official Response Draft state (Employee / Supervisor)
   const [officialReplyText, setOfficialReplyText] = useState('');
   const [replyRefNumber, setReplyRefNumber] = useState(`2026/خ.إ/${Math.floor(100 + Math.random() * 900)}`);
+  const [officialReplyAttachments, setOfficialReplyAttachments] = useState<AttachmentFile[]>([]);
 
   // Active role filtering toggle (e.g. for employee to view assigned files only)
   const [showOnlyAssignedToMe, setShowOnlyAssignedToMe] = useState(false);
@@ -144,6 +145,10 @@ export const InboxView: React.FC<InboxViewProps> = ({
   const getTicketAttachments = (ticket: EnhancedGrievance): AttachmentFile[] => {
     return Array.isArray(ticket.attachments) ? ticket.attachments : [];
   };
+
+  useEffect(() => {
+    setOfficialReplyAttachments(Array.isArray(selectedTicket?.officialResponse?.attachments) ? selectedTicket.officialResponse.attachments : []);
+  }, [selectedTicket?.id]);
 
   const handleOpenDocumentReader = (att: AttachmentFile, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
@@ -666,7 +671,9 @@ export const InboxView: React.FC<InboxViewProps> = ({
         text: officialReplyText,
         preparedBy: actorName,
         preparedAt: new Date().toISOString(),
-        approved: approveImmediately
+        approved: approveImmediately,
+        letterNumber: replyRefNumber,
+        attachments: officialReplyAttachments
       },
       timeline: [
         ...(selectedTicket.timeline || []),
@@ -691,6 +698,37 @@ export const InboxView: React.FC<InboxViewProps> = ({
         ? `تم اعتماد الرد الرسمي وإخطار المواطن بإغلاق الملف ${selectedTicket.id}.`
         : `أُحيلت المسودة للمسؤول للمصادقة عليها.`
     });
+  };
+
+  const handleOfficialReplyFiles = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    if (files.length === 0) return;
+    const available = Math.max(0, 5 - officialReplyAttachments.length);
+    if (files.length > available) {
+      addToast?.({ type: 'warning', title: 'عدد الملفات غير مسموح', message: 'يمكن إرفاق خمسة ملفات كحد أقصى مع الرد الرسمي.' });
+    }
+    files.slice(0, available).forEach(file => {
+      if (file.size > 8 * 1024 * 1024) {
+        addToast?.({ type: 'warning', title: 'الملف كبير', message: `الملف ${file.name} يتجاوز الحد المسموح 8 ميغابايت.` });
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = typeof reader.result === 'string' ? reader.result : undefined;
+        if (!dataUrl) return;
+        setOfficialReplyAttachments(previous => [...previous, {
+          id: `official-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          name: file.name,
+          size: `${Math.ceil(file.size / 1024)} KB`,
+          type: file.type || 'application/octet-stream',
+          uploadedAt: new Date().toISOString(),
+          dataUrl,
+          url: dataUrl
+        }]);
+      };
+      reader.readAsDataURL(file);
+    });
+    event.target.value = '';
   };
 
   const handleExportCsv = () => {
@@ -1560,7 +1598,30 @@ export const InboxView: React.FC<InboxViewProps> = ({
                     placeholder="اكتب هنا صيغة الرد الرسمي الإداري الذي سيتلقاه المواطن عبر المنصة والرسالة النصية..."
                     className="w-full p-3.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-[#006233] outline-none font-tajawal leading-relaxed"
                   />
-                  
+
+                  <div className="rounded-xl border border-dashed border-emerald-300 bg-emerald-50/40 p-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div>
+                        <p className="text-xs font-bold text-emerald-900">ملفات إضافية مع الرد والحل</p>
+                        <p className="text-[11px] text-emerald-700 mt-1">PDF أو صور أو مستندات — خمسة ملفات كحد أقصى، 8 ميغابايت للملف.</p>
+                      </div>
+                      <label className="inline-flex items-center gap-1.5 rounded-lg bg-white border border-emerald-300 px-3 py-2 text-xs font-bold text-[#006233] cursor-pointer hover:bg-emerald-100">
+                        <Paperclip className="w-4 h-4" />إرفاق ملف
+                        <input type="file" multiple accept=".pdf,.png,.jpg,.jpeg,.webp,.doc,.docx,.xls,.xlsx" className="hidden" onChange={handleOfficialReplyFiles} />
+                      </label>
+                    </div>
+                    {officialReplyAttachments.length > 0 && (
+                      <div className="mt-3 space-y-1.5">
+                        {officialReplyAttachments.map(file => (
+                          <div key={file.id} className="flex items-center justify-between gap-2 rounded-lg bg-white border border-emerald-200 px-2.5 py-1.5 text-xs">
+                            <span className="truncate text-gray-700">{file.name}</span>
+                            <button type="button" onClick={() => setOfficialReplyAttachments(previous => previous.filter(item => item.id !== file.id))} className="text-red-600 hover:text-red-800" aria-label={`حذف ${file.name}`}><X className="w-4 h-4" /></button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
                   <div className="flex flex-wrap items-center justify-end gap-2.5">
                     <button
                       type="button"

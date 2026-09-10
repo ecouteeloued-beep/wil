@@ -218,6 +218,7 @@ export interface OfficialResponse {
   reviewedAt?: string;
   approved: boolean;
   letterNumber?: string;
+  attachments?: AttachmentFile[];
 }
 
 export interface AttachmentFile {

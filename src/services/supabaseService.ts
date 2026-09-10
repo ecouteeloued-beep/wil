@@ -296,6 +296,7 @@ export const SupabaseService = {
         specialFlags: [],
         dueDate: row.deadline || new Date().toISOString(),
         isOverdue: false,
+        officialResponse: row.official_response || undefined,
         timeline: [
           {
             id: `t-${Date.now()}`,
