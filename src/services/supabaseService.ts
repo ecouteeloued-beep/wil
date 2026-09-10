@@ -228,17 +228,18 @@ export const SupabaseService = {
   /**
    * Search for a complaint in Supabase by tracking number and phone
    */
-  trackComplaint: async (trackingId: string, phone?: string): Promise<EnhancedGrievance | null> => {
+  trackComplaint: async (trackingId: string, phone?: string, secretPin?: string): Promise<EnhancedGrievance | null> => {
     if (!isSupabaseConfigured || !supabase) {
       return null;
     }
 
     try {
       const cleanId = trackingId.trim().toUpperCase();
-      if (!phone) return null;
+      if (!phone || !secretPin) return null;
       const { data, error } = await supabase.rpc('track_complaint', {
         p_tracking_id: cleanId,
         p_phone: phone.trim(),
+        p_secret_pin: secretPin.trim(),
       });
       const row = Array.isArray(data) ? data[0] : data;
       if (error || !row) {
