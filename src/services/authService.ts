@@ -27,12 +27,8 @@ export async function getAuthenticatedStaff(): Promise<SystemUser | null> {
   if (sessionError || !sessionData.session?.user) return null;
 
   const authUser = sessionData.session.user;
-  const { data: profile, error: profileError } = await supabase
-    .from('users')
-    .select('id,username,name,email,role,department,phone,is_active')
-    .eq('id', authUser.id)
-    .eq('is_active', true)
-    .maybeSingle();
+  const { data: profileRows, error: profileError } = await supabase.rpc('get_my_staff_profile');
+  const profile = Array.isArray(profileRows) ? profileRows[0] : null;
 
   if (profileError || !profile || !profile.is_active) {
     await supabase.auth.signOut();
