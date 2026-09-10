@@ -102,7 +102,7 @@ export const DocumentReaderModal: React.FC<DocumentReaderModalProps> = ({
   };
 
   const handleDownload = () => {
-    const rawUrl = attachment.dataUrl || attachment.url;
+    const rawUrl = attachment.dataUrl || attachment.url || attachment.previewUrl;
     const safeUrl = sanitizeDocumentUrl(rawUrl);
     if (safeUrl) {
       const link = document.createElement('a');
@@ -121,8 +121,9 @@ export const DocumentReaderModal: React.FC<DocumentReaderModalProps> = ({
     });
   };
 
-  const isPdf = attachment.type === 'application/pdf' || attachment.name.toLowerCase().endsWith('.pdf');
-  const isImage = attachment.type.startsWith('image/') || 
+  const attachmentType = attachment.type || '';
+  const isPdf = attachmentType === 'application/pdf' || attachment.name.toLowerCase().endsWith('.pdf');
+  const isImage = attachmentType.startsWith('image/') ||
                   attachment.name.toLowerCase().endsWith('.jpg') || 
                   attachment.name.toLowerCase().endsWith('.jpeg') || 
                   attachment.name.toLowerCase().endsWith('.png');
@@ -458,7 +459,7 @@ ${details || 'وثيقة إدارية ثبوتية مؤيدة للعريضة ا�
               {/* CASE A: Real DataURL / Image Source */}
               {(attachment.dataUrl || attachment.url) ? (
                 (() => {
-                  const rawUrl = attachment.dataUrl || attachment.url;
+                  const rawUrl = attachment.dataUrl || attachment.url || attachment.previewUrl;
                   const safeUrl = sanitizeDocumentUrl(rawUrl);
 
                   if (!safeUrl) {
