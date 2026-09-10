@@ -84,15 +84,16 @@ export const GrievanceService = {
     return {
       ...data,
       id: serverTrackingId,
+      secretPin: cloudResult.data?.secret_pin || '',
       status: 'قيد المعالجة',
       createdAt: cloudResult.data?.created_at || nowIso,
     };
   },
 
-  findByTrackingId: async (id: string, phone?: string): Promise<any> => {
+  findByTrackingId: async (id: string, phone?: string, secretPin?: string): Promise<any> => {
     const cleanId = id.trim().toUpperCase();
-    if (!cleanId || !phone || !SupabaseService.isConfigured()) return null;
-    return SupabaseService.trackComplaint(cleanId, phone);
+    if (!cleanId || !phone || !secretPin || !SupabaseService.isConfigured()) return null;
+    return SupabaseService.trackComplaint(cleanId, phone, secretPin);
   },
 
   // Dashboard statistics must come from scoped server queries. Returning zero here

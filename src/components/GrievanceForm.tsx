@@ -105,6 +105,7 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
   // Tracking Search State
   const [trackQuery, setTrackQuery] = useState('');
   const [trackPhone, setTrackPhone] = useState('');
+  const [trackPin, setTrackPin] = useState('');
   const [trackError, setTrackError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
@@ -279,15 +280,20 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
     setFormStep(1);
   };
 
-  const executeTrackSearch = async (codeToSearch: string, phoneToSearch: string) => {
+  const executeTrackSearch = async (codeToSearch: string, phoneToSearch: string, pinToSearch: string) => {
     const cleaned = sanitizeInput(codeToSearch.trim().toUpperCase(), 50);
     const cleanedPhone = sanitizeInput(phoneToSearch.trim(), 20);
+    const cleanedPin = sanitizeInput(pinToSearch.trim(), 6);
     if (!cleaned) {
       setTrackError('يرجى إدخال رقم التتبع');
       return;
     }
     if (!cleanedPhone) {
       setTrackError('يرجى إدخال رقم الهاتف');
+      return;
+    }
+    if (!/^\d{6}$/.test(cleanedPin)) {
+      setTrackError('يرجى إدخال الرمز السري المكون من 6 أرقام');
       return;
     }
 
@@ -308,22 +314,13 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
     try {
       // Tracking is intentionally cloud-only and phone-bound. Browser-local
       // repositories must never be used as an authority for citizen records.
-      const match = await GrievanceService.findByTrackingId(cleaned, cleanedPhone);
+      const match = await GrievanceService.findByTrackingId(cleaned, cleanedPhone, cleanedPin);
 
       if (!match) {
         const fail = SecurityRateLimiter.registerFailure('citizen_track', cleaned);
         setTrackError(fail.isLocked ? fail.message! : 'لم يتم العثور على عريضة مسجلة برقم التتبع المدخل.');
         setActiveTrackingResult(null);
         setHasSearched(true);
-        setIsSearching(false);
-        return;
-      }
-
-      if (match.phone !== cleanedPhone) {
-        const fail = SecurityRateLimiter.registerFailure('citizen_track', cleaned);
-        setTrackError(fail.isLocked ? fail.message! : `رقم الهاتف غير مطابق لبيانات الملف المسجل. يتبقى لديك (${fail.remainingAttempts}) محاولات.`);
-        setActiveTrackingResult(null);
-        setHasSearched(false);
         setIsSearching(false);
         return;
       }
@@ -343,7 +340,7 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    executeTrackSearch(trackQuery, trackPhone);
+    executeTrackSearch(trackQuery, trackPhone, trackPin);
   };
 
   const handlePrintReceipt = () => {
@@ -491,7 +488,7 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
                           type="button"
                           onClick={() => { 
                             onTabChange('track');
-                            executeTrackSearch(submittedTicket.id, submittedTicket.secretPin || '');
+                            executeTrackSearch(submittedTicket.id, submittedTicket.phone, submittedTicket.secretPin || '');
                           }}
                           className="py-2.5 px-6 bg-[#006233] hover:bg-[#004d28] text-white font-tajawal font-bold text-sm rounded-lg transition-colors flex items-center justify-center gap-2 shadow-xs cursor-pointer"
                         >
@@ -818,11 +815,11 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
                         الاستعلام ومتابعة العريضة
                       </h4>
                       <p className="font-tajawal text-xs text-gray-500 mt-1">
-                        أدخل رقم التسجيل أو رمز التتبع المطبوع على وصل الإيداع لمتابعة مآل المعالجة
+                        أدخل رقم التتبع ورقم الهاتف والرمز السري الموجود في وصل الإيداع للتحقق من هويتك
                       </p>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row gap-2.5 max-w-xl mx-auto">
+                    <div className="grid grid-cols-1 sm:grid-cols-[1.5fr_1fr_1fr_auto] gap-2.5 max-w-3xl mx-auto">
                       <div className="relative flex-1">
                         <input
                           type="text"
@@ -848,6 +845,22 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
                             setTrackError(null);
                           }}
                           placeholder="رقم الهاتف"
+                          dir="ltr"
+                          className={`${inputBaseClass} font-mono text-center tracking-widest text-sm`}
+                        />
+                      </div>
+                      <div className="relative w-full sm:w-1/3">
+                        <input
+                          type="password"
+                          inputMode="numeric"
+                          required
+                          maxLength={6}
+                          value={trackPin}
+                          onChange={e => {
+                            setTrackPin(e.target.value.replace(/\D/g, ''));
+                            setTrackError(null);
+                          }}
+                          placeholder="الرمز السري (6 أرقام)"
                           dir="ltr"
                           className={`${inputBaseClass} font-mono text-center tracking-widest text-sm`}
                         />
@@ -909,7 +922,7 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
                   {!hasSearched && !isSearching && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-6 text-gray-400 font-tajawal text-xs sm:text-sm flex flex-col items-center">
                       <Search className="w-8 h-8 text-gray-300 mb-2" />
-                      <span>يرجى إدخال رمز المتابعة المسلم لكم عند إيداع العريضة للاطلاع على مسار المعالجة.</span>
+                      <span>لن تظهر بيانات العريضة إلا عند تطابق رقم التتبع ورقم الهاتف والرمز السري الخاص بالملف.</span>
                     </motion.div>
                   )}
                 </motion.div>
