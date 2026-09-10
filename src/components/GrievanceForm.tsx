@@ -2,9 +2,6 @@ import React, { useState } from 'react';
 import { CATEGORIES, DAIRAS, DAIRAS_MUNICIPALITIES } from '../data';
 import { Municipality, GrievanceCategory, GrievanceSubmission, EnhancedGrievance, AttachmentFile } from '../types';
 import { GrievanceService } from '../services/grievanceService';
-import { complaintRepository } from '../services/complaintRepository';
-import { ComplaintService } from '../services/complaintService';
-import { AdminService } from '../services/adminService';
 import { sanitizeInput, validateUploadedFile, SecurityRateLimiter } from '../utils/security';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -303,54 +300,9 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
     setActiveTrackingResult(null);
 
     try {
-      // 1. Check direct complaintRepository
-      let match = await complaintRepository.getById(cleaned);
-      
-      // 2. Check AdminService all grievances if not found in first pass
-      if (!match) {
-        const allAdmin = AdminService.getAllGrievances();
-        match = allAdmin.find(g => 
-          g.id.trim().toUpperCase() === cleaned || 
-          (g.trackingNumber && g.trackingNumber.trim().toUpperCase() === cleaned)
-        ) || null;
-      }
-
-      // 3. Fallback to GrievanceService
-      if (!match) {
-        const legacyMatch = await GrievanceService.findByTrackingId(cleaned, cleanedPhone);
-        if (legacyMatch) {
-          match = {
-            id: legacyMatch.id,
-            trackingNumber: legacyMatch.id,
-            secretPin: (legacyMatch as any).secretPin || '',
-            statusCode: 'IN_PROGRESS',
-            status: legacyMatch.status || 'قيد المعالجة',
-            priority: legacyMatch.priority || 'عادي',
-            fullName: legacyMatch.fullName,
-            phone: legacyMatch.phone || '',
-            applicantDaira: legacyMatch.applicantDaira || 'الوادي',
-            applicantMunicipality: legacyMatch.applicantMunicipality || 'الوادي',
-            applicantNeighborhood: legacyMatch.applicantNeighborhood || '',
-            subject: legacyMatch.subject,
-            grievanceDaira: legacyMatch.grievanceDaira || legacyMatch.applicantDaira || 'الوادي',
-            grievanceMunicipality: legacyMatch.grievanceMunicipality || legacyMatch.applicantMunicipality || 'الوادي',
-            category: legacyMatch.category,
-            sector: legacyMatch.category || 'عام',
-            details: legacyMatch.details,
-            createdAt: legacyMatch.createdAt,
-            updatedAt: legacyMatch.createdAt,
-            dueDate: new Date(Date.now() + 15 * 86400000).toISOString(),
-            isOverdue: false,
-            specialFlags: [],
-            officialResponse: legacyMatch.officialResponse,
-            citizenActionRequired: legacyMatch.citizenActionRequired,
-            citizenRating: legacyMatch.citizenRating,
-            publicMessages: legacyMatch.publicMessages,
-            timeline: legacyMatch.timeline || [],
-            internalNotes: []
-          };
-        }
-      }
+      // Tracking is intentionally cloud-only and phone-bound. Browser-local
+      // repositories must never be used as an authority for citizen records.
+      const match = await GrievanceService.findByTrackingId(cleaned, cleanedPhone);
 
       if (!match) {
         const fail = SecurityRateLimiter.registerFailure('citizen_track', cleaned);
