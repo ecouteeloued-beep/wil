@@ -1,4 +1,4 @@
--- Require three factors for citizen tracking: tracking number, phone, and a one-time displayed six-digit PIN.
+-- Require three factors for citizen tracking: tracking number, phone, and a six-digit PIN.
 begin;
 
 drop function if exists public.submit_complaint(jsonb);
@@ -18,7 +18,6 @@ declare
   v_municipality text := nullif(trim(p_payload ->> 'municipality'), '');
   v_daira text := nullif(trim(p_payload ->> 'daira'), '');
   v_neighborhood text := nullif(trim(p_payload ->> 'neighborhood'), '');
-  v_email text := nullif(trim(p_payload ->> 'email'), '');
   v_attempt integer := 0;
 begin
   if v_name is null or length(v_name) > 160 then raise exception using errcode = '22023', message = 'invalid citizen name'; end if;
@@ -33,7 +32,7 @@ begin
     v_tracking_id := 'WLY-' || to_char(v_created_at, 'YYYY') || '-' || upper(substr(replace(gen_random_uuid()::text, '-', ''), 1, 12));
     begin
       insert into public.complaints (tracking_id, citizen_name, phone_encrypted, category, municipality, daira, neighborhood, subject, description, status, priority, deadline, pin_hash, created_at, updated_at)
-      values (v_tracking_id, v_name, encode(digest(v_phone, 'sha256'), 'hex'), v_category, v_municipality, coalesce(v_daira, 'الوادي'), v_neighborhood, v_subject, v_description, 'جديد', 'عادي', v_created_at + interval '15 days', encode(digest(v_secret_pin, 'sha256'), 'hex'), v_created_at, v_created_at);
+      values (v_tracking_id, v_name, encode(extensions.digest(v_phone, 'sha256'), 'hex'), v_category, v_municipality, coalesce(v_daira, 'الوادي'), v_neighborhood, v_subject, v_description, 'جديد', 'عادي', v_created_at + interval '15 days', v_secret_pin, v_created_at, v_created_at);
       exit;
     exception when unique_violation then
       if v_attempt >= 5 then raise; end if;
@@ -54,8 +53,8 @@ as $$
   select c.tracking_id, c.citizen_name, c.category, c.municipality, c.daira, c.neighborhood, c.subject, c.description, c.status, c.priority, c.assigned_department, c.deadline, c.official_response, c.timeline, c.created_at, c.updated_at
   from public.complaints c
   where upper(c.tracking_id) = upper(trim(p_tracking_id))
-    and c.phone_encrypted = encode(digest(trim(p_phone), 'sha256'), 'hex')
-    and c.pin_hash = encode(digest(trim(p_secret_pin), 'sha256'), 'hex')
+    and c.phone_encrypted = encode(extensions.digest(trim(p_phone), 'sha256'), 'hex')
+    and (extensions.crypt(trim(p_secret_pin), c.pin_hash) = c.pin_hash or extensions.crypt(encode(extensions.digest(trim(p_secret_pin), 'sha256'), 'hex'), c.pin_hash) = c.pin_hash)
   limit 1;
 $$;
 revoke all on function public.track_complaint(text, text, text) from public;
