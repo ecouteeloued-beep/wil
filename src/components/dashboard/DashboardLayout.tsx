@@ -125,7 +125,7 @@ export const DashboardLayout: React.FC<{ user: SystemUser; onLogout: () => void 
   };
 
   return (
-    <div className={`dashboard-theme ${dashboardTheme === 'dark' ? 'dashboard-dark' : 'dashboard-light'} min-h-screen bg-[#F4F6F8] flex flex-col font-tajawal text-gray-900 selection:bg-[#006233] selection:text-white`} dir="rtl">
+    <div className={`dashboard-theme ${dashboardTheme === 'dark' ? 'dashboard-dark' : 'dashboard-light'} min-h-screen flex flex-col font-tajawal text-gray-900 selection:bg-[#006233] selection:text-white`} dir="rtl">
       
       {/* Top Sovereign Republic Header Ribbon */}
       <div className="bg-[#04190c] text-white px-4 sm:px-6 py-2 border-b border-emerald-900/60 flex flex-wrap items-center justify-between gap-3 text-xs shrink-0 z-40">
@@ -322,7 +322,7 @@ export const DashboardLayout: React.FC<{ user: SystemUser; onLogout: () => void 
         <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
           
           {/* Top Command Bar */}
-          <header className="h-16 bg-white border-b border-gray-200/80 flex items-center justify-between px-4 sm:px-8 shrink-0 sticky top-0 z-30 shadow-xs">
+          <header className="dashboard-commandbar h-16 bg-white border-b border-gray-200/80 flex items-center justify-between px-4 sm:px-8 shrink-0 sticky top-0 z-30 shadow-xs">
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setIsSidebarOpen(true)}
@@ -399,7 +399,7 @@ export const DashboardLayout: React.FC<{ user: SystemUser; onLogout: () => void 
           </header>
 
           {/* Content Stage */}
-          <div className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8">
+          <div className="dashboard-content-stage flex-1 overflow-auto p-4 sm:p-6 lg:p-8">
             <div className="max-w-7xl mx-auto">
               <AnimatePresence mode="wait">
                 <motion.div

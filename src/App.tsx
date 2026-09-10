@@ -17,6 +17,7 @@ const PrivacyPolicy = React.lazy(() => import('./components/PrivacyPolicy').then
 const ProjectVision = React.lazy(() => import('./components/ProjectVision').then(module => ({ default: module.ProjectVision })));
 const DashboardLayout = React.lazy(() => import('./components/dashboard/DashboardLayout').then(module => ({ default: module.DashboardLayout })));
 const AdminLogin = React.lazy(() => import('./components/dashboard/AdminLogin').then(module => ({ default: module.AdminLogin })));
+const ResetPassword = React.lazy(() => import('./components/dashboard/ResetPassword').then(module => ({ default: module.ResetPassword })));
 
 // Loading fallback
 const SectionLoader = () => (
@@ -27,7 +28,7 @@ const SectionLoader = () => (
 
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
-  const [currentView, setCurrentView] = useState<'home' | 'privacy' | 'vision' | 'admin_dashboard'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'privacy' | 'vision' | 'admin_dashboard' | 'reset_password'>('home');
   const [adminUser, setAdminUser] = useState<SystemUser | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [formActiveTab, setFormActiveTab] = useState<'new' | 'track'>('new');
@@ -37,7 +38,7 @@ export default function App() {
     // Admin navigation is discoverable by design; authorization is enforced by Supabase Auth/RLS.
     const pathname = window.location.pathname.toLowerCase();
     if (pathname === '/admin' || pathname.startsWith('/admin/')) {
-      setCurrentView('admin_dashboard');
+      setCurrentView(pathname === '/admin/reset-password' ? 'reset_password' : 'admin_dashboard');
     }
 
     if (!isSupabaseConfigured || !supabase) {
@@ -86,6 +87,10 @@ export default function App() {
     setSelectedCategory(domainTitle as GrievanceCategory);
     handleScrollToForm('new');
   };
+
+  if (currentView === 'reset_password') {
+    return <Suspense fallback={<SectionLoader />}><ResetPassword onDone={() => setCurrentView('admin_dashboard')} /></Suspense>;
+  }
 
   if (currentView === 'admin_dashboard') {
     if (!authChecked) {

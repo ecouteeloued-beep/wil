@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { CATEGORIES, DAIRAS, DAIRAS_MUNICIPALITIES } from '../data';
 import { Municipality, GrievanceCategory, GrievanceSubmission, EnhancedGrievance, AttachmentFile } from '../types';
 import { GrievanceService } from '../services/grievanceService';
-import { sanitizeInput, validateUploadedFile, SecurityRateLimiter } from '../utils/security';
+import { sanitizeInput, validateUploadedFile, SecurityRateLimiter, parseAlgerianNIN } from '../utils/security';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Send, Search, CheckCircle, Copy, Check, FileText, 
@@ -64,6 +64,8 @@ const CATEGORY_ICONS: Record<GrievanceCategory, React.ReactNode> = {
   'الصحة': <HeartPulse className="w-4 h-4 text-rose-600" />,
   'الخدمات الإدارية': <FileBadge2 className="w-4 h-4 text-blue-600" />,
   'التنمية المحلية': <Briefcase className="w-4 h-4 text-blue-600" />,
+  'الفلاحة': <Leaf className="w-4 h-4 text-green-700" />,
+  'الاستثمار': <Briefcase className="w-4 h-4 text-indigo-600" />,
   'العمران': <Building className="w-4 h-4 text-amber-600" />,
   'النقل': <Bus className="w-4 h-4 text-blue-600" />,
   'الحالة المدنية': <FileBadge2 className="w-4 h-4 text-red-600" />,
@@ -158,8 +160,9 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
     const cleanDetails = sanitizeInput(details, 3000);
 
     // Strict Validations
-    if (!cleanNin || !/^\d{18}$/.test(cleanNin)) {
-      return setFormError('رقم التعريف الوطني غير صالح (يجب أن يتكون من 18 رقماً)');
+    const ninValidation = parseAlgerianNIN(cleanNin);
+    if (!ninValidation.valid) {
+      return setFormError(ninValidation.error || 'رقم التعريف الوطني غير صالح');
     }
     if (!cleanFullName) {
       return setFormError('يرجى إدخال الاسم واللقب بالكامل');
@@ -542,6 +545,7 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
                                 dir="ltr"
                                 className={`${inputBaseClass} font-mono text-right placeholder:text-right placeholder:font-tajawal`}
                               />
+                              <p className="text-[10px] text-gray-500 mt-1 leading-5">18 رقماً: أول رقميْن للجنس ونوع مكان الميلاد، ثم سنة الميلاد (3)، رمز البلدية (4)، رقم عقد الميلاد (5)، الرقم التسلسلي (2)، ومفتاح المراقبة (2).</p>
                             </div>
 
                             <div>
