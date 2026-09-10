@@ -176,7 +176,7 @@ export const SupabaseService = {
    */
   fetchComplaints: async (): Promise<EnhancedGrievance[]> => {
     if (!isSupabaseConfigured || !supabase) {
-      return [];
+      throw new Error('Supabase غير مهيأ.');
     }
 
     try {
@@ -187,11 +187,11 @@ export const SupabaseService = {
 
       if (error) {
         console.warn('⚠️ Supabase fetch complaints error:', error.message);
-        return [];
+        throw new Error(error.message);
       }
 
       if (!data || !Array.isArray(data)) {
-        return [];
+        throw new Error('استجابة قاعدة البيانات غير صالحة.');
       }
 
       return data.map((row: any): EnhancedGrievance => {
@@ -246,7 +246,7 @@ export const SupabaseService = {
       });
     } catch (err: any) {
       console.warn('⚠️ Supabase fetch failed:', err?.message || err);
-      return [];
+      throw err instanceof Error ? err : new Error(err?.message || 'تعذر جلب البيانات من Supabase.');
     }
   },
 

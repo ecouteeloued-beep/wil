@@ -441,30 +441,30 @@ export const AdminService = {
       }
 
       const remoteComplaints = await SupabaseService.fetchComplaints();
-      if (!remoteComplaints || remoteComplaints.length === 0) {
-        // Supabase is authoritative in production: never resurrect deleted local records.
-        localStorage.setItem(GRIEVANCES_STORAGE_KEY, JSON.stringify([]));
-        localStorage.setItem('wilaya_eloued_grievances', JSON.stringify([]));
-        return { total: 0, newAdded: 0 };
-      }
-
       const grievances = AdminService.getAllGrievances();
-      const existingIds = new Set(grievances.map(g => (g.trackingNumber || g.id).toUpperCase()));
+      const localById = new Map(
+        grievances.map(item => [(item.trackingNumber || item.id).trim().toUpperCase(), item])
+      );
+      const remoteIds = new Set<string>();
       let added = 0;
-
-      for (const remote of remoteComplaints) {
-        const remoteId = (remote.trackingNumber || remote.id).toUpperCase();
-        if (!existingIds.has(remoteId)) {
-          grievances.unshift(remote);
-          existingIds.add(remoteId);
-          added++;
-        }
-      }
-
-      if (added > 0) {
-        localStorage.setItem(GRIEVANCES_STORAGE_KEY, JSON.stringify(grievances));
+      const merged = remoteComplaints.map(remote => {
+        const remoteId = (remote.trackingNumber || remote.id).trim().toUpperCase();
+        remoteIds.add(remoteId);
+        if (!localById.has(remoteId)) added++;
+        return remote;
+      });
+      // Keep local records not yet uploaded. Failed fetches throw before this point.
+      const localOnly = grievances.filter(item => {
+        const id = (item.trackingNumber || item.id).trim().toUpperCase();
+        return !remoteIds.has(id);
+      });
+      const next = [...merged, ...localOnly];
+      localStorage.setItem(GRIEVANCES_STORAGE_KEY, JSON.stringify(next));
+      if (remoteComplaints.length > 0 || localOnly.length > 0) {
         if (typeof window !== 'undefined') {
-          window.dispatchEvent(new CustomEvent('complaints_updated', { detail: { count: added } }));
+          window.dispatchEvent(new CustomEvent('complaints_updated', {
+            detail: { count: added, total: next.length }
+          }));
         }
       }
 
