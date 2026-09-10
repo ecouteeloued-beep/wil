@@ -148,6 +148,29 @@ export const SupabaseService = {
     }
   },
 
+  updateComplaint: async (complaint: EnhancedGrievance): Promise<{ success: boolean; error?: string }> => {
+    if (!isSupabaseConfigured || !supabase) return { success: false, error: 'Supabase غير مهيأ.' };
+    const trackingId = (complaint.trackingNumber || complaint.id).trim().toUpperCase();
+    const { error } = await supabase
+      .from('complaints')
+      .update({
+        status: complaint.status,
+        priority: complaint.priority,
+        assigned_department: complaint.assignedDepartment || null,
+        assigned_user_id: complaint.assignedToId || null,
+        official_response: complaint.officialResponse || null,
+        timeline: complaint.timeline || [],
+        attachments: complaint.attachments || [],
+        updated_at: new Date().toISOString(),
+      })
+      .eq('tracking_id', trackingId);
+    if (error) {
+      console.warn('⚠️ Complaint cloud update failed:', error.message);
+      return { success: false, error: error.message };
+    }
+    return { success: true };
+  },
+
   /**
    * Fetch all complaints from Supabase and map them to EnhancedGrievance
    */

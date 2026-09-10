@@ -604,6 +604,9 @@ export const AdminService = {
     };
     grievances[idx] = updated;
     localStorage.setItem(GRIEVANCES_STORAGE_KEY, JSON.stringify(grievances));
+    if (SupabaseService.isConfigured()) {
+      void SupabaseService.updateComplaint(updated);
+    }
 
     if (actor) {
       AdminService.logAudit({
