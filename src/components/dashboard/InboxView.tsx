@@ -188,8 +188,14 @@ export const InboxView: React.FC<InboxViewProps> = ({
   const [lastSyncTime, setLastSyncTime] = useState<string>('');
 
   // Load grievances on mount and whenever changed
-  const loadData = () => {
-    const list = AdminService.getGrievances();
+  const loadData = async () => {
+    const list = SupabaseService.isConfigured()
+      ? await SupabaseService.fetchComplaints()
+      : AdminService.getGrievances();
+    if (SupabaseService.isConfigured()) {
+      localStorage.setItem('wilaya_eloued_admin_grievances', JSON.stringify(list));
+      localStorage.setItem('wilaya_eloued_grievances', JSON.stringify([]));
+    }
     setGrievances(list);
     // If ticket is currently selected, refresh its reference
     if (selectedTicket) {

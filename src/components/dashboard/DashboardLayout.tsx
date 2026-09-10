@@ -134,7 +134,7 @@ export const DashboardLayout: React.FC<{ user: SystemUser; onLogout: () => void 
   ];
 
   const canAccess = (item: { roles?: string[]; permissions?: string[] }) => {
-    if (user.role === 'super_admin') return true;
+    if (user.role === 'super_admin' || user.role === 'wali') return true;
     if (item.roles && !item.roles.includes(user.role)) return false;
     if (!item.permissions || item.permissions.length === 0) return true;
     return item.permissions.some(permission => user.permissions?.includes(permission));
