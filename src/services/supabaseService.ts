@@ -130,6 +130,7 @@ export const SupabaseService = {
           subject: complaint.subject || 'انشغال إداري',
           description: complaint.details || '',
           meeting_request: complaint.meetingRequest || null,
+          attachments: Array.isArray(complaint.attachments) ? complaint.attachments : [],
         },
       });
 
