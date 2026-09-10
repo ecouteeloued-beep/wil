@@ -57,7 +57,7 @@ export const SupabaseService = {
     const roleTitles: Record<string, string> = {
       wali: 'والي الولاية',
       chef_cabinet: 'الأمين العام للولاية',
-      head_department: 'رئيس الديوان',
+      head_department: 'رئيس الديوان — تابع لديوان الوالي',
       supervisor: 'رئيس خلية الإصغاء والتكفل',
       employee: 'الموظف المكلف',
       super_admin: 'المشرف التقني العام',
@@ -128,6 +128,7 @@ export const SupabaseService = {
           neighborhood: complaint.applicantNeighborhood || null,
           subject: complaint.subject || 'انشغال إداري',
           description: complaint.details || '',
+          meeting_request: complaint.meetingRequest || null,
         },
       });
 
@@ -156,7 +157,7 @@ export const SupabaseService = {
     try {
       const { data, error } = await supabase
         .from('complaints')
-        .select('id,tracking_id,citizen_name,category,municipality,daira,neighborhood,subject,description,status,priority,assigned_department,assigned_user_id,deadline,official_response,timeline,created_at,updated_at,attachments')
+        .select('id,tracking_id,citizen_name,category,municipality,daira,neighborhood,subject,description,meeting_request,status,priority,assigned_department,assigned_user_id,deadline,official_response,timeline,created_at,updated_at,attachments')
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -191,6 +192,7 @@ export const SupabaseService = {
           applicantMunicipality: row.municipality || 'الوادي',
           applicantNeighborhood: 'حي سكني',
           subject: row.subject || 'انشغال بدون عنوان',
+          meetingRequest: row.meeting_request || undefined,
           grievanceDaira: row.municipality || 'الوادي',
           grievanceMunicipality: row.municipality || 'الوادي',
           category: (row.category as any) || 'أخرى',
@@ -255,6 +257,7 @@ export const SupabaseService = {
         applicantMunicipality: row.municipality || 'الوادي',
         applicantNeighborhood: 'حي سكني',
         subject: row.subject || 'انشغال',
+        meetingRequest: row.meeting_request || undefined,
         grievanceDaira: row.municipality || 'الوادي',
         grievanceMunicipality: row.municipality || 'الوادي',
         category: row.category || 'أخرى',
@@ -315,6 +318,7 @@ export const SupabaseService = {
                 applicantMunicipality: row.municipality || 'الوادي',
                 applicantNeighborhood: 'حي سكني',
                 subject: row.subject || 'انشغال جديد',
+                meetingRequest: row.meeting_request || undefined,
                 grievanceDaira: row.municipality || 'الوادي',
                 grievanceMunicipality: row.municipality || 'الوادي',
                 category: (row.category as any) || 'أخرى',

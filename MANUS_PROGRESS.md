@@ -72,3 +72,12 @@ The branch was pushed to GitHub for review. It was not merged into `main` and wa
 ## Final status
 
 **Code corrected on branch and locally verified. Not deployed. Production deployment is blocked for safety and would be unsafe until the backup, staging, migration, RLS, Storage, and Vercel gates are satisfied.**
+
+## 2026-09-10 feature update
+
+- Added an optional citizen **meeting request** addressed to the Wali, the Secretary-General, or the Chief of Cabinet.
+- Added server/client mapping for `meeting_request`, including a new additive migration and display in the citizen confirmation and administrative inbox.
+- Renamed the role-management presentation from district chief to **Chief of Cabinet — attached to the Wali Office** while retaining the stable internal role key `head_department` for compatibility.
+- Redesigned the admin login surface in the dark-green official visual style from the supplied reference without exposing demo credentials or weakening Supabase Auth.
+- Local verification passed again: `npm run lint`, `npm run build`, and `git diff --check`.
+- The feature migration has not been executed on Production; the Vercel project is still not linked to this repository.

@@ -12,6 +12,7 @@ export const GrievanceService = {
     applicantMunicipality: string;
     applicantNeighborhood: string;
     subject: string;
+    meetingRequest?: 'والي الولاية' | 'رئيس الديوان' | 'الأمين العام للولاية';
     grievanceDaira: string;
     grievanceMunicipality: string;
     category: any;
@@ -45,6 +46,7 @@ export const GrievanceService = {
       applicantMunicipality: data.applicantMunicipality,
       applicantNeighborhood: data.applicantNeighborhood,
       subject: data.subject,
+      meetingRequest: data.meetingRequest,
       grievanceDaira: data.grievanceDaira,
       grievanceMunicipality: data.grievanceMunicipality,
       category: data.category,
