@@ -18,11 +18,10 @@ import { DAIRAS, DAIRAS_MUNICIPALITIES } from '../data';
 interface HeaderProps {
   onNavigateToForm: (tab?: 'new' | 'track') => void;
   onOpenWelcome: () => void;
-  onAdminClick?: () => void;
   onVisionClick?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onNavigateToForm, onOpenWelcome, onAdminClick, onVisionClick }) => {
+export const Header: React.FC<HeaderProps> = ({ onNavigateToForm, onOpenWelcome, onVisionClick }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showMunicipalitiesModal, setShowMunicipalitiesModal] = useState(false);
   const [activeLanguage, setActiveLanguage] = useState<'ar' | 'tif' | 'fr'>('ar');

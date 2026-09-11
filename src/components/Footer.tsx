@@ -4,10 +4,9 @@ import { motion } from 'motion/react';
 
 interface FooterProps {
   onPrivacyClick?: () => void;
-  onSecretAdminTrigger?: () => void;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onPrivacyClick, onSecretAdminTrigger }) => {
+export const Footer: React.FC<FooterProps> = ({ onPrivacyClick }) => {
   return (
     <footer className="bg-[#111827] text-white mt-16 pt-12 pb-6 border-t-4 border-[#D21034]">
       <div className="max-w-xl md:max-w-5xl mx-auto px-4">
@@ -17,11 +16,8 @@ export const Footer: React.FC<FooterProps> = ({ onPrivacyClick, onSecretAdminTri
           {/* Brand/Identity Column */}
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-3">
-              <div 
-                onClick={() => {
-                  if (onSecretAdminTrigger) onSecretAdminTrigger();
-                }}
-                className="w-12 h-12 shrink-0 bg-white rounded-full flex items-center justify-center p-0.5 shadow-sm overflow-hidden border border-gray-200 cursor-pointer"
+              <div
+                className="w-12 h-12 shrink-0 bg-white rounded-full flex items-center justify-center p-0.5 shadow-sm overflow-hidden border border-gray-200"
                 title="بوابة ولاية الوادي الرسمية"
               >
                 <img 
@@ -83,11 +79,7 @@ export const Footer: React.FC<FooterProps> = ({ onPrivacyClick, onSecretAdminTri
             <ShieldCheck className="w-4 h-4 text-[#006233]" />
             <span className="underline underline-offset-4 decoration-gray-600">سياسة الخصوصية وحماية المعطيات الشخصية</span>
           </button>
-          <p 
-            onDoubleClick={() => { if (onSecretAdminTrigger) onSecretAdminTrigger(); }}
-            title="انقر مرتين للوصول الإداري الآمن"
-            className="cursor-default select-none"
-          >
+          <p>
             جميع الحقوق محفوظة © ولاية الوادي 2026
           </p>
         </div>
