@@ -2,6 +2,8 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const fallbackOrigins = new Set([
+  "https://ecout-eloued.vercel.app",
+  "https://admin-ecout-eloued.vercel.app",
   "https://wilaya-eloued.dz",
   "https://www.wilaya-eloued.dz",
   "https://wil-seven-tan.vercel.app",
