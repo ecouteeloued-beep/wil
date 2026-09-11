@@ -201,33 +201,15 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
     setIsSubmitting(true);
 
     try {
-      // Process any uploaded attachments to Data URLs for instant preview/reading
-      const processedAttachments: AttachmentFile[] = [];
-      if (files && files.length > 0) {
-        for (let i = 0; i < files.length; i++) {
-          const file = files[i];
-          try {
-            const base64 = await new Promise<string>((resolve) => {
-              const reader = new FileReader();
-              reader.onloadend = () => resolve((reader.result as string) || '');
-              reader.onerror = () => resolve('');
-              reader.readAsDataURL(file);
-            });
-            processedAttachments.push({
-              id: `att-${Date.now()}-${i}`,
-              name: file.name,
-              size: `${(file.size / (1024 * 1024)).toFixed(2)} MB`,
-              type: file.type || 'application/octet-stream',
-              uploadedAt: new Date().toISOString().split('T')[0],
-              dataUrl: base64,
-              url: base64
-            });
-          } catch {
-            // fallback
-          }
-        }
-      }
-
+      // Never serialize citizen files as Base64. The production upload path stores
+      // only validated object metadata; the server rejects data/blob URLs.
+      const processedAttachments: AttachmentFile[] = files.map((file, index) => ({
+        id: `pending-${index}`,
+        name: file.name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(-120),
+        size: `${(file.size / (1024 * 1024)).toFixed(2)} MB`,
+        type: file.type || 'application/octet-stream',
+        uploadedAt: new Date().toISOString().split('T')[0],
+      }));
       const newSubmission = await GrievanceService.save({
         nin: cleanNin,
         fullName: cleanFullName,

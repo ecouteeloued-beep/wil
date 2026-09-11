@@ -97,7 +97,7 @@ export const CitizenTrackingDossier: React.FC<CitizenTrackingDossierProps> = ({ 
                 <div className="flex items-center gap-2 text-sm font-bold text-emerald-950 mb-2"><Paperclip className="w-4 h-4" />ملفات مرفقة بالرد الرسمي</div>
                 <div className="space-y-2">
                   {complaint.officialResponse.attachments.map(file => (
-                    <a key={file.id} href={file.url || file.dataUrl || '#'} download={file.name} target="_blank" rel="noreferrer" className="flex items-center justify-between gap-3 rounded-lg bg-white border border-emerald-200 px-3 py-2 text-xs text-gray-700 hover:bg-emerald-100">
+                    <a key={file.id} href={file.url || '#'} download={file.name} target="_blank" rel="noreferrer" className="flex items-center justify-between gap-3 rounded-lg bg-white border border-emerald-200 px-3 py-2 text-xs text-gray-700 hover:bg-emerald-100">
                       <span className="truncate">{file.name}</span><Download className="w-4 h-4 text-[#006233] shrink-0" />
                     </a>
                   ))}

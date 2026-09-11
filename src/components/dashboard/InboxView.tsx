@@ -166,8 +166,6 @@ export const InboxView: React.FC<InboxViewProps> = ({
       ? await SupabaseService.fetchComplaints()
       : AdminService.getGrievances();
     if (SupabaseService.isConfigured()) {
-      localStorage.setItem('wilaya_eloued_admin_grievances', JSON.stringify(list));
-      localStorage.setItem('wilaya_eloued_grievances', JSON.stringify([]));
     }
     setGrievances(list);
     // If ticket is currently selected, refresh its reference
@@ -701,7 +699,7 @@ export const InboxView: React.FC<InboxViewProps> = ({
   };
 
   const handleOfficialReplyFiles = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
+    const files = Array.from(event.target.files || []) as File[];
     if (files.length === 0) return;
     const available = Math.max(0, 5 - officialReplyAttachments.length);
     if (files.length > available) {
@@ -712,21 +710,13 @@ export const InboxView: React.FC<InboxViewProps> = ({
         addToast?.({ type: 'warning', title: 'الملف كبير', message: `الملف ${file.name} يتجاوز الحد المسموح 8 ميغابايت.` });
         return;
       }
-      const reader = new FileReader();
-      reader.onload = () => {
-        const dataUrl = typeof reader.result === 'string' ? reader.result : undefined;
-        if (!dataUrl) return;
-        setOfficialReplyAttachments(previous => [...previous, {
-          id: `official-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-          name: file.name,
-          size: `${Math.ceil(file.size / 1024)} KB`,
-          type: file.type || 'application/octet-stream',
-          uploadedAt: new Date().toISOString(),
-          dataUrl,
-          url: dataUrl
-        }]);
-      };
-      reader.readAsDataURL(file);
+      setOfficialReplyAttachments(previous => [...previous, {
+        id: `official-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        name: file.name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(-120),
+        size: `${Math.ceil(file.size / 1024)} KB`,
+        type: file.type || 'application/octet-stream',
+        uploadedAt: new Date().toISOString(),
+      }]);
     });
     event.target.value = '';
   };

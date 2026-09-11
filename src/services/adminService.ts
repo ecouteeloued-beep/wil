@@ -118,6 +118,7 @@ export const SEED_NOTIFICATIONS: NotificationItem[] = [];
 export const AdminService = {
   // --- USERS & SESSION ---
   getUsers: (): SystemUser[] => {
+    if (SupabaseService.isConfigured()) return [];
     try {
       const stored = localStorage.getItem(USERS_STORAGE_KEY);
       if (stored) {
@@ -301,76 +302,12 @@ export const AdminService = {
   },
 
   // --- GRIEVANCES & RBAC FILTERING ---
-  getAllGrievances: (): EnhancedGrievance[] => {
-    try {
-      // 1. Get admin grievances
-      let grievances: EnhancedGrievance[] = [];
-      const stored = localStorage.getItem(GRIEVANCES_STORAGE_KEY);
-      if (stored) {
-        grievances = JSON.parse(stored);
-      } else {
-        grievances = [];
-        localStorage.setItem(GRIEVANCES_STORAGE_KEY, JSON.stringify(grievances));
-      }
-
-      // 2. Synchronize with citizen submissions from `wilaya_eloued_grievances`
-      const citizenRaw = localStorage.getItem('wilaya_eloued_grievances');
-      if (citizenRaw) {
-        const citizenSubmissions = JSON.parse(citizenRaw);
-        let hasNew = false;
-        for (const sub of citizenSubmissions) {
-          const exists = grievances.some(g => g.id === sub.id);
-          if (!exists) {
-            const newEnhanced: EnhancedGrievance = {
-              id: sub.id,
-              nin: sub.nin || '',
-              fullName: sub.fullName || 'مواطن',
-              phone: sub.phone || '',
-              applicantDaira: sub.applicantDaira || 'الوادي',
-              applicantMunicipality: sub.applicantMunicipality || 'الوادي',
-              applicantNeighborhood: sub.applicantNeighborhood || 'حي سكني',
-              subject: sub.subject || 'انشغال إداري',
-              grievanceDaira: sub.grievanceDaira || sub.applicantDaira || 'الوادي',
-              grievanceMunicipality: sub.grievanceMunicipality || sub.applicantMunicipality || 'الوادي',
-              category: sub.category || 'أخرى',
-              sector: 'الشؤون الإدارية العامة',
-              details: sub.details || '',
-              createdAt: sub.createdAt || new Date().toISOString(),
-              updatedAt: sub.createdAt || new Date().toISOString(),
-              status: 'جديد',
-              priority: 'متوسط',
-              specialFlags: [],
-              dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-              isOverdue: false,
-              timeline: [
-                {
-                  id: `t-${Date.now()}`,
-                  date: new Date().toISOString().split('T')[0],
-                  time: new Date().toLocaleTimeString('ar-DZ', { hour: '2-digit', minute: '2-digit' }),
-                  author: sub.fullName || 'مواطن',
-                  authorRole: 'مواطن',
-                  action: 'تم تسجيل الانشغال عبر البوابة الإلكترونية'
-                }
-              ],
-              internalNotes: [],
-              attachments: []
-            };
-            grievances.unshift(newEnhanced);
-            hasNew = true;
-          }
-        }
-        if (hasNew) {
-          localStorage.setItem(GRIEVANCES_STORAGE_KEY, JSON.stringify(grievances));
-        }
-      }
-
-      return grievances;
-    } catch {
-      return [];
-    }
-  },
+  // Production complaints are loaded only through SupabaseService RPCs.
+  // This synchronous legacy accessor intentionally returns no local data.
+  getAllGrievances: (): EnhancedGrievance[] => [],
 
   addGrievanceDirectly: (newGrievance: EnhancedGrievance): EnhancedGrievance => {
+    if (SupabaseService.isConfigured()) return newGrievance;
     try {
       const grievances = AdminService.getAllGrievances();
       const cleanId = newGrievance.id.trim().toUpperCase();
@@ -476,6 +413,7 @@ export const AdminService = {
   },
 
   getGrievances: (): EnhancedGrievance[] => {
+    if (SupabaseService.isConfigured()) return [];
     return AdminService.getAllGrievances();
   },
 
@@ -1235,6 +1173,7 @@ export const AdminService = {
 
   // --- AUDIT LOGS ---
   getAuditLogs: (limit = 100): AuditLogEntry[] => {
+    if (SupabaseService.isConfigured()) return [];
     try {
       const stored = localStorage.getItem(AUDIT_LOGS_STORAGE_KEY);
       if (stored) return JSON.parse(stored).slice(0, limit);

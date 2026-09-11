@@ -56,34 +56,17 @@ export interface IComplaintRepository {
   resetToDefaults(): Promise<EnhancedGrievance[]>;
 }
 
-// Client-Side Clean Repository backed by LocalStorage starting empty for live demo
+// Volatile fallback only; Supabase is the production source of truth.
 export class MockComplaintRepository implements IComplaintRepository {
+  private volatileData: EnhancedGrievance[] = [];
+
   private load(): EnhancedGrievance[] {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) {
-          return parsed;
-        }
-      }
-    } catch (e) {
-      console.warn('Failed to parse complaints from storage:', e);
-    }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify([]));
-    return [];
+    return [...this.volatileData];
   }
 
   private save(data: EnhancedGrievance[]): void {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-      // Dispatch custom window event so open views react immediately
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('complaints_updated'));
-      }
-    } catch (e) {
-      console.error('Failed to save to local storage:', e);
-    }
+    this.volatileData = [...data];
+    if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('complaints_updated'));
   }
 
   async getAll(): Promise<EnhancedGrievance[]> {
@@ -142,10 +125,8 @@ export class MockComplaintRepository implements IComplaintRepository {
   }
 
   async resetToDefaults(): Promise<EnhancedGrievance[]> {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify([]));
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('complaints_updated'));
-    }
+    this.volatileData = [];
+    if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('complaints_updated'));
     return [];
   }
 }
