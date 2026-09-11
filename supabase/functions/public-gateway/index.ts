@@ -78,9 +78,9 @@ Deno.serve(async (request: Request) => {
 
   const payload = body?.payload;
   if (action === "submit_complaint") {
-    if (!payload || typeof payload !== "object" || !validText(payload.full_name, 160) || !validPhone(payload.phone) ||
+    if (!payload || typeof payload !== "object" || !validText(payload.first_name, 80) || !validText(payload.last_name, 80) || !validPhone(payload.phone) ||
       !validText(payload.subject, 240) || !validText(payload.description, 10000) || !validText(payload.category, 120) ||
-      !validText(payload.municipality, 120) || !validText(payload.daira, 120)) {
+      !validText(payload.residence_daira, 120) || !validText(payload.residence_municipality, 120) || !validText(payload.full_address, 300) || !/^\d{4}-\d{2}-\d{2}$/.test(String(payload.birth_date || '')) || !['ذكر', 'أنثى'].includes(payload.gender)) {
       return json({ error: "invalid_complaint_payload" }, 400, origin);
     }
     if (payload.attachments !== undefined) {

@@ -731,11 +731,10 @@ export const InboxView: React.FC<InboxViewProps> = ({
       return;
     }
 
-    const headers = ['رقم الملف', 'الرقم التعريفي (NIN)', 'المواطن', 'الهاتف', 'البلدية', 'القطاع', 'الموضوع', 'الحالة', 'درجة الاستعجال', 'تاريخ الإيداع', 'المصلحة المعنية'];
+    const headers = ['رقم الملف', 'المواطن', 'الهاتف', 'البلدية', 'القطاع', 'الموضوع', 'الحالة', 'درجة الاستعجال', 'تاريخ الإيداع', 'المصلحة المعنية'];
     const rows = filteredGrievances.map(g => [
       g.id,
-      g.nin || '',
-      `"${g.fullName || ''}"`,
+            `"${g.fullName || ''}"`,
       g.phone || '',
       g.grievanceMunicipality || g.applicantMunicipality || '',
       g.category || '',
@@ -1445,7 +1444,7 @@ export const InboxView: React.FC<InboxViewProps> = ({
                     </div>
                     <div>
                       <h4 className="font-changa font-bold text-base text-gray-900">{selectedTicket.fullName}</h4>
-                      <p className="text-xs text-gray-500 font-mono">الرقم التعريفي (NIN): {selectedTicket.nin || 'غير مسجل'}</p>
+                      <p className="text-xs text-gray-500">تاريخ الميلاد: {selectedTicket.birthDate || 'غير مسجل'} — الجنس: {selectedTicket.gender || 'غير مسجل'}</p>
                     </div>
                   </div>
 

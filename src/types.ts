@@ -40,8 +40,11 @@ export type GrievanceCategory =
 export interface GrievanceSubmission {
   id: string;
   secretPin?: string; // الرمز السري الخاص بالملف لحماية خصوصية المواطن
-  nin?: string;
   fullName: string;
+  firstName?: string;
+  lastName?: string;
+  birthDate?: string;
+  gender?: 'ذكر' | 'أنثى' | string;
   phone: string;
   email?: string;
   applicantDaira: string;
@@ -265,8 +268,11 @@ export interface EnhancedGrievance {
   trackingNumber?: string; // alias for id
   secretPin?: string; // الرمز السري الخاص بالملف لحماية خصوصية المواطن
   statusCode?: ComplaintStatusCode;
-  nin?: string;
   fullName: string;
+  firstName?: string;
+  lastName?: string;
+  birthDate?: string;
+  gender?: 'ذكر' | 'أنثى' | string;
   phone: string;
   email?: string;
   applicantDaira: string;

@@ -76,7 +76,6 @@ export class ComplaintService {
    */
   static async create(data: {
     fullName: string;
-    nin?: string;
     phone: string;
     applicantDaira: string;
     applicantMunicipality: string;
@@ -105,7 +104,6 @@ export class ComplaintService {
       status: 'جديد',
       priority: 'عادي',
       fullName: data.fullName,
-      nin: data.nin,
       phone: data.phone,
       applicantDaira: data.applicantDaira,
       applicantMunicipality: data.applicantMunicipality,
