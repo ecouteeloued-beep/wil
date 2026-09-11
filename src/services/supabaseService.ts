@@ -5,9 +5,7 @@ export interface SupabaseComplaintRow {
   id?: string;
   tracking_id: string;
   citizen_name: string;
-  national_id_encrypted?: string;
   phone_encrypted?: string;
-  citizen_nin?: string;
   citizen_phone?: string;
   category: string;
   municipality: string;
@@ -123,14 +121,16 @@ export const SupabaseService = {
       const trackingId = (complaint.trackingNumber || complaint.id).trim().toUpperCase();
       
       const { data, error } = await SupabaseService.invokePublicGateway('submit_complaint', {
-          full_name: complaint.fullName || 'مواطن',
-          nin: complaint.nin || null,
+          first_name: complaint.firstName || complaint.fullName.split(/\s+/)[0] || 'مواطن',
+          last_name: complaint.lastName || complaint.fullName.split(/\s+/).slice(1).join(' '),
+          birth_date: complaint.birthDate || null,
+          gender: complaint.gender || null,
           phone: complaint.phone,
           email: complaint.email || null,
           category: complaint.category || 'أخرى',
-          municipality: complaint.grievanceMunicipality || complaint.applicantMunicipality || 'الوادي',
-          daira: complaint.grievanceDaira || complaint.applicantDaira || 'الوادي',
-          neighborhood: complaint.applicantNeighborhood || null,
+          residence_daira: complaint.applicantDaira || 'الوادي',
+          residence_municipality: complaint.applicantMunicipality || 'الوادي',
+          full_address: complaint.applicantNeighborhood || '',
           subject: complaint.subject || 'انشغال إداري',
           description: complaint.details || '',
           meeting_request: complaint.meetingRequest || null,
@@ -204,8 +204,7 @@ export const SupabaseService = {
           trackingNumber: trackingId,
           secretPin: undefined,
           statusCode,
-          nin: undefined,
-          fullName: row.citizen_name || 'مواطن',
+            fullName: row.citizen_name || 'مواطن',
           phone: '',
           email: '',
           applicantDaira: row.municipality || 'الوادي',
@@ -263,7 +262,6 @@ export const SupabaseService = {
         trackingNumber: row.tracking_id || row.id,
         secretPin: undefined,
         fullName: row.citizen_name || 'مواطن',
-        nin: undefined,
         phone: '',
         applicantDaira: row.municipality || 'الوادي',
         applicantMunicipality: row.municipality || 'الوادي',

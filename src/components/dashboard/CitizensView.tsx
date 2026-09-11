@@ -35,7 +35,7 @@ export const CitizensView: React.FC<CitizensViewProps> = ({ user, addToast }) =>
       const grievances = await SupabaseService.fetchComplaints();
       const grouped = new Map<string, any>();
       grievances.forEach((item: EnhancedGrievance) => {
-        const key = `${item.nin || item.phone || item.fullName}|${item.grievanceMunicipality || item.applicantMunicipality}`;
+        const key = `${item.phone || item.fullName}|${item.grievanceMunicipality || item.applicantMunicipality}`;
         const current = grouped.get(key);
         if (current) {
           current.filesCount += 1;
@@ -44,8 +44,9 @@ export const CitizensView: React.FC<CitizensViewProps> = ({ user, addToast }) =>
           if (new Date(item.createdAt) > new Date(current.lastActivity)) current.lastActivity = item.createdAt;
         } else {
           grouped.set(key, {
-            id: item.nin || item.phone || item.id,
-            nin: item.nin || 'غير متوفر',
+            id: item.phone || item.id,
+            birthDate: item.birthDate || 'غير مسجل',
+            gender: item.gender || 'غير مسجل',
             fullName: item.fullName || 'مواطن بدون اسم',
             phone: item.phone || 'غير متوفر',
             municipality: item.grievanceMunicipality || item.applicantMunicipality || 'الوادي',
@@ -72,11 +73,11 @@ export const CitizensView: React.FC<CitizensViewProps> = ({ user, addToast }) =>
       if (filterMunicipality && c.municipality !== filterMunicipality) return false;
       if (searchTerm.trim()) {
         const q = searchTerm.toLowerCase();
-        const matchNin = c.nin.includes(q);
+        const matchIdentity = `${c.birthDate} ${c.gender}`.toLowerCase().includes(q);
         const matchName = c.fullName.toLowerCase().includes(q);
         const matchPhone = c.phone.includes(q);
         const matchMuni = c.municipality.toLowerCase().includes(q);
-        if (!matchNin && !matchName && !matchPhone && !matchMuni) return false;
+        if (!matchIdentity && !matchName && !matchPhone && !matchMuni) return false;
       }
       return true;
     });
@@ -237,7 +238,7 @@ export const CitizensView: React.FC<CitizensViewProps> = ({ user, addToast }) =>
                 <Search className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input 
                   type="text" 
-                  placeholder="البحث برقم التعريف الوطني (NIN)، الاسم، أو رقم الهاتف..." 
+                  placeholder="البحث بالاسم أو رقم الهاتف..." 
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-4 pr-10 py-2.5 rounded-xl border border-gray-200 text-xs font-tajawal focus:border-[#006233] outline-none shadow-2xs bg-white"
@@ -252,7 +253,7 @@ export const CitizensView: React.FC<CitizensViewProps> = ({ user, addToast }) =>
               <table className="w-full text-right border-collapse">
                 <thead className="bg-gray-50 text-gray-500 text-xs uppercase border-b border-gray-200">
                   <tr>
-                    <th className="px-6 py-4 font-bold">رقم التعريف الوطني (NIN)</th>
+                    <th className="px-6 py-4 font-bold">الاسم واللقب</th>
                     <th className="px-6 py-4 font-bold">المواطن</th>
                     <th className="px-6 py-4 font-bold">معلومات الاتصال</th>
                     <th className="px-6 py-4 font-bold">البلدية</th>
@@ -270,7 +271,7 @@ export const CitizensView: React.FC<CitizensViewProps> = ({ user, addToast }) =>
                     >
                       <td className="px-6 py-4">
                         <span className="font-mono font-bold text-gray-900 bg-gray-100 px-2.5 py-1 rounded-md">
-                          {citizen.nin}
+                          {citizen.fullName}
                         </span>
                       </td>
 
@@ -400,8 +401,8 @@ export const CitizensView: React.FC<CitizensViewProps> = ({ user, addToast }) =>
 
                 <div className="space-y-3 pt-3 border-t border-gray-100 text-xs">
                   <div className="flex justify-between py-1">
-                    <span className="text-gray-500 flex items-center gap-1.5"><Hash className="w-3.5 h-3.5 text-gray-400" /> الرقم التعريفي (NIN):</span>
-                    <span className="font-mono font-bold text-gray-900">{selectedCitizen.nin}</span>
+                    <span className="text-gray-500">تاريخ الميلاد والجنس:</span>
+                    <span className="font-bold text-gray-900">{selectedCitizen.birthDate || 'غير مسجل'} — {selectedCitizen.gender || 'غير مسجل'}</span>
                   </div>
                   <div className="flex justify-between py-1">
                     <span className="text-gray-500 flex items-center gap-1.5"><Phone className="w-3.5 h-3.5 text-gray-400" /> رقم الهاتف:</span>

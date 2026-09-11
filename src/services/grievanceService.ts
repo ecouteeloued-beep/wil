@@ -4,8 +4,11 @@ import { SupabaseService } from './supabaseService';
 
 export const GrievanceService = {
   save: async (data: {
-    nin?: string;
     fullName: string;
+    firstName?: string;
+    lastName?: string;
+    birthDate?: string;
+    gender?: string;
     phone: string;
     email?: string;
     applicantDaira: string;
@@ -37,8 +40,10 @@ export const GrievanceService = {
       status: 'جديد',
       priority: 'عادي',
       fullName: data.fullName,
-      // The server stores a hashed copy for protection and a staff-only display field.
-      nin: data.nin,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      birthDate: data.birthDate,
+      gender: data.gender,
       phone: data.phone,
       email: data.email || '',
       applicantDaira: data.applicantDaira,

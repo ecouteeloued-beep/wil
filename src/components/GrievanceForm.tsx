@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { CATEGORIES, DAIRAS, DAIRAS_MUNICIPALITIES } from '../data';
 import { Municipality, GrievanceCategory, GrievanceSubmission, EnhancedGrievance, AttachmentFile } from '../types';
 import { GrievanceService } from '../services/grievanceService';
-import { sanitizeInput, validateUploadedFile, SecurityRateLimiter, parseAlgerianNIN } from '../utils/security';
+import { sanitizeInput, validateUploadedFile, SecurityRateLimiter } from '../utils/security';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Send, Search, CheckCircle, Copy, Check, FileText, 
@@ -78,8 +78,10 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
   initialCategory,
 }) => {
   // Submission Form State
-  const [nin, setNin] = useState('');
-  const [fullName, setFullName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [birthDate, setBirthDate] = useState('');
+  const [gender, setGender] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [applicantDaira, setApplicantDaira] = useState('');
@@ -152,8 +154,11 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
     setFormError(null);
 
     // Sanitized Inputs
-    const cleanNin = sanitizeInput(nin, 18);
-    const cleanFullName = sanitizeInput(fullName, 100);
+    const cleanFirstName = sanitizeInput(firstName, 60);
+    const cleanLastName = sanitizeInput(lastName, 60);
+    const cleanFullName = `${cleanFirstName} ${cleanLastName}`.trim();
+    const cleanBirthDate = birthDate.trim();
+    const cleanGender = gender.trim();
     const cleanPhone = sanitizeInput(phone, 10);
     const cleanEmail = email.trim() ? sanitizeInput(email, 100) : undefined;
     const cleanNeighborhood = sanitizeInput(applicantNeighborhood, 150);
@@ -161,12 +166,14 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
     const cleanDetails = sanitizeInput(details, 3000);
 
     // Strict Validations
-    const ninValidation = parseAlgerianNIN(cleanNin);
-    if (!ninValidation.valid) {
-      return setFormError(ninValidation.error || 'رقم التعريف الوطني غير صالح');
-    }
-    if (!cleanFullName) {
+    if (!cleanFirstName || !cleanLastName) {
       return setFormError('يرجى إدخال الاسم واللقب بالكامل');
+    }
+    if (!cleanBirthDate || !/^\d{4}-\d{2}-\d{2}$/.test(cleanBirthDate)) {
+      return setFormError('يرجى إدخال تاريخ الميلاد بصيغة يوم/شهر/سنة');
+    }
+    if (!cleanGender || !['ذكر', 'أنثى'].includes(cleanGender)) {
+      return setFormError('يرجى اختيار الجنس');
     }
     if (!cleanPhone || !/^(05|06|07)\d{8}$/.test(cleanPhone)) {
       return setFormError('رقم الهاتف غير صالح (يجب أن يبدأ بـ 05، 06، أو 07 ويتكون من 10 أرقام)');
@@ -211,7 +218,10 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
         uploadedAt: new Date().toISOString().split('T')[0],
       }));
       const newSubmission = await GrievanceService.save({
-        nin: cleanNin,
+        firstName: cleanFirstName,
+        lastName: cleanLastName,
+        birthDate: cleanBirthDate,
+        gender: cleanGender,
         fullName: cleanFullName,
         phone: cleanPhone,
         email: cleanEmail,
@@ -243,8 +253,10 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
   };
 
   const handleResetForm = () => {
-    setNin('');
-    setFullName('');
+    setFirstName('');
+    setLastName('');
+    setBirthDate('');
+    setGender('');
     setPhone('');
     setEmail('');
     setApplicantDaira('');
@@ -514,29 +526,23 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
                           
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
                             <div>
-                              <label className={labelClass}>رقم التعريف الوطني (NIN) <span className="text-[#D21034]">*</span></label>
-                              <input
-                                type="text"
-                                required
-                                value={nin}
-                                onChange={e => setNin(e.target.value.replace(/[^0-9]/g, '').slice(0, 18))}
-                                placeholder="18 رقماً"
-                                dir="ltr"
-                                className={`${inputBaseClass} font-mono text-right placeholder:text-right placeholder:font-tajawal`}
-                              />
-                              <p className="text-[10px] text-gray-500 mt-1 leading-5">18 رقماً: رمز الجنسية (1)، رمز الجنس (1)، سنة التسجيل في الولادات (3)، رمز البلدية أو البلد (4)، رقم عقد الميلاد (5)، الرقم التسلسلي (2)، ومفتاح المراقبة (2).</p>
+                              <label className={labelClass}>الاسم <span className="text-[#D21034]">*</span></label>
+                              <input type="text" required value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="الاسم" className={inputBaseClass} />
                             </div>
-
                             <div>
-                              <label className={labelClass}>الاسم واللقب <span className="text-[#D21034]">*</span></label>
-                              <input
-                                type="text"
-                                required
-                                value={fullName}
-                                onChange={e => setFullName(e.target.value)}
-                                placeholder="كما في الوثائق الرسمية"
-                                className={inputBaseClass}
-                              />
+                              <label className={labelClass}>اللقب <span className="text-[#D21034]">*</span></label>
+                              <input type="text" required value={lastName} onChange={e => setLastName(e.target.value)} placeholder="اللقب" className={inputBaseClass} />
+                            </div>
+                            <div>
+                              <label className={labelClass}>تاريخ الميلاد <span className="text-[#D21034]">*</span></label>
+                              <input type="date" required value={birthDate} onChange={e => setBirthDate(e.target.value)} className={`${inputBaseClass} font-mono`} />
+                              <p className="text-[10px] text-gray-500 mt-1">الصيغة: jj/mm/aaaa</p>
+                            </div>
+                            <div>
+                              <label className={labelClass}>الجنس <span className="text-[#D21034]">*</span></label>
+                              <select required value={gender} onChange={e => setGender(e.target.value)} className={inputBaseClass}>
+                                <option value="">اختر الجنس</option><option value="ذكر">ذكر</option><option value="أنثى">أنثى</option>
+                              </select>
                             </div>
 
                             <div>
@@ -604,13 +610,13 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
                             </div>
 
                             <div>
-                              <label className={labelClass}>الحي / التجمع السكني <span className="text-[#D21034]">*</span></label>
+                              <label className={labelClass}>العنوان الكامل <span className="text-[#D21034]">*</span></label>
                               <input
                                 type="text"
                                 required
                                 value={applicantNeighborhood}
                                 onChange={e => setApplicantNeighborhood(e.target.value)}
-                                placeholder="مثال: حي الرمال، الشارع الرئيسي..."
+                                placeholder="مثال: الحي، رقم المنزل، الشارع"
                                 className={inputBaseClass}
                               />
                             </div>
