@@ -43,7 +43,7 @@ const validPin = (value: unknown) => typeof value === "string" && /^[0-9]{6,12}$
 Deno.serve(async (request: Request) => {
   const origin = originFor(request);
   if (request.method === "OPTIONS") {
-    return origin ? new Response("ok", { status: 204, headers: headersFor(origin) }) : new Response("", { status: 403 });
+    return origin ? new Response(null, { status: 204, headers: headersFor(origin) }) : new Response("", { status: 403 });
   }
   if (!origin || request.method !== "POST") return json({ error: "request_not_allowed" }, 403, origin);
 
