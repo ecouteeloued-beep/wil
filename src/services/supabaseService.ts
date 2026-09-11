@@ -54,11 +54,11 @@ export const SupabaseService = {
   /** Load active staff profiles for the administrative users directory. */
   fetchStaffUsers: async (): Promise<SystemUser[]> => {
     if (!isSupabaseConfigured || !supabase) return [];
-    const { data, error } = await supabase
-      .from('users')
-      .select('id,username,name,email,role,department,is_active,permissions,created_at')
-      .order('created_at', { ascending: true });
-    if (error || !Array.isArray(data)) return [];
+    const { data, error } = await supabase.rpc('list_staff_users');
+    if (error || !Array.isArray(data)) {
+      console.warn('تعذر جلب قائمة الموظفين من الخادم:', error?.message || 'استجابة غير صالحة');
+      return [];
+    }
     const roleTitles: Record<string, string> = {
       wali: 'والي الولاية',
       chef_cabinet: 'الأمين العام للولاية',
