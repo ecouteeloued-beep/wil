@@ -102,7 +102,7 @@ export const DocumentReaderModal: React.FC<DocumentReaderModalProps> = ({
   };
 
   const handleDownload = () => {
-    const rawUrl = attachment.dataUrl || attachment.url || attachment.previewUrl;
+    const rawUrl = attachment.url || attachment.previewUrl;
     const safeUrl = sanitizeDocumentUrl(rawUrl);
     if (safeUrl) {
       const link = document.createElement('a');
@@ -128,75 +128,13 @@ export const DocumentReaderModal: React.FC<DocumentReaderModalProps> = ({
                   attachment.name.toLowerCase().endsWith('.jpeg') || 
                   attachment.name.toLowerCase().endsWith('.png');
 
-  // Simulated OCR / Extracted Text for the document
-  const getExtractedText = () => {
-    const name = attachment.name;
-    const citizenName = grievance?.fullName || 'غير متوفر';
-    const nin = grievance?.nin || '198839010045230012';
-    const municipality = grievance?.grievanceMunicipality || grievance?.applicantMunicipality || 'الوادي';
-    const trackingId = grievance?.id || 'غير متوفر';
-    const subject = grievance?.subject || 'انشغال مواطن رسمي';
-    const details = grievance?.details || '';
+  // Only show metadata returned by the authorized server; never synthesize document identity data.
+  const getExtractedText = () => `المرفق: ${attachment.name}
+الحجم: ${attachment.size || 'غير متوفر'}
+تاريخ الرفع: ${attachment.uploadedAt || 'غير متوفر'}
+رقم التتبع: ${grievance?.id || 'غير متوفر'}
 
-    if (name.includes('هوية') || name.includes('بيومترية')) {
-      return `الجمهورية الجزائرية الديمقراطية الشعبية
-وزارة الداخلية والجماعات المحلية والنقل
-بطاقة التعريف الوطنية البيومترية الإلكترونية
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-اللقب والاسم: ${citizenName}
-تاريخ ومكان الازدياد: 14/05/1988 بـ ${municipality}
-الجنس: ذكر | فصيلة الدم: O+
-رقم التعريف الوطني (NIN): ${nin}
-رقم البطاقة: 2390104882
-تاريخ الإصدار: 10/01/2022 | صالحة إلى غاية: 09/01/2032
-جهة الإصدار: دائرة ${municipality} - ولاية الوادي
-[الحالة الرقمية: وثيقة بيومترية أصلية مطابقة للقيد 39/2026]`;
-    }
-
-    if (name.includes('عريضة') || name.includes('طلب') || name.includes('خطية')) {
-      return `الجمهورية الجزائرية الديمقراطية الشعبية
-إلى السيد المحترم: والي ولاية الوادي
-عبر المنظومة الرقمية لإصغاء المواطن
-
-الموضوع: ${subject}
-رقم القيد والتتبع: ${trackingId}
-صاحب العريضة: ${citizenName}
-العنوان: ${grievance?.applicantNeighborhood || 'حي تكسبت'}، بلدية ${municipality}
-رقم الهاتف: ${grievance?.phone || '0661000000'}
-
-نص العريضة المكتوبة:
-يشرفني أن أتقدم إلى سيادتكم الموقرة بهذه العريضة راجياً تدخلكم الكريم للنظر في انشغالنا المتمثل في:
-${details}
-
-نحيطكم علماً بأننا قمنا بمراسلة المصالح المختصة سابقاً، ونلتمس من عنايتكم اتخاذ الإجراءات اللازمة لرفع الغبن عنا ومتابعة الملف ميدانياً.
-
-تقبلوا منا فائق عبارات التقدير والاحترام.
-إمضاء المعني بالأمر: ${citizenName}
-تاريخ الرفع: ${attachment.uploadedAt || new Date().toISOString().split('T')[0]}`;
-    }
-
-    if (name.includes('فلاح') || name.includes('مخطط')) {
-      return `الغرفة الفلاحية لولاية الوادي
-بطاقة فلاح مهنية معتمدة
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-الاسم واللقب: ${citizenName}
-رقم الفلاح الولائي: 39-FLH-09412
-المحيط الفلاحي: محيط الغربية، بلدية ${municipality}
-المساحة المستغلة: 05 هكتار (نخيل + زراعات محميّة)
-رقم بطاقة التعريف: ${nin}
-تاريخ التجديد: 2026-03-01
-خاتم المصادقة: مصادق عليها ومسجلة بسجلات الغرفة الفلاحية لولاية الوادي`;
-    }
-
-    return `وثيقة مرفقة بالانشغال رقم: ${trackingId}
-المواطن: ${citizenName}
-البلدية: ${municipality}
-عنوان الملف: ${name}
-الحجم: ${attachment.size}
-تاريخ الرفع الإلكتروني: ${attachment.uploadedAt || '2026-09-08'}
-المحتوى المستخرج:
-${details || 'وثيقة إدارية ثبوتية مؤيدة للعريضة المقدمة، مصادق عليها إلكترونياً وتتوافق مع نصوص وشروط استقبال العرائض الولائية.'}`;
-  };
+لم يتم إنشاء OCR اصطناعي. المحتوى المعروض هو الملف الخاص الموقّع من التخزين أو البيانات التي أعادها الخادم فقط.`;
 
   const handleCopyText = () => {
     navigator.clipboard.writeText(getExtractedText());
@@ -456,10 +394,10 @@ ${details || 'وثيقة إدارية ثبوتية مؤيدة للعريضة ا�
                 filter: highContrastMode ? 'contrast(160%) brightness(110%) saturate(140%)' : 'none'
               }}
             >
-              {/* CASE A: Real DataURL / Image Source */}
-              {(attachment.dataUrl || attachment.url) ? (
+              {/* CASE A: Private signed URL only */}
+              {attachment.url ? (
                 (() => {
-                  const rawUrl = attachment.dataUrl || attachment.url || attachment.previewUrl;
+                  const rawUrl = attachment.url;
                   const safeUrl = sanitizeDocumentUrl(rawUrl);
 
                   if (!safeUrl) {
@@ -521,35 +459,21 @@ ${details || 'وثيقة إدارية ثبوتية مؤيدة للعريضة ا�
                       
                       {/* Document Title Banner */}
                       <div className="bg-[#006233]/5 border-y-2 border-[#006233] p-3 text-center">
-                        <h4 className="font-changa font-bold text-base text-[#006233]">
-                          {attachment.name.includes('هوية') 
-                            ? 'نسخة مطابقة للأصل — بطاقة التعريف الوطنية البيومترية' 
-                            : attachment.name.includes('فلاح')
-                            ? 'شهادة التسجيل وإثبات الصفة الفلاحية'
-                            : 'عريضة رسمية مرفوعة إلى السيد والي ولاية الوادي'}
-                        </h4>
+                        <h4 className="font-changa font-bold text-base text-[#006233]">مرفق رسمي محفوظ في التخزين الخاص</h4>
                         <div className="text-[11px] text-gray-500 mt-0.5">
-                          تاريخ الإيداع الإلكتروني: {attachment.uploadedAt || '2026-09-08'} — سجل رقم: {Math.floor(1000 + Math.random() * 9000)}/2026
+                          تاريخ الإيداع الإلكتروني: {attachment.uploadedAt || 'غير متوفر'}
                         </div>
                       </div>
 
-                      {/* Citizen Info Grid */}
+                      {/* Non-sensitive metadata only */}
                       <div className="grid grid-cols-2 gap-4 text-xs bg-gray-50/80 p-4 rounded-xl border border-gray-200">
                         <div>
                           <span className="text-gray-500 block mb-0.5">صاحب الملف:</span>
                           <span className="font-bold text-sm text-gray-900">{grievance?.fullName || 'غير متوفر'}</span>
                         </div>
                         <div>
-                          <span className="text-gray-500 block mb-0.5">رقم التعريف الوطني (NIN):</span>
-                          <span className="font-mono font-bold text-xs text-gray-900">{grievance?.nin || '198839010045230012'}</span>
-                        </div>
-                        <div>
-                          <span className="text-gray-500 block mb-0.5">بلدية الإقامة / المعنية:</span>
-                          <span className="font-bold text-xs text-gray-800">{grievance?.grievanceMunicipality || 'الوادي'} — {grievance?.applicantNeighborhood || 'حي تكسبت'}</span>
-                        </div>
-                        <div>
-                          <span className="text-gray-500 block mb-0.5">الهاتف المعتمد:</span>
-                          <span className="font-mono font-bold text-xs text-gray-800">{grievance?.phone || '0661245890'}</span>
+                          <span className="text-gray-500 block mb-0.5">رقم التتبع:</span>
+                          <span className="font-mono font-bold text-xs text-gray-900">{grievance?.id || 'غير متوفر'}</span>
                         </div>
                       </div>
 

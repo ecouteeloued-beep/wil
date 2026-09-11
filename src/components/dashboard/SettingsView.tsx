@@ -199,10 +199,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ user, addToast }) =>
       wilaya: 'الوادي (39)',
       exportedBy: user?.name || 'المشرف التقني',
       settings: AdminService.getSystemSettings(),
-      users: AdminService.getUsers(),
-      grievances: AdminService.getGrievances(),
-      auditLogs: AdminService.getAuditLogs(),
-      permissions: localStorage.getItem('wilaya_eloued_role_permissions')
+      note: 'البيانات التشغيلية والشكاوى وسجل التدقيق لا تُخزّن أو تُستعاد من المتصفح؛ النسخ الاحتياطي الرسمي يتم من Supabase.'
     };
 
     const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
@@ -276,15 +273,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ user, addToast }) =>
         if (data.settings) {
           AdminService.saveSystemSettings(data.settings, user);
         }
-        if (data.users && Array.isArray(data.users)) {
-          localStorage.setItem('wilaya_eloued_admin_users', JSON.stringify(data.users));
-        }
-        if (data.grievances && Array.isArray(data.grievances)) {
-          localStorage.setItem('wilaya_eloued_admin_grievances', JSON.stringify(data.grievances));
-        }
-        if (data.auditLogs && Array.isArray(data.auditLogs)) {
-          localStorage.setItem('wilaya_eloued_admin_audit_logs', JSON.stringify(data.auditLogs));
-        }
+        // PII, complaints, users, permissions, and audit logs are never restored from browser storage.
 
         AdminService.logAudit({
           userId: user?.id || 'admin',

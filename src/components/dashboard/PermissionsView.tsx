@@ -31,22 +31,15 @@ const PERMISSIONS = [
   { id: 'manage_settings', label: 'تعديل إعدادات المنظومة والنسخ الاحتياطي', desc: 'التحكم في معلمات النظام والربط والنسخ واستعادة البيانات', type: 'admin' },
 ];
 
-const STORAGE_KEY = 'wilaya_eloued_role_permissions';
-
 export const PermissionsView: React.FC<PermissionsViewProps> = ({ user, addToast }) => {
-  const [roleMatrix, setRoleMatrix] = useState<Record<string, string[]>>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) return JSON.parse(saved);
-    } catch (e) {
-      console.error(e);
-    }
-    return DEFAULT_ROLE_PERMISSIONS;
-  });
+  const [roleMatrix, setRoleMatrix] = useState<Record<string, string[]>>(DEFAULT_ROLE_PERMISSIONS);
 
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   const handleToggle = (roleId: string, permId: string) => {
+    addToast?.({ type: 'info', title: 'الصلاحيات محمية server-side', message: 'تُفرض الصلاحيات من PostgreSQL/RLS ولا يمكن تعديل مصفوفة RBAC من المتصفح.' });
+    return;
+    /*
     // Super admin permissions are locked to full access
     if (roleId === 'super_admin') return;
 
@@ -63,44 +56,15 @@ export const PermissionsView: React.FC<PermissionsViewProps> = ({ user, addToast
       };
     });
     setHasUnsavedChanges(true);
+    */
   };
 
   const handleSave = () => {
-    try {
-      const serialized = JSON.stringify(roleMatrix);
-      localStorage.setItem(STORAGE_KEY, serialized);
-      if (localStorage.getItem(STORAGE_KEY) !== serialized) {
-        throw new Error('تعذر التحقق من التخزين المحلي');
-      }
-      setHasUnsavedChanges(false);
-
-      AdminService.logAudit({
-        userId: user?.id || 'admin',
-        userName: user?.name || 'المسؤول',
-        userRole: user?.roleTitle || 'مسؤول الصلاحيات',
-        action: 'تحديث مصفوفة الصلاحيات (RBAC)',
-        targetId: 'rbac-matrix',
-        targetType: 'صلاحيات',
-        details: 'تم تحديث وحفظ مصفوفة الصلاحيات العامة للأدوار في المنظومة.'
-      });
-
-      addToast?.({
-        type: 'success',
-        title: 'تم حفظ الصلاحيات بنجاح',
-        message: 'تم تطبيق مصفوفة الصلاحيات (RBAC) المحدثة على كافة مستخدمي المنظومة.'
-      });
-    } catch (e) {
-      addToast?.({
-        type: 'error',
-        title: 'خطأ في الحفظ',
-        message: 'تعذر حفظ الصلاحيات في التخزين المحلي.'
-      });
-    }
+    addToast?.({ type: 'info', title: 'لا يوجد حفظ محلي للصلاحيات', message: 'لتعديل صلاحية مستخدم استخدم إجراء الإدارة server-side الذي يفرضه PostgreSQL ويسجل في Audit Log.' });
   };
 
   const handleResetToDefault = () => {
     setRoleMatrix(DEFAULT_ROLE_PERMISSIONS);
-    localStorage.removeItem(STORAGE_KEY);
     setHasUnsavedChanges(false);
 
     addToast?.({

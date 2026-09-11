@@ -228,7 +228,6 @@ export interface AttachmentFile {
   type: string;
   uploadedAt: string;
   url?: string;
-  dataUrl?: string;
   previewUrl?: string;
   documentType?: 'id_card' | 'petition_letter' | 'field_photo' | 'receipt' | 'technical_report' | 'other';
   extractedText?: string;
