@@ -3,6 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const fallbackOrigins = new Set([
   "https://ecout-eloued.vercel.app",
+  "https://admin-ecoute.vercel.app",
   "https://admin-ecout-eloued.vercel.app",
   "https://admin-ecout-eloued.netlify.app",
   "https://wilaya-eloued.dz",
