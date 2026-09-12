@@ -328,6 +328,7 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
       console.error('Error executing track search:', err);
       setActiveTrackingResult(null);
       setHasSearched(true);
+      setTrackError(err instanceof Error ? err.message : 'تعذر الاتصال بخدمة التتبع، يرجى المحاولة لاحقاً.');
       setIsSearching(false);
     }
   };
@@ -819,7 +820,7 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
                             setTrackQuery(e.target.value);
                             setTrackError(null);
                           }}
-                          placeholder="رقم التتبع (مثال: WIL-2026-00130)"
+                          placeholder="رقم التتبع (مثال: WLY-2026-00130)"
                           dir="ltr"
                           className={`${inputBaseClass} w-full min-w-0 h-12 font-mono uppercase text-center sm:text-left text-sm px-4`}
                         />
