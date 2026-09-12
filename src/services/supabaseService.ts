@@ -251,10 +251,11 @@ export const SupabaseService = {
         phone: phone.trim(),
         secret_pin: secretPin.trim(),
       });
-      const row = Array.isArray(data) ? data[0] : data;
-      if (error || !row) {
-        return null;
+      if (error) {
+        throw new Error(error.message || 'تعذر الاتصال بخدمة التتبع.');
       }
+      const row = Array.isArray(data) ? data[0] : data;
+      if (!row) return null;
 
       const statusArabic: GrievanceStatus = (row.status as GrievanceStatus) || 'جديد';
       return {
