@@ -11,6 +11,7 @@ import {
   FileBadge2, Leaf, Building, Bus, HeartPulse, MessageCircle, AlertTriangle, Briefcase, Home as HomeIcon
 } from 'lucide-react';
 import { CitizenTrackingDossier } from './CitizenTrackingDossier';
+import { supabase } from '../lib/supabase';
 
 interface GrievanceFormProps {
   activeTab: 'new' | 'track';
@@ -208,15 +209,24 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
     setIsSubmitting(true);
 
     try {
-      // Never serialize citizen files as Base64. The production upload path stores
-      // only validated object metadata; the server rejects data/blob URLs.
-      const processedAttachments: AttachmentFile[] = files.map((file, index) => ({
-        id: `pending-${index}`,
-        name: file.name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(-120),
-        size: `${(file.size / (1024 * 1024)).toFixed(2)} MB`,
-        type: file.type || 'application/octet-stream',
-        uploadedAt: new Date().toISOString().split('T')[0],
-      }));
+      // Upload the actual bytes to the private bucket; only the safe storage
+      // path and metadata are sent to the complaints RPC (never Base64/blob URLs).
+      const processedAttachments: AttachmentFile[] = [];
+      for (const [index, file] of files.entries()) {
+        if (!supabase) throw new Error('تخزين المرفقات غير متاح حالياً.');
+        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(-120);
+        const path = `citizen/${crypto.randomUUID()}-${safeName}`;
+        const { error: uploadError } = await supabase.storage.from('complaint-attachments').upload(path, file, { contentType: file.type, upsert: false });
+        if (uploadError) throw new Error(`تعذر رفع المرفق ${file.name}: ${uploadError.message}`);
+        processedAttachments.push({
+          id: `attachment-${index}-${crypto.randomUUID()}`,
+          name: safeName,
+          size: `${(file.size / (1024 * 1024)).toFixed(2)} MB`,
+          type: file.type,
+          uploadedAt: new Date().toISOString(),
+          url: path,
+        });
+      }
       const newSubmission = await GrievanceService.save({
         firstName: cleanFirstName,
         lastName: cleanLastName,
