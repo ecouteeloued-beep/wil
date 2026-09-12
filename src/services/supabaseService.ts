@@ -246,10 +246,13 @@ export const SupabaseService = {
     try {
       const cleanId = trackingId.trim().toUpperCase();
       if (!phone || !secretPin) return null;
-      const { data, error } = await SupabaseService.invokePublicGateway('track_complaint', {
-        tracking_id: cleanId,
-        phone: phone.trim(),
-        secret_pin: secretPin.trim(),
+      // track_complaint is granted to anon/authenticated. Calling the RPC
+      // directly avoids gateway-origin mismatches that turn valid records into
+      // false "not found" results in production.
+      const { data, error } = await supabase.rpc('track_complaint', {
+        p_tracking_id: cleanId,
+        p_phone: phone.trim(),
+        p_secret_pin: secretPin.trim(),
       });
       if (error) {
         throw new Error(error.message || 'تعذر الاتصال بخدمة التتبع.');
