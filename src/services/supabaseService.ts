@@ -265,12 +265,12 @@ export const SupabaseService = {
         secretPin: undefined,
         fullName: row.citizen_name || 'مواطن',
         phone: '',
-        applicantDaira: row.municipality || 'الوادي',
+        applicantDaira: row.daira || 'الوادي',
         applicantMunicipality: row.municipality || 'الوادي',
         applicantNeighborhood: row.neighborhood || '',
         subject: row.subject || 'انشغال',
         meetingRequest: row.meeting_request || undefined,
-        grievanceDaira: row.municipality || 'الوادي',
+        grievanceDaira: row.daira || 'الوادي',
         grievanceMunicipality: row.municipality || 'الوادي',
         category: row.category || 'أخرى',
         sector: 'الشؤون الإدارية العامة',
@@ -285,7 +285,8 @@ export const SupabaseService = {
         officialResponse: row.official_response || undefined,
         timeline: Array.isArray(row.timeline) ? row.timeline : [],
         internalNotes: [],
-        attachments: Array.isArray(row.attachments) ? row.attachments : []
+        attachments: Array.isArray(row.attachments) ? row.attachments : [],
+        assignedDepartment: row.assigned_department || undefined,
       };
     } catch {
       return null;

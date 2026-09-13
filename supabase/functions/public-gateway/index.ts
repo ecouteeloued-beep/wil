@@ -110,7 +110,16 @@ Deno.serve(async (request: Request) => {
       p_tracking_id: payload.tracking_id.trim().toUpperCase(), p_phone: payload.phone.trim(), p_secret_pin: payload.secret_pin.trim(),
     });
     if (result.error) return json({ error: "request_rejected" }, 400, origin);
-    return json(result.data, 200, origin);
+    const rows = Array.isArray(result.data) ? result.data : [];
+    const withSignedFiles = await Promise.all(rows.map(async (row: any) => {
+      const attachments = Array.isArray(row.attachments) ? await Promise.all(row.attachments.map(async (file: any) => {
+        if (!file?.url || /^https?:\/\//i.test(file.url)) return file;
+        const signed = await admin.storage.from("complaint-attachments").createSignedUrl(file.url, 900);
+        return signed.data?.signedUrl ? { ...file, url: signed.data.signedUrl } : { ...file, url: undefined };
+      })) : [];
+      return { ...row, attachments };
+    }));
+    return json(withSignedFiles, 200, origin);
   }
   const result = await publicClient.rpc("resolve_login_identifier", { p_identifier: payload.identifier.trim() });
   if (result.error) return json({ error: "request_rejected" }, 400, origin);

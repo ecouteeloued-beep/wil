@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { CATEGORIES, DAIRAS, DAIRAS_MUNICIPALITIES } from '../data';
 import { Municipality, GrievanceCategory, GrievanceSubmission, EnhancedGrievance, AttachmentFile } from '../types';
 import { GrievanceService } from '../services/grievanceService';
@@ -347,6 +347,17 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
     e.preventDefault();
     executeTrackSearch(trackQuery, trackPhone, trackPin);
   };
+
+  useEffect(() => {
+    if (!activeTrackingResult || !trackQuery || !trackPhone || !trackPin) return;
+    let cancelled = false;
+    const refresh = async () => {
+      const latest = await GrievanceService.findByTrackingId(trackQuery, trackPhone, trackPin);
+      if (!cancelled && latest) setActiveTrackingResult(latest);
+    };
+    const timer = window.setInterval(() => { void refresh(); }, 15000);
+    return () => { cancelled = true; window.clearInterval(timer); };
+  }, [activeTrackingResult?.id, trackQuery, trackPhone, trackPin]);
 
   const handlePrintReceipt = () => {
     window.print();
