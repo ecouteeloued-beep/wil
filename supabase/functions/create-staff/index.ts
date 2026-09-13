@@ -14,11 +14,9 @@ const headersFor = (origin: string) => ({
   "Vary": "Origin",
 });
 
-const allowedRoles = new Set(["wali", "super_admin", "chef_cabinet", "head_department", "supervisor", "employee"]);
+const allowedRoles = new Set(["super_admin", "head_department", "supervisor", "employee"]);
 const rolePermissions: Record<string, string[]> = {
-  wali: ["view_all", "assign_grievance", "draft_reply", "approve_reply", "manage_users", "view_audit_logs", "manage_settings"],
   super_admin: ["manage_users", "view_audit_logs", "manage_settings"],
-  chef_cabinet: ["view_all", "assign_grievance", "draft_reply", "approve_reply", "view_audit_logs"],
   head_department: ["view_department", "assign_grievance", "draft_reply", "view_audit_logs"],
   supervisor: ["view_department", "assign_grievance", "draft_reply", "approve_reply", "view_audit_logs"],
   employee: ["view_assigned", "draft_reply"],
@@ -46,7 +44,7 @@ Deno.serve(async (req) => {
   if (callerError || !caller) return json({ error: "unauthorized" }, 401, origin);
   const { data: callerProfile, error: profileError } = await admin
     .from("users").select("role,is_active").eq("id", caller.id).maybeSingle();
-  if (profileError || !callerProfile?.is_active || !["wali", "super_admin"].includes(callerProfile.role)) return json({ error: "administrative_permission_required" }, 403, origin);
+  if (profileError || !callerProfile?.is_active || !["super_admin"].includes(callerProfile.role)) return json({ error: "administrative_permission_required" }, 403, origin);
   const callerLimit = await admin.rpc("consume_api_rate_limit", { p_bucket: `edge:create-staff:user:${caller.id}`, p_limit: 10, p_window_seconds: 3600 });
   if (callerLimit.error || callerLimit.data !== true) return json({ error: "rate_limited" }, 429, origin);
 

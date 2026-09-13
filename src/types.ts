@@ -51,7 +51,7 @@ export interface GrievanceSubmission {
   applicantMunicipality: string;
   applicantNeighborhood: string;
   subject: string;
-  meetingRequest?: 'والي الولاية' | 'رئيس الديوان' | 'الأمين العام للولاية';
+  meetingRequest?: 'رئيس الديوان';
   grievanceDaira: string;
   grievanceMunicipality: string;
   category: GrievanceCategory;
@@ -128,8 +128,6 @@ export interface ChannelItem {
 
 export type UserRole = 
   | 'super_admin'
-  | 'wali'
-  | 'chef_cabinet'
   | 'head_department'
   | 'supervisor'
   | 'employee';
@@ -279,7 +277,7 @@ export interface EnhancedGrievance {
   applicantMunicipality: string;
   applicantNeighborhood: string;
   subject: string;
-  meetingRequest?: 'والي الولاية' | 'رئيس الديوان' | 'الأمين العام للولاية';
+  meetingRequest?: 'رئيس الديوان';
   grievanceDaira: string;
   grievanceMunicipality: string;
   category: GrievanceCategory;

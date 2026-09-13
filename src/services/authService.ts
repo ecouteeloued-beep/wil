@@ -3,8 +3,6 @@ import { SystemUser, UserRole } from '../types';
 
 const ROLE_TITLES: Record<UserRole, string> = {
   super_admin: 'المشرف التقني العام',
-  wali: 'والي الولاية',
-  chef_cabinet: 'الأمين العام للولاية',
   head_department: 'رئيس الديوان — تابع لديوان الوالي',
   supervisor: 'رئيس خلية الإصغاء والتكفل',
   employee: 'الموظف المكلف',
@@ -12,8 +10,6 @@ const ROLE_TITLES: Record<UserRole, string> = {
 
 // These permissions are UX metadata only. Authorization is enforced by Supabase RLS/RPC.
 const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
-  wali: ['view_all', 'assign_grievance', 'draft_reply', 'approve_reply', 'manage_users', 'view_audit_logs', 'manage_settings'],
-  chef_cabinet: ['view_all', 'assign_grievance', 'draft_reply', 'approve_reply', 'view_audit_logs'],
   super_admin: ['manage_users', 'view_audit_logs', 'manage_settings'],
   supervisor: ['view_department', 'assign_grievance', 'draft_reply', 'approve_reply', 'view_audit_logs'],
   head_department: ['view_department', 'assign_grievance', 'draft_reply', 'view_audit_logs'],

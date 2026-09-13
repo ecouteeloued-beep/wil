@@ -132,7 +132,7 @@ export const OverviewStats: React.FC<OverviewStatsProps> = ({
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold border border-emerald-500/30">
               <Building2 className="w-3.5 h-3.5" />
-              <span>خلية الإصغاء والوساطة — ديوان والي ولاية الوادي</span>
+              <span>خلية الإصغاء والوساطة — ديوان ولاية الوادي</span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-black font-changa text-white">
               لوحة القيادة المركزية ومتابعة الأداء الولائي
@@ -153,7 +153,7 @@ export const OverviewStats: React.FC<OverviewStatsProps> = ({
               onClick={onOpenExecutiveReport}
               className="bg-[#006233] hover:bg-[#004d28] border border-emerald-400/40 px-4 py-2.5 rounded-2xl text-xs font-bold text-amber-300 shadow-md transition-colors cursor-pointer"
             >
-              تقرير السيد الوالي (PDF)
+              التقرير التنفيذي (PDF)
             </button>
           </div>
         </div>
@@ -169,7 +169,7 @@ export const OverviewStats: React.FC<OverviewStatsProps> = ({
             <h4 className="font-changa font-bold text-sm text-[#D21034]">
               {overdueGrievances > 0 ? `تنبيه ولائي عاجل: ${overdueGrievances} ملف بحاجة لتسوية استعجالية` : 'الحالة العامة مستقرة: لا توجد انشغالات متأخرة تجاوزت المهلة القانونية'}
             </h4>
-            <p className="text-xs text-gray-700">هذه الملفات تخضع لمتابعة مباشرة من ديوان والي الولاية والمصالح المختصة.</p>
+            <p className="text-xs text-gray-700">هذه الملفات تخضع لمتابعة مباشرة من رئيس الديوان والمصالح المختصة.</p>
           </div>
         </div>
         <button 

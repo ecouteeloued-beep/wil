@@ -1,18 +1,11 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const fallbackOrigins = new Set([
-  "https://ecout-eloued.vercel.app",
-  "https://admin-ecoute.vercel.app",
-  "https://admin-ecout-eloued.vercel.app",
-  "https://admin-ecout-eloued.netlify.app",
-  "https://wilaya-eloued.dz",
-  "https://www.wilaya-eloued.dz",
-  "https://wil-seven-tan.vercel.app",
+const allowedOrigins = new Set([
+  "https://chikaya.myeloued.com",
+  "https://admin.chikaya.myeloued.com",
+  ...(Deno.env.get("APP_ORIGINS") || "").split(",").map(value => value.trim()).filter(Boolean),
 ]);
-const configuredOrigins = (Deno.env.get("APP_ORIGINS") || "")
-  .split(",").map((value) => value.trim()).filter(Boolean);
-const allowedOrigins = new Set([...fallbackOrigins, ...configuredOrigins]);
 const maxBodyBytes = 64 * 1024;
 
 const originFor = (request: Request) => {
@@ -79,9 +72,9 @@ Deno.serve(async (request: Request) => {
 
   const payload = body?.payload;
   if (action === "submit_complaint") {
-    if (!payload || typeof payload !== "object" || !validText(payload.first_name, 80) || !validText(payload.last_name, 80) || !validPhone(payload.phone) ||
+    if (!payload || typeof payload !== "object" || !validText(payload.full_name, 160) || !validPhone(payload.phone) ||
       !validText(payload.subject, 240) || !validText(payload.description, 10000) || !validText(payload.category, 120) ||
-      !validText(payload.residence_daira, 120) || !validText(payload.residence_municipality, 120) || !validText(payload.full_address, 300) || !/^\d{4}-\d{2}-\d{2}$/.test(String(payload.birth_date || '')) || !['ذكر', 'أنثى'].includes(payload.gender)) {
+      !validText(payload.municipality, 120) || !validText(payload.daira, 120)) {
       return json({ error: "invalid_complaint_payload" }, 400, origin);
     }
     if (payload.attachments !== undefined) {

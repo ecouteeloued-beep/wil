@@ -90,7 +90,7 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
   const [applicantNeighborhood, setApplicantNeighborhood] = useState('');
   
   const [subject, setSubject] = useState('');
-  const [meetingRequest, setMeetingRequest] = useState<'' | 'والي الولاية' | 'رئيس الديوان' | 'الأمين العام للولاية'>('');
+  const [meetingRequest, setMeetingRequest] = useState<'' | 'رئيس الديوان'>('');
   const [grievanceDaira, setGrievanceDaira] = useState('');
   const [grievanceMunicipality, setGrievanceMunicipality] = useState('');
   const [category, setCategory] = useState<GrievanceCategory>(initialCategory || 'الخدمات الإدارية');
@@ -661,10 +661,8 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
                                 className={`${inputBaseClass} appearance-none`}
                               >
                                 <option value="">لا يوجد طلب لقاء</option>
-                                <option value="والي الولاية">طلب لقاء مع السيد والي الولاية</option>
-                                <option value="رئيس الديوان">طلب لقاء مع السيد رئيس الديوان — تابع لديوان الوالي</option>
-                                <option value="الأمين العام للولاية">طلب لقاء مع السيد الأمين العام للولاية</option>
-                              </select>
+                                                                <option value="رئيس الديوان">طلب لقاء مع السيد رئيس الديوان — تابع لديوان الوالي</option>
+                                                              </select>
                               <p className="text-[11px] text-gray-500 mt-1">سيظهر الطلب للجهة المختصة داخل لوحة التحكم لمراجعته وتحديد موعد مناسب.</p>
                             </div>
 

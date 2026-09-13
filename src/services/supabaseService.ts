@@ -58,8 +58,6 @@ export const SupabaseService = {
       return [];
     }
     const roleTitles: Record<string, string> = {
-      wali: 'والي الولاية',
-      chef_cabinet: 'الأمين العام للولاية',
       head_department: 'رئيس الديوان — تابع لديوان الوالي',
       supervisor: 'رئيس خلية الإصغاء والتكفل',
       employee: 'الموظف المكلف',
@@ -294,11 +292,20 @@ export const SupabaseService = {
     }
   },
 
-  /**
-   * Listen to real-time complaint submissions
-   */
-  subscribeToComplaints: (_onNewComplaint: (complaint: EnhancedGrievance) => void) => {
-    // Realtime is disabled because replica payloads cannot mask sensitive columns.
-    return () => {};
+  /** Count complaints visible to the authenticated staff member. */
+  countStaffComplaints: async (): Promise<number> => {
+    if (!isSupabaseConfigured || !supabase) return 0;
+    const { data, error } = await supabase.rpc('count_staff_complaints');
+    return error ? 0 : Number(data || 0);
+  },
+
+  /** Listen only to redacted complaint event metadata; never subscribe to complaints PII. */
+  subscribeToComplaints: (onChanged: () => void) => {
+    if (!isSupabaseConfigured || !supabase) return () => {};
+    const channel = supabase
+      .channel('staff-complaint-events')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'staff_complaint_events' }, onChanged)
+      .subscribe();
+    return () => { void supabase.removeChannel(channel); };
   }
 };

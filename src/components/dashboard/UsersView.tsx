@@ -64,7 +64,7 @@ export const UsersView: React.FC<UsersViewProps> = ({ user, addToast }) => {
 
   const canManageUsers = useMemo(() => {
     if (!user) return true;
-    return user.role === 'super_admin' || user.role === 'wali' || user.permissions?.includes('manage_users');
+    return user.role === 'super_admin' || user.permissions?.includes('manage_users');
   }, [user]);
 
   const filteredUsers = useMemo(() => {
@@ -222,12 +222,12 @@ export const UsersView: React.FC<UsersViewProps> = ({ user, addToast }) => {
   const handleDeleteUser = () => {
     if (!deleteConfirmUser) return;
     
-    // Safety lock: Cannot delete Wali or Super Admin
-    if (deleteConfirmUser.role === 'wali' || deleteConfirmUser.id === 'usr-superadmin') {
+    // Safety lock: Cannot delete Super Admin
+    if (deleteConfirmUser.id === 'usr-superadmin') {
       addToast?.({
         type: 'error',
         title: 'إجراء محظور سيادياً',
-        message: 'لا يمكن حذف الحساب السيادي لوالي الولاية أو حساب المشرف التقني العام.'
+        message: 'لا يمكن حذف حساب المشرف التقني العام.'
       });
       setDeleteConfirmUser(null);
       return;
@@ -288,8 +288,6 @@ export const UsersView: React.FC<UsersViewProps> = ({ user, addToast }) => {
 
   const getRoleBadge = (role: string) => {
     switch (role) {
-      case 'wali': return 'bg-amber-100 text-amber-900 border-amber-300 font-black';
-      case 'chef_cabinet': return 'bg-emerald-100 text-emerald-900 border-emerald-300 font-bold';
       case 'head_department': return 'bg-blue-100 text-blue-900 border-blue-300 font-bold';
       case 'supervisor': return 'bg-purple-100 text-purple-900 border-purple-300 font-bold';
       case 'employee': return 'bg-gray-100 text-gray-800 border-gray-300 font-bold';
@@ -349,8 +347,6 @@ export const UsersView: React.FC<UsersViewProps> = ({ user, addToast }) => {
               className="border border-gray-200 rounded-xl px-3 py-2 text-xs font-tajawal outline-none focus:border-[#006233] w-full sm:w-auto bg-white text-gray-700 shadow-2xs"
             >
               <option value="">كافة الرتب والمسؤوليات</option>
-              <option value="wali">السيد والي الولاية</option>
-              <option value="chef_cabinet">السيد الأمين العام للولاية</option>
               <option value="head_department">رئيس الديوان — تابع لديوان الوالي</option>
               <option value="supervisor">مسؤولو خلية الإصغاء</option>
               <option value="employee">الموظفون المكلفون بالمعالجة</option>
@@ -383,7 +379,7 @@ export const UsersView: React.FC<UsersViewProps> = ({ user, addToast }) => {
                       <div>
                         <div className="font-bold text-gray-900 text-sm flex items-center gap-1.5">
                           <span>{u.name}</span>
-                          {u.role === 'wali' && (
+                          {false && (
                             <span className="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-bold">
                               سيادي
                             </span>
@@ -443,7 +439,7 @@ export const UsersView: React.FC<UsersViewProps> = ({ user, addToast }) => {
                           <Key className="w-4 h-4" />
                         </button>
 
-                        {u.role !== 'wali' && u.id !== 'usr-superadmin' && (
+                        {u.id !== 'usr-superadmin' && (
                           <button 
                             onClick={() => setDeleteConfirmUser(u)}
                             className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
@@ -493,7 +489,7 @@ export const UsersView: React.FC<UsersViewProps> = ({ user, addToast }) => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block font-bold text-gray-700 mb-1">اسم المستخدم للدخول</label>
-                    <input type="text" required pattern="[A-Za-z0-9._-]{3,40}" value={formData.username} onChange={(e) => setFormData({ ...formData, username: e.target.value.toLowerCase() })} placeholder="wali" className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-[#006233] outline-none font-mono" />
+                    <input type="text" required pattern="[A-Za-z0-9._-]{3,40}" value={formData.username} onChange={(e) => setFormData({ ...formData, username: e.target.value.toLowerCase() })} placeholder="employee" className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-[#006233] outline-none font-mono" />
                   </div>
                   <div>
                     <label className="block font-bold text-gray-700 mb-1">الاسم واللقب</label>
@@ -549,8 +545,6 @@ export const UsersView: React.FC<UsersViewProps> = ({ user, addToast }) => {
                       onChange={(e) => handleRoleChange(e.target.value as any)}
                       className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-[#006233] outline-none font-bold"
                     >
-                      <option value="wali">السيد والي الولاية (صلاحيات سيادية كاملة)</option>
-                      <option value="chef_cabinet">السيد الأمين العام للولاية (إشراف ومتابعة)</option>
                       <option value="head_department">رئيس الديوان — تابع لديوان الوالي</option>
                       <option value="supervisor">مسؤول خلية الإصغاء والتكفل</option>
                       <option value="employee">موظف معالج وميداني</option>

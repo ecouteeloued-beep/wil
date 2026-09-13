@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { AlertCircle, ArrowRight, Eye, EyeOff, KeyRound, Lock, ShieldCheck, User as UserIcon, Crown, Landmark, Users } from 'lucide-react';
+import { AlertCircle, ArrowRight, Eye, EyeOff, KeyRound, Lock, ShieldCheck, User as UserIcon, Users } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { SupabaseService } from '../../services/supabaseService';
 import { SecurityRateLimiter } from '../../utils/security';
@@ -13,8 +13,6 @@ interface AdminLoginProps {
 }
 
 const ENTRY_ROLES = [
-  { title: 'والي ولاية الوادي', subtitle: 'المسؤول الأول للولاية', icon: Crown, tone: 'amber' },
-  { title: 'الأمين العام للولاية', subtitle: 'التنسيق والمتابعة الإدارية', icon: Landmark, tone: 'emerald' },
   { title: 'رئيس الديوان', subtitle: 'تابع لديوان الوالي', icon: Users, tone: 'blue' },
 ];
 

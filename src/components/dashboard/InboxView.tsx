@@ -33,7 +33,7 @@ const DIRECTORATES = [
   'مديرية الاستثمار وترقية المؤسسات',
   'مديرية النقل والمواصلات',
   'مديرية التجارة وترقية الصادرات',
-  'مصالح ديوان والي الولاية',
+  'مصالح ديوان الولاية',
   'الدائرة المختصة إقليمياً',
   'المجلس الشعبي البلدي المختص (APC)'
 ];
@@ -121,7 +121,7 @@ export const InboxView: React.FC<InboxViewProps> = ({
   const [newStatus, setNewStatus] = useState('قيد المعالجة');
   const [statusNotes, setStatusNotes] = useState('');
   
-  // Executive directive state (Wali / SG)
+  // Executive directive state (Chief of Staff)
   const [directiveRef, setDirectiveRef] = useState(`2026/ت.و/${Math.floor(100 + Math.random() * 900)}`);
   const [directiveText, setDirectiveText] = useState('نظراً للطابع الاستعجالي لهذا الانشغال، يُطلب من المصلحة المعنية التدخل الفوري خلال 48 ساعة وموافاتنا بتقرير كتابي مفصل.');
   const [directiveDeadline, setDirectiveDeadline] = useState('48 ساعة');
@@ -219,13 +219,12 @@ export const InboxView: React.FC<InboxViewProps> = ({
     window.addEventListener('storage', handleStorageChange);
 
     // 4. Supabase Realtime channel subscription
-    const unsubscribeSupabase = SupabaseService.subscribeToComplaints((newComplaint) => {
-      AdminService.addGrievanceDirectly(newComplaint);
-      loadData();
+    const unsubscribeSupabase = SupabaseService.subscribeToComplaints(() => {
+      void loadData();
       addToast?.({
-        type: 'success',
-        title: 'عريضة جديدة سحابية (مباشر)',
-        message: `تم استلام عريضة جديدة رقم ${newComplaint.id} في قطاع (${newComplaint.category}).`
+        type: 'info',
+        title: 'تحديث مباشر للانشغالات',
+        message: 'تم تحديث البيانات من قاعدة البيانات المركزية.'
       });
     });
 
@@ -585,7 +584,7 @@ export const InboxView: React.FC<InboxViewProps> = ({
     e.preventDefault();
     if (!selectedTicket) return;
 
-    const actorName = user?.name || 'السيد والي الولاية';
+    const actorName = user?.name || 'مسؤول النظام';
     const actorRole = user?.roleTitle || 'والي ولاية الوادي';
 
     AdminService.updateGrievance(selectedTicket.id, {
@@ -607,7 +606,7 @@ export const InboxView: React.FC<InboxViewProps> = ({
     });
 
     AdminService.logAudit({
-      userId: user?.id || 'wali',
+      userId: user?.id || 'system',
       userName: actorName,
       userRole: actorRole,
       action: 'إصدار تعليمة ولائية استعجالية',
@@ -1378,8 +1377,8 @@ export const InboxView: React.FC<InboxViewProps> = ({
                 <span>تعديل وحفظ الشكوى</span>
               </button>
 
-              {/* Wali & SG Executive Directive Button */}
-              {(user?.role === 'wali' || user?.role === 'chef_cabinet' || user?.role === 'super_admin') && (
+              {/* Chief of Staff Executive Directive Button */}
+              {(user?.role === 'head_department' || user?.role === 'supervisor' || user?.role === 'super_admin') && (
                 <button
                   onClick={() => setShowDirectiveModal(true)}
                   className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white rounded-xl text-xs font-bold shadow-sm transition-all"
@@ -1621,8 +1620,8 @@ export const InboxView: React.FC<InboxViewProps> = ({
                       حفظ كمسودة
                     </button>
                     
-                    {/* Supervisor & Wali can approve and close */}
-                    {(user?.role === 'supervisor' || user?.role === 'wali' || user?.role === 'chef_cabinet' || user?.role === 'super_admin') && (
+                    {/* Supervisor & Chief of Staff can approve and close */}
+                    {(user?.role === 'supervisor' || user?.role === 'head_department' || user?.role === 'supervisor' || user?.role === 'super_admin') && (
                       <button
                         type="button"
                         onClick={() => handleSaveOfficialReply(true)}
@@ -1870,7 +1869,7 @@ export const InboxView: React.FC<InboxViewProps> = ({
         )}
       </AnimatePresence>
 
-      {/* MODAL: EXECUTIVE DIRECTIVE (Wali / SG) */}
+      {/* MODAL: EXECUTIVE DIRECTIVE (Chief of Staff) */}
       <AnimatePresence>
         {showDirectiveModal && (
           <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">

@@ -61,8 +61,6 @@ export const DEFAULT_SYSTEM_SETTINGS: SystemSettings = {
 // INITIAL SEED USERS WITH DISTINCT SOVEREIGN ROLES & PERMISSIONS
 // =========================================================================
 export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
-  wali: ['view_all', 'executive_directive', 'export_reports', 'view_audit_logs'],
-  chef_cabinet: ['view_all', 'assign_grievance', 'export_reports', 'view_audit_logs'],
   head_department: ['view_department', 'assign_grievance', 'draft_reply', 'export_reports'],
   supervisor: ['view_all', 'assign_grievance', 'approve_reply', 'draft_reply', 'export_reports', 'manage_users'],
   employee: ['view_department', 'draft_reply'],
@@ -124,7 +122,6 @@ export const AdminService = {
       if (stored) {
         const parsed: SystemUser[] = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          // Check if seed users (like wali or sg) need to be merged if missing
           const existingIds = new Set(parsed.map(u => u.id));
           const missingSeed = SEED_USERS.filter(su => !existingIds.has(su.id));
           if (missingSeed.length > 0) {

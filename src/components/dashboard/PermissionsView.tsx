@@ -10,8 +10,6 @@ interface PermissionsViewProps {
 }
 
 const ROLES = [
-  { id: 'wali', name: 'والي الولاية', color: 'bg-amber-100 text-amber-900 border-amber-300' },
-  { id: 'chef_cabinet', name: 'الأمين العام', color: 'bg-emerald-100 text-emerald-900 border-emerald-300' },
   { id: 'head_department', name: 'رئيس الديوان — تابع لديوان الوالي', color: 'bg-blue-100 text-blue-900 border-blue-300' },
   { id: 'supervisor', name: 'مسؤول الخلية', color: 'bg-purple-100 text-purple-900 border-purple-300' },
   { id: 'employee', name: 'موظف معالج', color: 'bg-gray-100 text-gray-800 border-gray-300' },
@@ -157,7 +155,6 @@ export const PermissionsView: React.FC<PermissionsViewProps> = ({ user, addToast
 
                   {ROLES.map(role => {
                     const isSuperAdmin = role.id === 'super_admin';
-                    const isWali = role.id === 'wali';
                     const hasPerm = (roleMatrix[role.id] || []).includes(perm.id);
 
                     return (
@@ -173,8 +170,6 @@ export const PermissionsView: React.FC<PermissionsViewProps> = ({ user, addToast
                           <div className={`w-10 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all ${
                             isSuperAdmin 
                               ? 'peer-checked:bg-gray-400 cursor-not-allowed' 
-                              : isWali
-                              ? 'peer-checked:bg-amber-600'
                               : 'peer-checked:bg-[#006233]'
                           }`} />
                         </label>
