@@ -134,7 +134,7 @@ export const DashboardLayout: React.FC<{ user: SystemUser; onLogout: () => void 
   ];
 
   const canAccess = (item: { roles?: string[]; permissions?: string[] }) => {
-    if (user.role === 'super_admin' || user.role === 'wali') return true;
+    if (user.role === 'super_admin') return true;
     if (item.roles && !item.roles.includes(user.role)) return false;
     if (!item.permissions || item.permissions.length === 0) return true;
     return item.permissions.some(permission => user.permissions?.includes(permission));
@@ -266,7 +266,7 @@ export const DashboardLayout: React.FC<{ user: SystemUser; onLogout: () => void 
           <div className="px-3 py-5 flex flex-col gap-6 flex-1 overflow-y-auto custom-scrollbar">
             {visibleMenuSections.map((section, sIdx) => {
               const visibleItems = section.items.filter(item => 
-                !item.roles || item.roles.includes(user.role) || user.role === 'wali'
+                !item.roles || item.roles.includes(user.role)
               );
               if (visibleItems.length === 0) return null;
 

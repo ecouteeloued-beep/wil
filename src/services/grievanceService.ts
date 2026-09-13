@@ -15,7 +15,7 @@ export const GrievanceService = {
     applicantMunicipality: string;
     applicantNeighborhood: string;
     subject: string;
-    meetingRequest?: 'والي الولاية' | 'رئيس الديوان' | 'الأمين العام للولاية';
+    meetingRequest?: 'رئيس الديوان';
     grievanceDaira: string;
     grievanceMunicipality: string;
     category: any;

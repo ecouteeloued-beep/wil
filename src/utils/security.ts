@@ -277,7 +277,7 @@ export function validateUploadedFile(file: File): { valid: boolean; error?: stri
 // 5. SECURE BACKUP SCHEMA VALIDATOR (Insecure Deserialization Defense)
 // ---------------------------------------------------------------------------
 
-const ALLOWED_ROLES = ['super_admin', 'wali', 'chef_cabinet', 'head_department', 'supervisor', 'employee'];
+const ALLOWED_ROLES = ['super_admin', 'head_department', 'supervisor', 'employee'];
 
 export function validateBackupSchema(data: any): { valid: boolean; error?: string; cleanData?: any } {
   if (!data || typeof data !== 'object' || Array.isArray(data)) {

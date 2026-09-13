@@ -6,7 +6,7 @@ import { SystemUser } from '../../types';
 type Recipient = { id: string; name: string; role: string; department?: string | null };
 type Message = { id: string; sender_id: string; recipient_id: string; subject: string; body: string; created_at: string; read_at?: string | null };
 
-const roleLabels: Record<string, string> = { wali: 'والي الولاية', chef_cabinet: 'رئيس الديوان', supervisor: 'مشرف', head_department: 'رئيس مصلحة', employee: 'موظف', super_admin: 'مسؤول النظام' };
+const roleLabels: Record<string, string> = { supervisor: 'مشرف', head_department: 'رئيس مصلحة', employee: 'موظف', super_admin: 'مسؤول النظام' };
 
 export const InternalMessagesView: React.FC<{ user: SystemUser; addToast: (toast: { type: 'success' | 'info' | 'warning' | 'error'; title: string; message: string }) => void }> = ({ user, addToast }) => {
   const [recipients, setRecipients] = useState<Recipient[]>([]);

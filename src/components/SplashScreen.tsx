@@ -169,7 +169,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
               <p className="text-base sm:text-xl text-gray-200 max-w-2xl leading-relaxed mb-8 font-tajawal">
                 في البوابة الإلكترونية لسجل الشكاوى والعرائض لولاية الوادي
                 <span className="block text-xs sm:text-sm text-amber-300/90 mt-1 font-medium">
-                  ديوان السيد والي الولاية • خلية الإصغاء والتكفل بانشغالات المواطنين
+                  خلية الإصغاء والتكفل بانشغالات المواطنين
                 </span>
               </p>
 
