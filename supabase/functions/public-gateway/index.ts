@@ -72,9 +72,10 @@ Deno.serve(async (request: Request) => {
 
   const payload = body?.payload;
   if (action === "submit_complaint") {
-    if (!payload || typeof payload !== "object" || !validText(payload.full_name, 160) || !validPhone(payload.phone) ||
+    if (!payload || typeof payload !== "object" || !validText(payload.first_name, 80) || !validText(payload.last_name, 80) || !validPhone(payload.phone) ||
       !validText(payload.subject, 240) || !validText(payload.description, 10000) || !validText(payload.category, 120) ||
-      !validText(payload.municipality, 120) || !validText(payload.daira, 120)) {
+      !validText(payload.residence_municipality, 120) || !validText(payload.residence_daira, 120) || !validText(payload.full_address, 240) ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(String(payload.birth_date || "")) || !["ذكر", "أنثى"].includes(String(payload.gender || ""))) {
       return json({ error: "invalid_complaint_payload" }, 400, origin);
     }
     if (payload.attachments !== undefined) {
@@ -102,14 +103,14 @@ Deno.serve(async (request: Request) => {
   const publicClient = admin;
   if (action === "submit_complaint") {
     const result = await publicClient.rpc("submit_complaint", { p_payload: payload });
-    if (result.error) return json({ error: "request_rejected" }, 400, origin);
+    if (result.error) return json({ error: "request_rejected", detail: result.error.message }, 400, origin);
     return json(result.data, 200, origin);
   }
   if (action === "track_complaint") {
     const result = await publicClient.rpc("track_complaint", {
       p_tracking_id: payload.tracking_id.trim().toUpperCase(), p_phone: payload.phone.trim(), p_secret_pin: payload.secret_pin.trim(),
     });
-    if (result.error) return json({ error: "request_rejected" }, 400, origin);
+    if (result.error) return json({ error: "request_rejected", detail: result.error.message }, 400, origin);
     const rows = Array.isArray(result.data) ? result.data : [];
     const withSignedFiles = await Promise.all(rows.map(async (row: any) => {
       const attachments = Array.isArray(row.attachments) ? await Promise.all(row.attachments.map(async (file: any) => {
