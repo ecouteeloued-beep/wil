@@ -137,6 +137,13 @@ export const SupabaseService = {
 
       if (error) {
         console.warn('⚠️ Supabase complaint insert notice:', error.message);
+        const response = (error as any).context as Response | undefined;
+        if (response) {
+          try {
+            const body = await response.clone().json();
+            if (body?.error) return { success: false, error: body.detail ? `${body.error}: ${body.detail}` : body.error };
+          } catch { /* keep the SDK error below */ }
+        }
         return { success: false, error: error.message };
       }
 
