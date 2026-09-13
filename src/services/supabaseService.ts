@@ -303,8 +303,8 @@ export const SupabaseService = {
   subscribeToComplaints: (onChanged: () => void) => {
     if (!isSupabaseConfigured || !supabase) return () => {};
     const channel = supabase
-      .channel('staff-complaint-events')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'staff_complaint_events' }, onChanged)
+      .channel('staff-complaints', { config: { private: true } })
+      .on('broadcast', { event: 'complaint_change' }, onChanged)
       .subscribe();
     return () => { void supabase.removeChannel(channel); };
   }

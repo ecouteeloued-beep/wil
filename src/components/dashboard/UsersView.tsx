@@ -533,7 +533,7 @@ export const UsersView: React.FC<UsersViewProps> = ({ user, addToast }) => {
                       type="text"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      placeholder="0655000000"
+                      placeholder="أدخل رقم الهاتف المهني الحقيقي"
                       className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-[#006233] outline-none"
                     />
                   </div>
@@ -572,7 +572,7 @@ export const UsersView: React.FC<UsersViewProps> = ({ user, addToast }) => {
                       maxLength={4}
                       value={formData.pin}
                       onChange={(e) => setFormData({ ...formData, pin: e.target.value })}
-                      placeholder="1234"
+                      placeholder="أدخل رمزاً حقيقياً وفق سياسة المؤسسة"
                       className="w-32 p-2.5 bg-gray-50 border border-gray-200 rounded-xl text-center font-mono font-bold text-base focus:border-[#006233] outline-none"
                     />
                   </div>
