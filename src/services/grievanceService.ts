@@ -84,7 +84,6 @@ export const GrievanceService = {
     }
 
     const serverTrackingId = cloudResult.data?.tracking_id || clientDisplayId;
-    window.localStorage.setItem('wilaya_eloued_last_submit_time', Date.now().toString());
     return {
       ...data,
       id: serverTrackingId,
@@ -104,11 +103,6 @@ export const GrievanceService = {
   // avoids presenting browser-local counts as institutional facts until that query exists.
   getStats: () => ({ total: 0, resolved: 0 }),
 
-  // Client throttling is only a UX measure; server-side rate limiting remains mandatory.
-  canSubmit: (): boolean => {
-    const key = 'wilaya_eloued_last_submit_time';
-    const lastSubmit = window.localStorage.getItem(key);
-    if (!lastSubmit) return true;
-    return Date.now() - Number(lastSubmit) > 30 * 1000;
-  }
+  // Submission throttling is enforced server-side; no browser storage is used.
+  canSubmit: (): boolean => true
 };

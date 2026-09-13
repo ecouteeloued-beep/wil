@@ -86,13 +86,20 @@ export const OverviewStats: React.FC<OverviewStatsProps> = ({
     return { name, total, resolved, rate };
   }).filter(item => item.total > 0);
 
+  const resolvedWithDates = grievances.filter(g =>
+    resolvedGrievances > 0 && (g.status === 'تمت التسوية' || g.status === 'مغلقة' || g.status === 'مقبولة') && g.createdAt && g.updatedAt
+  );
+  const averageResolutionDays = resolvedWithDates.length > 0
+    ? (resolvedWithDates.reduce((sum, g) => sum + Math.max(0, new Date(g.updatedAt).getTime() - new Date(g.createdAt).getTime()) / 86400000, 0) / resolvedWithDates.length).toFixed(1)
+    : '0.0';
+
   const stats = [
     { label: 'إجمالي الانشغالات المسجلة', value: totalGrievances.toLocaleString('ar-DZ'), icon: FileText, color: 'text-[#006233]', bg: 'bg-emerald-50 border-emerald-200', trend: totalGrievances > 0 ? 'بيانات حية محدثة' : 'قاعدة بيانات نظيفة' },
     { label: 'انشغالات جديدة (اليوم)', value: todayGrievances.toLocaleString('ar-DZ'), icon: Users, color: 'text-blue-700', bg: 'bg-blue-50 border-blue-200', trend: todayGrievances > 0 ? 'وارد جديد اليوم' : 'لا جديد اليوم' },
     { label: 'قيد المعالجة والتحقيق', value: inProgressGrievances.toLocaleString('ar-DZ'), icon: Clock, color: 'text-amber-700', bg: 'bg-amber-50 border-amber-200', trend: totalGrievances > 0 ? `${Math.round((inProgressGrievances / (totalGrievances || 1)) * 100)}% من الإجمالي` : '0%' },
     { label: 'تجاوزت المهلة (عاجلة)', value: overdueGrievances.toLocaleString('ar-DZ'), icon: AlertTriangle, color: 'text-[#D21034]', bg: 'bg-red-50 border-red-200', trend: overdueGrievances > 0 ? 'بحاجة لتدخل الوالي' : 'لا توجد متأخرات' },
     { label: 'تمت التسوية والإغلاق', value: resolvedGrievances.toLocaleString('ar-DZ'), icon: CheckCircle2, color: 'text-teal-700', bg: 'bg-teal-50 border-teal-200', trend: `نسبة الإنجاز ${completionRate}%` },
-    { label: 'متوسط سرعة المعالجة', value: totalGrievances > 0 ? '2.8 أيام' : '0 أيام', icon: Timer, color: 'text-purple-700', bg: 'bg-purple-50 border-purple-200', trend: 'ضمن المعيار القانوني' },
+    { label: 'متوسط سرعة المعالجة', value: `${averageResolutionDays} يوم`, icon: Timer, color: 'text-purple-700', bg: 'bg-purple-50 border-purple-200', trend: resolvedWithDates.length > 0 ? 'محسوب من الملفات المغلقة' : 'لا توجد ملفات مغلقة' },
   ];
 
   const handleExportKpi = () => {
@@ -103,7 +110,7 @@ export const OverviewStats: React.FC<OverviewStatsProps> = ({
       `قيد المعالجة والتحقيق,${inProgressGrievances},نسبة جارية`,
       `تجاوزت المهلة (عاجلة),${overdueGrievances},متأخرات`,
       `تمت التسوية والإغلاق,${resolvedGrievances},نسبة الإنجاز ${completionRate}%`,
-      'متوسط سرعة المعالجة,2.8 أيام,ضمن المعيار القانوني'
+      `متوسط سرعة المعالجة,${averageResolutionDays} أيام,محسوب من الملفات المغلقة`
     ].join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });

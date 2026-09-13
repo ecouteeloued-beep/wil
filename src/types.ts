@@ -148,7 +148,8 @@ export interface SystemUser {
   overdueCount: number;
   lastActive: string;
   permissions: string[];
-  pinCode?: string; // 0000 لمسؤول الخلية، 1111 للموظف المعالج، 1234 للـ Super Admin
+  // Kept only for legacy type compatibility; production authentication uses Supabase Auth.
+  pinCode?: string;
 }
 
 export type ComplaintStatusCode = 

@@ -1,9 +1,7 @@
-// Configuration for Demo / Simulation Mode
-// Strictly ensures NO real production databases, emails, or SMS are triggered.
+// Production configuration. The application must never present simulated records.
 
 export const DEMO_CONFIG = {
-  // Demo mode flag (defaults to true)
-  isDemoMode: true,
+  isDemoMode: false,
   
   // Base application URL used for QR Codes and direct share links
   appUrl: (typeof window !== 'undefined' && window.location?.origin) 
@@ -11,14 +9,14 @@ export const DEMO_CONFIG = {
     : 'https://wil-seven-tan.vercel.app',
 
   // Version identifier
-  version: '1.0.0-demo',
+  version: '1.0.0-production',
   
-  // Guardrails: strictly prohibited in Demo Mode
+  // Production capabilities are enabled only through the configured server.
   guards: {
-    allowProductionDatabase: false,
+    allowProductionDatabase: true,
     allowExternalSms: false,
     allowExternalEmail: false,
-    allowRealCitizenStorage: false,
+    allowRealCitizenStorage: true,
   }
 };
 
