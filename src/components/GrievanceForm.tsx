@@ -121,6 +121,19 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
     }
   }, [initialCategory]);
 
+  // The public portal cannot subscribe to the private staff topic. Refresh the
+  // authenticated tracking record frequently so citizen and staff views converge
+  // without relying on browser-local data.
+  React.useEffect(() => {
+    if (!activeTrackingResult || !trackQuery || !trackPhone || !trackPin) return;
+    const refresh = async () => {
+      const updated = await GrievanceService.findByTrackingId(trackQuery, trackPhone, trackPin);
+      if (updated && updated.updatedAt !== activeTrackingResult.updatedAt) setActiveTrackingResult(updated);
+    };
+    const interval = window.setInterval(() => { void refresh(); }, 5000);
+    return () => window.clearInterval(interval);
+  }, [activeTrackingResult, trackQuery, trackPhone, trackPin]);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const incomingFiles = Array.from(e.target.files) as File[];
