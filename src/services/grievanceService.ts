@@ -83,7 +83,13 @@ export const GrievanceService = {
       throw new Error(cloudResult.error || 'تعذر حفظ الانشغال في قاعدة البيانات المركزية.');
     }
 
-    const serverTrackingId = cloudResult.data?.tracking_id || clientDisplayId;
+    // The database allocates the canonical tracking id. Never fall back to the
+    // browser-generated id, otherwise the confirmation screen can diverge from
+    // the record that staff actually see.
+    const serverTrackingId = String(cloudResult.data?.tracking_id || '').trim().toUpperCase();
+    if (!serverTrackingId) {
+      throw new Error('تعذر استلام رقم التتبع الرسمي من قاعدة البيانات. لم يتم تأكيد الإيداع.');
+    }
     return {
       ...data,
       id: serverTrackingId,
