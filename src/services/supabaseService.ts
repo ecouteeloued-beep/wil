@@ -290,6 +290,7 @@ export const SupabaseService = {
         dueDate: row.deadline || new Date().toISOString(),
         isOverdue: false,
         officialResponse: row.official_response || undefined,
+        assignedDepartment: row.assigned_department || undefined,
         timeline: Array.isArray(row.timeline) ? row.timeline : [],
         internalNotes: [],
         attachments: Array.isArray(row.attachments) ? row.attachments : [],
