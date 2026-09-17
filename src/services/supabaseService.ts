@@ -294,7 +294,6 @@ export const SupabaseService = {
         timeline: Array.isArray(row.timeline) ? row.timeline : [],
         internalNotes: [],
         attachments: Array.isArray(row.attachments) ? row.attachments : [],
-        assignedDepartment: row.assigned_department || undefined,
       };
     } catch {
       return null;
