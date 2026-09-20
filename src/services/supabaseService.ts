@@ -251,18 +251,21 @@ export const SupabaseService = {
     try {
       const cleanId = trackingId.trim().toUpperCase();
       if (!phone || !secretPin) return null;
-      // track_complaint is granted to anon/authenticated. Calling the RPC
-      // directly avoids gateway-origin mismatches that turn valid records into
-      // false "not found" results in production.
-      const { data, error } = await supabase.rpc('track_complaint', {
-        p_tracking_id: cleanId,
-        p_phone: phone.trim(),
-        p_secret_pin: secretPin.trim(),
+      // The tracking RPC is intentionally restricted to service_role in
+      // production. Citizens must therefore go through the public gateway,
+      // which validates the request and performs the privileged lookup.
+      const { data, error } = await SupabaseService.invokePublicGateway('track_complaint', {
+        tracking_id: cleanId,
+        phone: phone.trim(),
+        secret_pin: secretPin.trim(),
       });
       if (error) {
         throw new Error(error.message || 'تعذر الاتصال بخدمة التتبع.');
       }
-      const row = Array.isArray(data) ? data[0] : data;
+      const envelope = data as any;
+      const row = Array.isArray(envelope)
+        ? envelope[0]
+        : envelope?.data?.[0] || envelope;
       if (!row) return null;
 
       const statusArabic: GrievanceStatus = (row.status as GrievanceStatus) || 'جديد';
