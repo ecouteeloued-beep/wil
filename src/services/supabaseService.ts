@@ -271,9 +271,17 @@ export const SupabaseService = {
       const statusArabic: GrievanceStatus = (row.status as GrievanceStatus) || 'جديد';
       return {
         id: row.tracking_id || row.id,
+        databaseId: row.id,
         trackingNumber: row.tracking_id || row.id,
         secretPin: undefined,
-        fullName: row.citizen_name || 'مواطن',
+        fullName: row.citizen_name || [row.first_name, row.last_name].filter(Boolean).join(' ') || 'مواطن',
+        firstName: row.first_name || undefined,
+        lastName: row.last_name || undefined,
+        birthDate: row.birth_date || undefined,
+        gender: row.gender || undefined,
+        residenceDaira: row.residence_daira || row.daira || undefined,
+        residenceMunicipality: row.residence_municipality || row.municipality || undefined,
+        fullAddress: row.full_address || undefined,
         phone: '',
         applicantDaira: row.daira || 'الوادي',
         applicantMunicipality: row.municipality || 'الوادي',

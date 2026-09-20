@@ -264,6 +264,7 @@ export interface PublicMessage {
 
 export interface EnhancedGrievance {
   id: string; // e.g. WIL-2026-X7K4P92 or WD-2026-00125
+  databaseId?: string;
   trackingNumber?: string; // alias for id
   secretPin?: string; // الرمز السري الخاص بالملف لحماية خصوصية المواطن
   statusCode?: ComplaintStatusCode;
@@ -272,6 +273,9 @@ export interface EnhancedGrievance {
   lastName?: string;
   birthDate?: string;
   gender?: 'ذكر' | 'أنثى' | string;
+  residenceDaira?: string;
+  residenceMunicipality?: string;
+  fullAddress?: string;
   phone: string;
   email?: string;
   applicantDaira: string;

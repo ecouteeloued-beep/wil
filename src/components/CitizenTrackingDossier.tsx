@@ -72,10 +72,20 @@ export const CitizenTrackingDossier: React.FC<CitizenTrackingDossierProps> = ({ 
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="rounded-xl border border-gray-200 bg-gray-50 p-4"><div className="flex items-center gap-2 text-xs text-gray-500"><FileText className="w-4 h-4" />اسم صاحب العريضة</div><p className="font-bold text-sm text-gray-800 mt-2">{complaint.fullName || 'غير متوفر'}</p></div>
+          <div className="rounded-xl border border-gray-200 bg-gray-50 p-4"><div className="flex items-center gap-2 text-xs text-gray-500"><MapPin className="w-4 h-4" />الإقامة</div><p className="font-bold text-sm text-gray-800 mt-2">{complaint.residenceDaira || complaint.grievanceDaira || 'غير متوفر'} — {complaint.residenceMunicipality || complaint.applicantMunicipality || 'غير متوفر'}</p></div>
+          <div className="rounded-xl border border-gray-200 bg-gray-50 p-4"><div className="text-xs text-gray-500">الهوية المدنية</div><p className="font-bold text-sm text-gray-800 mt-2">{complaint.birthDate || 'تاريخ الميلاد غير متوفر'} — {complaint.gender || 'الجنس غير متوفر'}</p></div>
           <div className="rounded-xl border border-gray-200 bg-gray-50 p-4"><div className="flex items-center gap-2 text-xs text-gray-500"><FileText className="w-4 h-4" />موضوع العريضة</div><p className="font-bold text-sm text-gray-800 mt-2">{complaint.subject || 'غير متوفر'}</p></div>
           <div className="rounded-xl border border-gray-200 bg-gray-50 p-4"><div className="flex items-center gap-2 text-xs text-gray-500"><MapPin className="w-4 h-4" />البلدية المعنية</div><p className="font-bold text-sm text-gray-800 mt-2">{complaint.grievanceMunicipality || 'غير متوفر'}</p></div>
+          <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 sm:col-span-2"><div className="text-xs text-gray-500">العنوان والحي</div><p className="font-bold text-sm text-gray-800 mt-2">{complaint.fullAddress || complaint.applicantNeighborhood || 'غير متوفر'}</p></div>
           <div className="rounded-xl border border-gray-200 bg-gray-50 p-4"><div className="flex items-center gap-2 text-xs text-gray-500"><Clock3 className="w-4 h-4" />تاريخ الإيداع</div><p className="font-bold text-sm text-gray-800 mt-2">{createdDate}</p></div>
           <div className="rounded-xl border border-gray-200 bg-gray-50 p-4"><div className="flex items-center gap-2 text-xs text-gray-500"><Phone className="w-4 h-4" />المصلحة المعنية</div><p className="font-bold text-sm text-gray-800 mt-2">{complaint.assignedDepartment || 'سيتم تحديدها عند التوجيه'}</p></div>
+        </div>
+
+        <div className="rounded-xl border border-gray-200 bg-white p-5 space-y-2">
+          <h3 className="font-changa font-bold text-base text-gray-900">تفاصيل العريضة</h3>
+          <p className="whitespace-pre-wrap text-sm leading-7 text-gray-700">{complaint.details || 'لا توجد تفاصيل إضافية.'}</p>
+          <p className="text-xs text-gray-500">التصنيف: <strong className="text-gray-700">{complaint.category || 'غير مصنف'}</strong></p>
         </div>
 
         {complaint.officialResponse?.approved && complaint.officialResponse.text && (
