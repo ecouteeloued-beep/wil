@@ -222,19 +222,28 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
     setIsSubmitting(true);
 
     try {
-      // Upload the actual bytes to the private bucket; only the safe storage
-      // path and metadata are sent to the complaints RPC (never Base64/blob URLs).
+      // Obtain a short-lived server authorization before uploading. The storage
+      // policy rejects arbitrary anonymous paths, and the database trigger later
+      // consumes the authorization when the complaint is created.
       const processedAttachments: AttachmentFile[] = [];
       for (const [index, file] of files.entries()) {
         if (!supabase) throw new Error('تخزين المرفقات غير متاح حالياً.');
-        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(-120);
-        const path = `citizen/${crypto.randomUUID()}-${safeName}`;
+        const { data: authorization, error: authorizationError } = await supabase.rpc('authorize_upload', {
+          p_original_name: file.name,
+          p_content_type: file.type,
+          p_byte_size: file.size,
+        });
+        if (authorizationError || !authorization?.[0]?.upload_path) {
+          throw new Error(`تعذر تفويض رفع المرفق ${file.name}.`);
+        }
+        const path = authorization[0].upload_path as string;
         const { error: uploadError } = await supabase.storage.from('complaint-attachments').upload(path, file, { contentType: file.type, upsert: false });
         if (uploadError) throw new Error(`تعذر رفع المرفق ${file.name}: ${uploadError.message}`);
         processedAttachments.push({
           id: `attachment-${index}-${crypto.randomUUID()}`,
-          name: safeName,
+          name: file.name.slice(0, 120),
           size: `${(file.size / (1024 * 1024)).toFixed(2)} MB`,
+          size_bytes: file.size,
           type: file.type,
           uploadedAt: new Date().toISOString(),
           url: path,

@@ -227,6 +227,7 @@ export interface AttachmentFile {
   id: string;
   name: string;
   size: string;
+  size_bytes?: number;
   type: string;
   uploadedAt: string;
   url?: string;
