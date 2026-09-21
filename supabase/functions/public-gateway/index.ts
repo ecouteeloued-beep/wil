@@ -31,7 +31,14 @@ const clientAddress = (request: Request) => {
   return forwarded || request.headers.get("cf-connecting-ip") || "unknown";
 };
 const validText = (value: unknown, max: number) => typeof value === "string" && value.trim().length <= max;
-const validPhone = (value: unknown) => typeof value === "string" && /^0[567][0-9]{8}$/.test(value.trim());
+const normalizePhone = (value: unknown) => {
+  if (typeof value !== "string") return null;
+  let digits = value.replace(/\D/g, "");
+  if (digits.startsWith("00213") && digits.length === 14) digits = `0${digits.slice(5)}`;
+  else if (digits.startsWith("213") && digits.length === 12) digits = `0${digits.slice(3)}`;
+  return /^0[567][0-9]{8}$/.test(digits) ? digits : null;
+};
+const validPhone = (value: unknown) => normalizePhone(value) !== null;
 const validTrackingId = (value: unknown) => typeof value === "string" && /^[A-Z0-9-]{6,64}$/i.test(value.trim());
 const validPin = (value: unknown) => typeof value === "string" && /^[0-9]{6,12}$/.test(value.trim());
 
@@ -108,7 +115,7 @@ Deno.serve(async (request: Request) => {
   }
   if (action === "track_complaint") {
     const result = await publicClient.rpc("track_complaint", {
-      p_tracking_id: payload.tracking_id.trim().toUpperCase(), p_phone: payload.phone.trim(), p_secret_pin: payload.secret_pin.trim(),
+      p_tracking_id: payload.tracking_id.trim().toUpperCase(), p_phone: normalizePhone(payload.phone), p_secret_pin: payload.secret_pin.trim(),
     });
     if (result.error) return json({ error: "request_rejected", detail: result.error.message }, 400, origin);
     const rows = Array.isArray(result.data) ? result.data : [];
