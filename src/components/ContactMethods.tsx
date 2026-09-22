@@ -13,8 +13,8 @@ export const ContactMethods: React.FC = () => {
     {
       icon: <MapPin className="w-6 h-6 text-white" />,
       title: 'الاستقبال المباشر',
-      desc1: 'مقر ولاية الوادي',
-      desc2: 'حي 08 ماي 1945',
+      desc1: '1961 حي 17 أكتوبر',
+      desc2: 'El Oued, Algeria, 39009, El Oued, Algeria, 39009',
     },
     {
       icon: <Mail className="w-6 h-6 text-white" />,

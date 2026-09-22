@@ -8,10 +8,21 @@ interface HeroProps {
 }
 
 export const Hero: React.FC<HeroProps> = ({ onSelectTab, onVisionClick }) => {
-  const [stats, setStats] = useState({ total: 0, resolved: 0 });
+  const [stats, setStats] = useState<{ total: number; resolved: number } | null>(null);
 
   useEffect(() => {
-    setStats(GrievanceService.getStats());
+    let active = true;
+    const refreshStats = async () => {
+      const nextStats = await GrievanceService.getStats();
+      if (active) setStats(nextStats);
+    };
+
+    void refreshStats();
+    const interval = window.setInterval(refreshStats, 60_000);
+    return () => {
+      active = false;
+      window.clearInterval(interval);
+    };
   }, []);
 
   const handleAction = (tab: 'new' | 'track') => {
@@ -57,11 +68,11 @@ export const Hero: React.FC<HeroProps> = ({ onSelectTab, onVisionClick }) => {
             <span className="font-tajawal text-sm text-white/90">استقبال العرائض</span>
           </div>
           <div className="bg-white/10 border border-white/20 rounded-xl p-6 flex flex-col items-center justify-center backdrop-blur-sm">
-            <span className="font-changa text-3xl font-bold text-[#D21034] mb-2">{stats.total}</span>
+            <span className="font-changa text-3xl font-bold text-[#D21034] mb-2">{stats?.total ?? '—'}</span>
             <span className="font-tajawal text-sm text-white/90">إجمالي الانشغالات (مباشر)</span>
           </div>
           <div className="bg-white/10 border border-white/20 rounded-xl p-6 flex flex-col items-center justify-center backdrop-blur-sm">
-            <span className="font-changa text-3xl font-bold text-[#D21034] mb-2">{stats.resolved}</span>
+            <span className="font-changa text-3xl font-bold text-[#D21034] mb-2">{stats?.resolved ?? '—'}</span>
             <span className="font-tajawal text-sm text-white/90">عريضة تمت معالجتها</span>
           </div>
         </div>

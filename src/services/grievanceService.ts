@@ -105,9 +105,10 @@ export const GrievanceService = {
     return SupabaseService.trackComplaint(cleanId, phone, secretPin);
   },
 
-  // Dashboard statistics must come from scoped server queries. Returning zero here
-  // avoids presenting browser-local counts as institutional facts until that query exists.
-  getStats: () => ({ total: 0, resolved: 0 }),
+  // Public counters come from the same aggregate Supabase RPC used by the platform.
+  getStats: async (): Promise<{ total: number; resolved: number }> => {
+    return SupabaseService.fetchPublicPlatformStats();
+  },
 
   // Submission throttling is enforced server-side; no browser storage is used.
   canSubmit: (): boolean => true

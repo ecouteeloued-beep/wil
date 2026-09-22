@@ -311,6 +311,18 @@ export const SupabaseService = {
     }
   },
 
+  /** Public aggregate counters only; no citizen or complaint fields are exposed. */
+  fetchPublicPlatformStats: async (): Promise<{ total: number; resolved: number }> => {
+    if (!isSupabaseConfigured || !supabase) return { total: 0, resolved: 0 };
+    const { data, error } = await supabase.rpc('get_public_platform_stats');
+    if (error || !data) return { total: 0, resolved: 0 };
+    const row = Array.isArray(data) ? data[0] : data;
+    return {
+      total: Number(row?.total || 0),
+      resolved: Number(row?.resolved || 0),
+    };
+  },
+
   /** Count complaints visible to the authenticated staff member. */
   countStaffComplaints: async (): Promise<number> => {
     if (!isSupabaseConfigured || !supabase) return 0;

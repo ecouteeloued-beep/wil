@@ -220,6 +220,25 @@ $$;
 revoke all on function public.track_complaint(text, text) from public;
 grant execute on function public.track_complaint(text, text) to anon, authenticated;
 
+-- مؤشرات عامة مجمعة فقط؛ لا تكشف أي بيانات مواطن أو تفاصيل عرائض.
+create or replace function public.get_public_platform_stats()
+returns table(total bigint, resolved bigint)
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select
+    count(*)::bigint as total,
+    count(*) filter (
+      where c.status in ('تم الحل', 'تمت المعالجة', 'تمت التسوية', 'مغلقة', 'مغلق', 'مغلق ومسوى')
+    )::bigint as resolved
+  from public.complaints c;
+$$;
+
+revoke all on function public.get_public_platform_stats() from public;
+grant execute on function public.get_public_platform_stats() to anon, authenticated;
+
 -- البيانات الداخلية لا تكون مكشوفة للزوار.
 drop policy if exists "Allow staff read/write internal notes" on public.internal_notes;
 create policy "Allow staff read/write internal notes" on public.internal_notes

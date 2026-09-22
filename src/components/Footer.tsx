@@ -43,7 +43,7 @@ export const Footer: React.FC<FooterProps> = ({ onPrivacyClick }) => {
                 
             <div className="flex items-start gap-3">
               <MapPin className="w-4 h-4 text-[#D21034] shrink-0 mt-0.5" />
-              <span className="text-gray-300">مقر ولاية الوادي، حي 08 ماي 1945، بلدية الوادي، ولاية الوادي 39000</span>
+              <span className="text-gray-300" dir="ltr">1961 حي 17 أكتوبرEl Oued, Algeria, 39009, El Oued, Algeria, 39009</span>
             </div>
                 
             <div className="flex items-start gap-3">
