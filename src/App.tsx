@@ -3,6 +3,7 @@ import { Header } from './components/Header';
 import { Hero } from './components/Hero';
 import { GrievanceForm } from './components/GrievanceForm';
 import { SplashScreen } from './components/SplashScreen';
+import { PwaInstallPrompt } from './components/PwaInstallPrompt';
 import { GrievanceCategory } from './types';
 
 // Lazy loaded components (Code Splitting for performance)
@@ -65,6 +66,7 @@ export default function App() {
           handleScrollToForm(tab);
         }}
       />
+      <PwaInstallPrompt />
 
       <div className="min-h-screen flex flex-col bg-[#f4ebda] text-[#26352f] font-tajawal selection:bg-[#c67d2a]/20 selection:text-[#2f5d45]">
         <Header 
