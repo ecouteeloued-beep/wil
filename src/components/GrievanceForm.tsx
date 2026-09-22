@@ -186,8 +186,8 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
     if (!cleanBirthDate || !/^\d{4}-\d{2}-\d{2}$/.test(cleanBirthDate)) {
       return setFormError('يرجى إدخال تاريخ الميلاد بصيغة يوم/شهر/سنة');
     }
-    if (!cleanGender || !['ذكر', 'أنثى'].includes(cleanGender)) {
-      return setFormError('يرجى اختيار الجنس');
+    if (!cleanGender || !['مواطن', 'فلاح', 'مجتمع مدني', 'جمعيات', 'مستثمر'].includes(cleanGender)) {
+      return setFormError('يرجى اختيار الصفة');
     }
     if (!cleanPhone || !/^(05|06|07)\d{8}$/.test(cleanPhone)) {
       return setFormError('رقم الهاتف غير صالح (يجب أن يبدأ بـ 05، 06، أو 07 ويتكون من 10 أرقام)');
@@ -574,9 +574,14 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
                               <p className="text-[10px] text-gray-500 mt-1">الصيغة: jj/mm/aaaa</p>
                             </div>
                             <div>
-                              <label className={labelClass}>الجنس <span className="text-[#D21034]">*</span></label>
+                              <label className={labelClass}>الصفة <span className="text-[#D21034]">*</span></label>
                               <select required value={gender} onChange={e => setGender(e.target.value)} className={inputBaseClass}>
-                                <option value="">اختر الجنس</option><option value="ذكر">ذكر</option><option value="أنثى">أنثى</option>
+                                <option value="">اختر الصفة</option>
+                                <option value="مواطن">مواطن</option>
+                                <option value="فلاح">فلاح</option>
+                                <option value="مجتمع مدني">مجتمع مدني</option>
+                                <option value="جمعيات">جمعيات</option>
+                                <option value="مستثمر">مستثمر</option>
                               </select>
                             </div>
 

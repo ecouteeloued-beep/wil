@@ -401,7 +401,7 @@ export const CitizensView: React.FC<CitizensViewProps> = ({ user, addToast }) =>
 
                 <div className="space-y-3 pt-3 border-t border-gray-100 text-xs">
                   <div className="flex justify-between py-1">
-                    <span className="text-gray-500">تاريخ الميلاد والجنس:</span>
+                    <span className="text-gray-500">تاريخ الميلاد والصفة:</span>
                     <span className="font-bold text-gray-900">{selectedCitizen.birthDate || 'غير مسجل'} — {selectedCitizen.gender || 'غير مسجل'}</span>
                   </div>
                   <div className="flex justify-between py-1">
