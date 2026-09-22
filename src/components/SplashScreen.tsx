@@ -65,10 +65,13 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
               <div className="flex items-center gap-3 sm:gap-4 text-right">
                 <div className="flex items-center gap-2">
                   <img 
-                    src="/assets/official-ministry-logo.jpg" 
+                    src="/assets/official-ministry-logo.webp" 
                     alt="شعار وزارة الداخلية والجماعات المحلية" 
+                    width={192}
+                    height={192}
+                    decoding="async"
                     className="w-14 h-14 sm:w-16 sm:h-16 object-contain rounded-full shadow-sm bg-white p-0.5"
-                    onError={(e) => { e.currentTarget.src = '/assets/cropped-549160908_1253679926802055_7139711205682662553_n-e1759419335360.jpg'; }}
+                    onError={(e) => { e.currentTarget.src = '/assets/ministry-logo.png'; }}
                   />
                 </div>
                 <div className="border-r-2 border-gray-200 pr-3">
@@ -133,10 +136,13 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
               <div className="relative mb-5">
                 <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-white p-1.5 border-2 border-emerald-400/60 shadow-2xl flex items-center justify-center relative">
                   <img 
-                    src="/assets/official-ministry-logo.jpg" 
+                    src="/assets/official-ministry-logo.webp" 
                     alt="الشعار الرسمي لوزارة الداخلية والجماعات المحلية" 
+                    width={192}
+                    height={192}
+                    decoding="async"
                     className="w-full h-full object-contain rounded-full filter drop-shadow-sm"
-                    onError={(e) => { e.currentTarget.src = '/assets/cropped-549160908_1253679926802055_7139711205682662553_n-e1759419335360.jpg'; }}
+                    onError={(e) => { e.currentTarget.src = '/assets/ministry-logo.png'; }}
                   />
                   {/* Subtle rotating glow ring */}
                   <motion.div 

@@ -21,10 +21,13 @@ export const Footer: React.FC<FooterProps> = ({ onPrivacyClick }) => {
                 title="بوابة ولاية الوادي الرسمية"
               >
                 <img 
-                  src="/assets/official-ministry-logo.jpg" 
+                  src="/assets/official-ministry-logo.webp" 
                   alt="شعار وزارة الداخلية والجماعات المحلية" 
+                  width={192}
+                  height={192}
+                  decoding="async"
                   className="w-full h-full object-contain rounded-full"
-                  onError={(e) => { e.currentTarget.src = '/assets/cropped-549160908_1253679926802055_7139711205682662553_n-e1759419335360.jpg'; }}
+                  onError={(e) => { e.currentTarget.src = '/assets/ministry-logo.png'; }}
                 />
               </div>
               <div>

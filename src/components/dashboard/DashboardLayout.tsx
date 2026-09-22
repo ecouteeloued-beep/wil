@@ -152,7 +152,7 @@ export const DashboardLayout: React.FC<{ user: SystemUser; onLogout: () => void 
       <div className="bg-[#04190c] text-white px-4 sm:px-6 py-2 border-b border-emerald-900/60 flex flex-wrap items-center justify-between gap-3 text-xs shrink-0 z-40">
         <div className="flex items-center gap-3">
           <div className="w-5 h-5 rounded-full overflow-hidden shrink-0 border border-amber-400/40">
-            <img src="/assets/algeria-emblem.png" alt="شعار الدولة" className="w-full h-full object-contain" onError={(e) => { e.currentTarget.src = '/assets/official-ministry-logo.jpg'; }} />
+            <img src="/assets/algeria-emblem.png" alt="شعار الدولة" width={192} height={192} decoding="async" className="w-full h-full object-contain" onError={(e) => { e.currentTarget.src = '/assets/official-ministry-logo.webp'; }} />
           </div>
           <span className="font-changa font-bold text-amber-300">الجمهورية الجزائرية الديمقراطية الشعبية</span>
           <span className="hidden md:inline text-white/30">•</span>
@@ -249,7 +249,7 @@ export const DashboardLayout: React.FC<{ user: SystemUser; onLogout: () => void 
                   src="/assets/algeria-emblem.png" 
                   alt="شعار الولاية" 
                   className="w-full h-full object-contain"
-                  onError={(e) => { e.currentTarget.src = '/assets/official-ministry-logo.jpg'; }}
+                  onError={(e) => { e.currentTarget.src = '/assets/official-ministry-logo.webp'; }}
                 />
               </div>
               <div>

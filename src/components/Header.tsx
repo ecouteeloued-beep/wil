@@ -117,11 +117,14 @@ export const Header: React.FC<HeaderProps> = ({ onNavigateToForm, onOpenWelcome,
                 {/* Official Ministry Logo (Exact uploaded emblem from interieur.gov.dz) */}
                 <div className="relative">
                   <img 
-                    src="/assets/official-ministry-logo.jpg" 
+                    src="/assets/official-ministry-logo.webp" 
                     alt="شعار وزارة الداخلية والجماعات المحلية" 
+                    width={192}
+                    height={192}
+                    decoding="async"
                     className="w-16 h-16 sm:w-20 sm:h-20 object-contain rounded-full shadow-sm border border-gray-100 p-0.5 hover:scale-105 transition-transform bg-white"
                     onError={(e) => { 
-                      e.currentTarget.src = '/assets/cropped-549160908_1253679926802055_7139711205682662553_n-e1759419335360.jpg'; 
+                      e.currentTarget.src = '/assets/ministry-logo.png'; 
                     }}
                   />
                 </div>
