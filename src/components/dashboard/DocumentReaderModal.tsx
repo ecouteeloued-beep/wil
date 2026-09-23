@@ -6,6 +6,8 @@ import {
   Calendar, User, Hash, AlertCircle, FileCheck, Layers
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import DocViewer, { DocViewerRenderers } from '@cyntler/react-doc-viewer';
+import '@cyntler/react-doc-viewer/dist/index.css';
 import { AttachmentFile, EnhancedGrievance } from '../../types';
 import { sanitizeDocumentUrl } from '../../utils/security';
 
@@ -411,23 +413,22 @@ export const DocumentReaderModal: React.FC<DocumentReaderModalProps> = ({
                   }
 
                   return (
-                    <div className="max-w-3xl w-full bg-white text-slate-900 rounded-2xl shadow-2xl p-4 sm:p-8 overflow-hidden">
-                      {isPdf ? (
-                        <iframe 
-                          src={safeUrl} 
-                          className="w-full h-[650px] rounded-xl border border-slate-200"
-                          title={attachment.name}
-                          sandbox="allow-scripts allow-same-origin allow-forms allow-downloads"
-                          referrerPolicy="no-referrer"
-                        />
-                      ) : (
-                        <img 
-                          src={safeUrl} 
-                          alt={attachment.name}
-                          className="max-h-[700px] w-auto mx-auto object-contain rounded-xl shadow-md"
-                          referrerPolicy="no-referrer"
-                        />
-                      )}
+                    <div className="max-w-5xl w-full h-[min(72vh,760px)] bg-white text-slate-900 rounded-2xl shadow-2xl overflow-hidden border border-slate-200">
+                      <DocViewer
+                        documents={[{ uri: safeUrl, fileName: attachment.name }]}
+                        pluginRenderers={DocViewerRenderers}
+                        prefetchMethod="GET"
+                        config={{ header: { disableHeader: true } }}
+                        theme={{
+                          primary: '#006233',
+                          secondary: '#f8fafc',
+                          tertiary: '#e2e8f0',
+                          textPrimary: '#0f172a',
+                          textSecondary: '#475569',
+                          textTertiary: '#94a3b8',
+                          disableThemeScrollbar: false,
+                        }}
+                      />
                     </div>
                   );
                 })()
