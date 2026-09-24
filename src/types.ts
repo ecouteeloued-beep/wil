@@ -116,10 +116,10 @@ export interface ChannelItem {
   title: string;
   value: string;
   description: string;
-  iconName: 'whatsapp' | 'phone' | 'qr' | 'web';
+  iconName: 'phone' | 'qr' | 'web';
   badge?: string;
   actionText?: string;
-  actionType?: 'call' | 'whatsapp' | 'scroll' | 'info';
+  actionType?: 'call' | 'scroll' | 'info';
 }
 
 // =========================================================================

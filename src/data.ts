@@ -83,15 +83,6 @@ export const HOW_IT_WORKS_STEPS = [
 
 export const CHANNELS: ChannelItem[] = [
   {
-    title: 'واتساب المباشر',
-    value: '06XX XX XX XX (للعرض)',
-    description: 'إرسال الرسائل النصية والوثائق أو الصور الداعمة لانشغالك على مدار الساعة.',
-    iconName: 'whatsapp',
-    badge: 'رد سريع',
-    actionText: 'مراسلة عبر واتساب',
-    actionType: 'whatsapp',
-  },
-  {
     title: 'الرقم الأخضر المجاني',
     value: '3099',
     description: 'خط هاتفي مباشر ومجاني من أي هاتف ثابت أو محمول للتحدث مع ممثل الخلية.',

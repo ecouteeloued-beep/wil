@@ -1,4 +1,4 @@
-const CACHE_NAME = 'wilaya-citizen-portal-v1';
+const CACHE_NAME = 'wilaya-citizen-portal-v2';
 const APP_SHELL = ['/', '/manifest.webmanifest', '/assets/icon-192.png', '/assets/icon-512.png'];
 
 self.addEventListener('install', (event) => {
