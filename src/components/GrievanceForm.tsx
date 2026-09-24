@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { CATEGORIES, DAIRAS, DAIRAS_MUNICIPALITIES } from '../data';
 import { Municipality, GrievanceCategory, GrievanceSubmission, EnhancedGrievance, AttachmentFile } from '../types';
 import { GrievanceService } from '../services/grievanceService';
+import { SupabaseService } from '../services/supabaseService';
 import { sanitizeInput, validateUploadedFile, SecurityRateLimiter } from '../utils/security';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -11,7 +12,6 @@ import {
   FileBadge2, Leaf, Building, Bus, HeartPulse, MessageCircle, AlertTriangle, Briefcase, Home as HomeIcon
 } from 'lucide-react';
 import { CitizenTrackingDossier } from './CitizenTrackingDossier';
-import { supabase } from '../lib/supabase';
 
 interface GrievanceFormProps {
   activeTab: 'new' | 'track';
@@ -225,12 +225,20 @@ export const GrievanceForm: React.FC<GrievanceFormProps> = ({
       // Upload the actual bytes to the private bucket; only the safe storage
       // path and metadata are sent to the complaints RPC (never Base64/blob URLs).
       const processedAttachments: AttachmentFile[] = [];
+      let uploadSessionId: string | undefined;
+      if (files.length > 0) {
+        const uploadSession = await SupabaseService.authorizeUploadSession();
+        if (!uploadSession.sessionId) {
+          throw new Error(uploadSession.error || 'تعذر إنشاء جلسة رفع آمنة للمرفقات.');
+        }
+        uploadSessionId = uploadSession.sessionId;
+      }
       for (const [index, file] of files.entries()) {
-        if (!supabase) throw new Error('تخزين المرفقات غير متاح حالياً.');
         const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(-120);
-        const path = `citizen/${crypto.randomUUID()}-${safeName}`;
-        const { error: uploadError } = await supabase.storage.from('complaint-attachments').upload(path, file, { contentType: file.type, upsert: false });
+        const path = `${uploadSessionId}/${crypto.randomUUID()}-${safeName}`;
+        const { data: uploadData, error: uploadError } = await SupabaseService.uploadAttachment(path, file);
         if (uploadError) throw new Error(`تعذر رفع المرفق ${file.name}: ${uploadError.message}`);
+        if (!uploadData) throw new Error(`تعذر رفع المرفق ${file.name}.`);
         processedAttachments.push({
           id: `attachment-${index}-${crypto.randomUUID()}`,
           name: safeName,

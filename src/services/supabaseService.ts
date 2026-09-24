@@ -31,6 +31,23 @@ export const SupabaseService = {
     return supabase.functions.invoke('public-gateway', { body: { action, payload } });
   },
 
+  authorizeUploadSession: async (): Promise<{ sessionId?: string; error?: string }> => {
+    if (!supabase) return { error: 'Supabase غير مهيأ.' };
+    const { data, error } = await SupabaseService.invokePublicGateway('authorize_upload', {});
+    if (error || typeof data?.session_id !== 'string' || !data.session_id) {
+      return { error: error?.message || 'تعذر إنشاء جلسة رفع آمنة.' };
+    }
+    return { sessionId: data.session_id };
+  },
+
+  uploadAttachment: async (path: string, file: File) => {
+    if (!supabase) return { data: null, error: new Error('Supabase غير مهيأ.') };
+    return supabase.storage.from('complaint-attachments').upload(path, file, {
+      contentType: file.type,
+      upsert: false,
+    });
+  },
+
   markComplaintViewed: async (trackingId: string): Promise<{ success: boolean; error?: string }> => {
     if (!isSupabaseConfigured || !supabase) return { success: false, error: 'Supabase غير مهيأ.' };
     const { error } = await supabase.rpc('transition_complaint', {
